@@ -148,6 +148,18 @@ void main() {
       expect(harness.controller.value, '+49791234567');
     });
 
+    testWidgets(
+        'strips a leading trunk zero from a pre-filled value without user interaction',
+        (tester) async {
+      // A returning user's stored phone number can still carry a legacy,
+      // un-normalized leading trunk 0 (pre-dating the API's E.164 transform).
+      // Seeding the field must not sign/submit that value unchanged.
+      final harness = await _pumpPhoneField(tester, initialPhoneNumber: '+410791234567');
+      await tester.pump();
+
+      expect(harness.controller.value, '+41791234567');
+    });
+
     testWidgets('accepts a 9-digit +49 national number (valid per the API, not a length error)',
         (tester) async {
       // A 9-digit German national number (e.g. a Frankfurt landline, 069 …) is

@@ -40,14 +40,17 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
     // what the user typed. Fall back to the first prefix; the number field starts empty,
     // so the validator still blocks submit until it is re-entered.
     prefix ??= prefixes.first;
+
+    // A pre-filled value (e.g. an existing user's stored phone number) goes through this
+    // decomposition, not through updatePhoneNumber()/onChanged. Run the same trunk-0 strip here,
+    // or a legacy un-normalized number would be signed and submitted unchanged.
+    updatePhoneNumber();
   }
 
   void updatePhoneNumber() {
     if (prefix != null && number != null) {
       // A leading trunk 0 would be signed, but the API strips it before verifying the signature.
-      final national = (prefix!.startsWith('+') && number!.startsWith('0'))
-          ? number!.substring(1)
-          : number;
+      final national = number!.startsWith('0') ? number!.substring(1) : number;
       final value = '$prefix$national';
       widget.controller.value = value;
     }
