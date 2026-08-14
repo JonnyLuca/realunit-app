@@ -123,6 +123,31 @@ void main() {
       expect(isValid, isTrue);
     });
 
+    testWidgets('strips a leading Swiss trunk zero from the national number',
+        (tester) async {
+      final harness = await _pumpPhoneField(tester);
+
+      final isValid = await _enterAndValidate(tester, harness, '0791234567');
+
+      expect(harness.controller.value, '+41791234567');
+      expect(isValid, isTrue);
+    });
+
+    testWidgets('strips a leading trunk zero when the country prefix changes',
+        (tester) async {
+      final harness = await _pumpPhoneField(tester);
+      await tester.enterText(find.byType(TextFormField), '0791234567');
+      await tester.pump();
+
+      final dropdown = tester.widget<DropdownButtonFormField<String>>(
+        find.byType(DropdownButtonFormField<String>),
+      );
+      dropdown.onChanged!('+49');
+      await tester.pumpAndSettle();
+
+      expect(harness.controller.value, '+49791234567');
+    });
+
     testWidgets('accepts a 9-digit +49 national number (valid per the API, not a length error)',
         (tester) async {
       // A 9-digit German national number (e.g. a Frankfurt landline, 069 …) is

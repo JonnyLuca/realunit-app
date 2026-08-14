@@ -44,7 +44,11 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
 
   void updatePhoneNumber() {
     if (prefix != null && number != null) {
-      final value = '$prefix$number';
+      // A leading trunk 0 would be signed, but the API strips it before verifying the signature.
+      final national = (prefix!.startsWith('+') && number!.startsWith('0'))
+          ? number!.substring(1)
+          : number;
+      final value = '$prefix$national';
       widget.controller.value = value;
     }
   }
@@ -100,7 +104,7 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
             Expanded(
               flex: 6,
               child: LabeledTextField(
-                hintText: '1231234567',
+                hintText: '791234567',
                 initialValue: number,
                 keyboardType: .phone,
                 onChanged: (v) {

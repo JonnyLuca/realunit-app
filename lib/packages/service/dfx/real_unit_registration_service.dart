@@ -203,14 +203,16 @@ class RealUnitRegistrationService extends DFXAuthService {
       // rejection of exactly this submit — typed so the UI can attribute it
       // ("check your entries"). The runtimeType check keeps code-specific
       // subclasses (KYC_LEVEL_REQUIRED, REGISTRATION_REQUIRED) intact; auth
-      // (401/403) and rate-limit (429) responses plus 5xx stay plain.
+      // (401/403), rate-limit (429) and 'Invalid signature' responses plus
+      // 5xx stay plain.
       if (error.runtimeType == ApiException &&
           status != null &&
           status >= 400 &&
           status < 500 &&
           status != 401 &&
           status != 403 &&
-          status != 429) {
+          status != 429 &&
+          error.message != 'Invalid signature') {
         throw RegistrationRejectedException(
           statusCode: status,
           code: error.code,

@@ -308,6 +308,24 @@ void main() {
       );
     });
 
+    test('keeps an Invalid signature 400 a plain ApiException (not user-attributable)', () async {
+      when(() => account.primaryAddress).thenReturn(FakeBitboxCredentials());
+      final client = completionErrorClient(400, {
+        'statusCode': 400,
+        'message': 'Invalid signature',
+      });
+
+      expect(
+        () => build(client).completeRegistration(buildRegistration()),
+        throwsA(
+          allOf(
+            isA<ApiException>(),
+            isNot(isA<RegistrationRejectedException>()),
+          ),
+        ),
+      );
+    });
+
     test('preserves the code-specific subclass for KYC_LEVEL_REQUIRED', () async {
       when(() => account.primaryAddress).thenReturn(FakeBitboxCredentials());
       final client = completionErrorClient(400, {
