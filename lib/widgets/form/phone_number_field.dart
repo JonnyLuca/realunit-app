@@ -51,16 +51,19 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
   }
 
   void updatePhoneNumber() {
-    if (prefix != null && number != null) {
-      // A leading trunk 0 would be signed, but the API strips it before verifying the
-      // signature — only for CH/DE/AT. In Italy the leading 0 is significant; stripping
-      // it would make landlines such as 0666982 invalid.
-      final national = _trunkZeroPrefixes.contains(prefix) && number!.startsWith('0')
-          ? number!.substring(1)
-          : number;
-      final value = '$prefix$national';
-      widget.controller.value = value;
-    }
+    final prefix = this.prefix;
+    final number = this.number;
+    if (prefix == null || number == null) return;
+
+    // The API normalizes to E.164 before verifying the signature and drops a
+    // national trunk 0 wherever the numbering plan has one. The client still
+    // only strips for `_trunkZeroPrefixes`: in Italy the leading 0 belongs to
+    // the number, so stripping it would make landlines such as 0666982 invalid.
+    final national = _trunkZeroPrefixes.contains(prefix) && number.startsWith('0')
+        ? number.substring(1)
+        : number;
+    final value = '$prefix$national';
+    widget.controller.value = value;
   }
 
   @override
