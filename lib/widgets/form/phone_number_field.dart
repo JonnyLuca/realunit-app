@@ -16,6 +16,9 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
   // Used only to decompose a seeded value. Input is free-form and not limited to this list.
   // `+41` stays first: it is the fallback default (`prefix ??= prefixes.first`).
   final prefixes = ['+41', '+49', '+43', '+423'];
+  // CH/DE/AT drop a leading national trunk 0. `+423` is in `prefixes` but not here:
+  // Liechtenstein has no trunk-0 prefix.
+  static const _trunkZeroPrefixes = ['+41', '+49', '+43'];
   String? prefix;
   String? number;
 
@@ -49,8 +52,12 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
 
   void updatePhoneNumber() {
     if (prefix != null && number != null) {
-      // A leading trunk 0 would be signed, but the API strips it before verifying the signature.
-      final national = number!.startsWith('0') ? number!.substring(1) : number;
+      // A leading trunk 0 would be signed, but the API strips it before verifying the
+      // signature — only for CH/DE/AT. In Italy the leading 0 is significant; stripping
+      // it would make landlines such as 0666982 invalid.
+      final national = _trunkZeroPrefixes.contains(prefix) && number!.startsWith('0')
+          ? number!.substring(1)
+          : number;
       final value = '$prefix$national';
       widget.controller.value = value;
     }

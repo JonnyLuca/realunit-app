@@ -136,16 +136,49 @@ void main() {
     testWidgets('strips a leading trunk zero when the country prefix changes',
         (tester) async {
       final harness = await _pumpPhoneField(tester);
-      await tester.enterText(find.byType(TextFormField), '0791234567');
+      await tester.enterText(_numberField(), '0791234567');
       await tester.pump();
 
-      final dropdown = tester.widget<DropdownButtonFormField<String>>(
-        find.byType(DropdownButtonFormField<String>),
-      );
-      dropdown.onChanged!('+49');
-      await tester.pumpAndSettle();
+      await tester.enterText(_prefixField(), '49');
+      await tester.pump();
 
       expect(harness.controller.value, '+49791234567');
+    });
+
+    testWidgets('strips a leading Austrian trunk zero from the national number',
+        (tester) async {
+      final harness = await _pumpPhoneField(tester);
+
+      await tester.enterText(_prefixField(), '43');
+      final isValid = await _enterAndValidate(tester, harness, '06641234567');
+
+      expect(harness.controller.value, '+436641234567');
+      expect(isValid, isTrue);
+    });
+
+    testWidgets('keeps a leading Italian zero in the stored number', (tester) async {
+      // For +39 the leading 0 is significant (measured against libphonenumber).
+      // Stripping it would make landlines such as 0666982 invalid.
+      final harness = await _pumpPhoneField(tester);
+
+      await tester.enterText(_prefixField(), '39');
+      final isValid = await _enterAndValidate(tester, harness, '0666982');
+
+      expect(harness.controller.value, '+390666982');
+      expect(isValid, isTrue);
+    });
+
+    testWidgets('keeps a leading Liechtenstein zero in the stored number',
+        (tester) async {
+      // `+423` is in `prefixes` (seeded-value decomposition) but not in
+      // `_trunkZeroPrefixes`: Liechtenstein has no national trunk-0.
+      final harness = await _pumpPhoneField(tester);
+
+      await tester.enterText(_prefixField(), '423');
+      final isValid = await _enterAndValidate(tester, harness, '0123456');
+
+      expect(harness.controller.value, '+4230123456');
+      expect(isValid, isTrue);
     });
 
     testWidgets(
