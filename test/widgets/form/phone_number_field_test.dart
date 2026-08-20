@@ -133,6 +133,29 @@ void main() {
       expect(isValid, isTrue);
     });
 
+    testWidgets('does not strip a zero that is not at the start of the national number',
+        (tester) async {
+      // A 0 that is not leading must not trigger the strip. Mutating
+      // `startsWith('0')` to `contains('0')` would drop the leading 7 here.
+      final harness = await _pumpPhoneField(tester);
+
+      final isValid = await _enterAndValidate(tester, harness, '790123456');
+
+      expect(harness.controller.value, '+41790123456');
+      expect(isValid, isTrue);
+    });
+
+    testWidgets('strips exactly one leading trunk zero', (tester) async {
+      // `substring(1)` removes one 0; the second stays. The result need not be
+      // a plausible number — the API decides validity, this pins strip semantics.
+      final harness = await _pumpPhoneField(tester);
+
+      final isValid = await _enterAndValidate(tester, harness, '00791234567');
+
+      expect(harness.controller.value, '+410791234567');
+      expect(isValid, isTrue);
+    });
+
     testWidgets('strips a leading trunk zero when the country prefix changes',
         (tester) async {
       final harness = await _pumpPhoneField(tester);
