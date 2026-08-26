@@ -273,6 +273,24 @@ const kResponsiveSurfaceCatalog = <ResponsiveSurface>[
     matrixTestPath: 'test/screens/pin/pin_sheets_responsive_matrix_test.dart',
     productionPath: 'lib/screens/pin/widgets/enable_biometric_bottom_sheet.dart',
   ),
+  ResponsiveSurface(
+    id: 'referral_terms_page',
+    description: 'Referral terms acceptance page (sticky create CTA)',
+    matrixTestPath: 'test/screens/referral/referral_responsive_matrix_test.dart',
+    productionPath: 'lib/screens/referral/referral_terms_page.dart',
+  ),
+  ResponsiveSurface(
+    id: 'referral_create_page',
+    description: 'Referral invite create page (sticky create CTA)',
+    matrixTestPath: 'test/screens/referral/referral_responsive_matrix_test.dart',
+    productionPath: 'lib/screens/referral/referral_create_page.dart',
+  ),
+  ResponsiveSurface(
+    id: 'referral_overview_page',
+    description: 'Referral overview page (sticky create CTA)',
+    matrixTestPath: 'test/screens/referral/referral_responsive_matrix_test.dart',
+    productionPath: 'lib/screens/referral/referral_overview_page.dart',
+  ),
   // Migration covers 36 surfaces total (bitbox_connect_sheet + 35 above). No
   // further known candidates remain from the prior sweep. welcome_page was
   // reviewed and found safe (scrolls end-to-end, no separate sticky CTA) — not

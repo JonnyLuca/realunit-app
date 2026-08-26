@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
-import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 import 'package:realunit_wallet/styles/colors.dart';
@@ -48,10 +47,6 @@ class ReferralOverviewPage extends StatelessWidget {
             }
 
             final summary = state.summary;
-            final openInvites = state.invites.where((i) => i.isOpen).toList();
-            final creditedInvites = state.invites
-                .where((i) => i.isCredited)
-                .toList();
             final chfFormat = NumberFormat.currency(
               locale: 'de_CH',
               symbol: 'CHF',
@@ -93,20 +88,6 @@ class ReferralOverviewPage extends StatelessWidget {
                           '${chfFormat.format(summary.chfSum)}\n'
                           '${s.referralSharePrice}',
                     ),
-                    if (openInvites.isNotEmpty) ...[
-                      Text(
-                        s.referralStatusOpen,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      ...openInvites.map(_InviteRow.new),
-                    ],
-                    if (creditedInvites.isNotEmpty) ...[
-                      Text(
-                        s.referralStatusCredited,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      ...creditedInvites.map(_InviteRow.new),
-                    ],
                   ],
                 ),
                 actions: [
@@ -166,25 +147,6 @@ class _CountTile extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _InviteRow extends StatelessWidget {
-  final ReferralInviteDto invite;
-
-  const _InviteRow(this.invite);
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedTile(
-      leading: Icon(
-        invite.isCredited ? Icons.check_circle_outline : Icons.hourglass_empty,
-        color: RealUnitColors.realUnitBlue,
-        size: 24,
-      ),
-      title: invite.guestName,
-      subtitle: DateFormat('dd.MM.yyyy').format(invite.created.toLocal()),
     );
   }
 }

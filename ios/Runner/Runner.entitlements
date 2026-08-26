@@ -5,6 +5,8 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:realunit.app</string>
+		<string>applinks:www.realunit.app</string>
+		<string>applinks:dev.realunit.app</string>
 	</array>
 	<key>keychain-access-groups</key>
 	<array>

@@ -539,6 +539,31 @@ void main() {
       );
     });
 
+    test('reads promo codes from custom-scheme and https App Links', () {
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('realunit-wallet://promo/EVT1'),
+        ),
+        'EVT1',
+      );
+      expect(
+        extractReferralInviteCode(Uri.parse('realunit-wallet:promo/EVT1')),
+        'EVT1',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://realunit.app/promo/EVT1'),
+        ),
+        'EVT1',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://www.realunit.app/promo/EVT1'),
+        ),
+        'EVT1',
+      );
+    });
+
     test('returns null for the canonical open and for other https paths', () {
       expect(extractReferralInviteCode(Uri.parse(appLinkUrl)), isNull);
       expect(

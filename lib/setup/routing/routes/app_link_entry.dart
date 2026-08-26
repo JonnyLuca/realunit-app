@@ -61,19 +61,30 @@ String? extractPaymentDeeplinkPayload(String rawUri) {
   return remainder;
 }
 
+const _referralLinkHosts = {
+  'realunit.app',
+  'www.realunit.app',
+  'dev.realunit.app',
+};
+
+bool _isReferralPathKind(String? value) =>
+    value == 'invite' || value == 'promo';
+
 /// Extracts a referral/promo invite code from a custom-scheme or https App Link.
 ///
 /// Matches:
-/// - `realunit-wallet://invite/{code}`
-/// - `realunit-wallet:invite/{code}`
-/// - `https://realunit.app/invite/{code}` (Android App Links / iOS Universal Links)
+/// - `realunit-wallet://invite/{code}` and `realunit-wallet://promo/{code}`
+/// - `realunit-wallet:invite/{code}` and `realunit-wallet:promo/{code}`
+/// - `https://realunit.app/invite/{code}` and `/promo/{code}`
+///   (Android App Links / iOS Universal Links)
 ///
-/// Returns the last path segment (trimmed, max 256) or null when not an invite link.
+/// Returns the last path segment (trimmed, max 256) or null when not a
+/// referral/promo link. Invite and promo share one code field.
 String? extractReferralInviteCode(Uri uri) {
   if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-      uri.host == 'realunit.app') {
+      _referralLinkHosts.contains(uri.host)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
-    if (segments.length >= 2 && segments.first == 'invite') {
+    if (segments.length >= 2 && _isReferralPathKind(segments.first)) {
       return _capReferralCode(segments[1]);
     }
     return null;
@@ -82,7 +93,7 @@ String? extractReferralInviteCode(Uri uri) {
   if (uri.scheme != appLinkScheme) return null;
 
   // Prefer structured Uri parts when hierarchical (`://invite/{code}`).
-  if (uri.host == 'invite') {
+  if (_isReferralPathKind(uri.host)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
     if (segments.isNotEmpty) return _capReferralCode(segments.first);
   }
@@ -96,7 +107,7 @@ String? extractReferralInviteCode(Uri uri) {
   if (remainder.startsWith('//')) remainder = remainder.substring(2);
   final withoutQuery = remainder.split('?').first;
   final segments = withoutQuery.split('/').where((s) => s.isNotEmpty).toList();
-  if (segments.length >= 2 && segments.first == 'invite') {
+  if (segments.length >= 2 && _isReferralPathKind(segments.first)) {
     return _capReferralCode(segments[1]);
   }
   return null;
