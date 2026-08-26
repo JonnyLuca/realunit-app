@@ -1121,6 +1121,9 @@
               <a href="#spec-web"><span class="spec-num">W</span>Web · realunit.app</a>
             </li>
             <li>
+              <a href="#spec-referral"><span class="spec-num">R</span>Empfehlungen &amp; Promo-Code</a>
+            </li>
+            <li>
               <a href="#spec-mails"><span class="spec-num">M</span>E-Mails</a>
             </li>
             <li>
@@ -8901,6 +8904,57 @@
             Kommt im web-Repo eine View hinzu oder weg, failt der Handbook-Build am
             <code>EXPECTED_WEB_BASELINE_COUNT</code>-Guard, bis Zahl und Karten hier
             im selben Zug nachgezogen sind.
+          </p>
+        </details>
+
+        <hr class="sep" />
+
+        <details id="spec-referral" class="spec" open>
+          <summary>
+            <div class="spec-head">
+              <div class="lhs">
+                <h2><span class="num">R</span>Empfehlungen &amp; Promo-Code</h2>
+                <div class="file">lib/screens/referral/ · docs/referral-programme.md</div>
+              </div>
+              <div class="rhs">
+                <b>API entscheidet</b>
+                <div class="links">
+                  <a href="https://github.com/RealUnitCH/app/blob/develop/docs/referral-programme.md">Vertrag ↗</a>
+                </div>
+              </div>
+            </div>
+          </summary>
+          <p class="spec-intro">
+            Verifizierte Aktionäre mit ausreichendem Bestand sehen auf dem Dashboard
+            die Karte <b>Empfehlungen</b> («Erhalte 20 REALU pro Weiterempfehlung»)
+            und denselben Einstieg in den Einstellungen. Sichtbarkeit, Mindestbestand
+            und Auszahlung entscheidet die DFX API; die App rendert
+            <code>eligible</code> 1:1.
+          </p>
+          <p>
+            Einladung erstellen: Name der eingeladenen Person, Checkbox
+            <b>Ich habe die Teilnahmebedingungen gelesen und akzeptiert</b>
+            (Button erst danach aktiv), persönlicher Link von der API
+            (<code>realunit.app/invite/…</code>). Übersicht zeigt nur Anzahl offen /
+            gutgeschrieben sowie Summe REALU und Frankenwert. Kachel-Beschriftung
+            <b>Aktienkurs</b>. Jede Gutschrift in der Historie zeigt ganze REALU,
+            Datum und den <b>im Zeitpunkt der Gutschrift fixierten</b> Frankenwert —
+            kein späteres Nachziehen auf den aktuellen Kurs.
+          </p>
+          <p>
+            Promo-Code und Einladungscode teilen dasselbe Eingabefeld (Registrierung
+            und Deep Link). 20 REALU als Promo-Zugabe nur beim ersten erfolgreichen
+            Kauf von mindestens N REALU (Vorgabe 200, durch die API gesetzt).
+            Einlösung und Kumulierungssperre sind Server-Pflicht. Universal Links:
+            <code>https://realunit.app/invite/…</code> und
+            <code>/promo/…</code> öffnen die App; nach Neuinstallation auf iOS den
+            Link erneut antippen oder den Code manuell eingeben. Android trägt den
+            Code als Play-Store-Install-Referrer.
+          </p>
+          <p>
+            Automatisierte Oberflächen-Tests: Responsive-Matrix auf
+            Teilnahmebedingungen, Übersicht und Erstellseite, Cubit- und
+            API-Vertrags-Tests, Deeplink-Parser.
           </p>
         </details>
 
