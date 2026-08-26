@@ -41,6 +41,7 @@ import 'package:realunit_wallet/packages/service/session_cache.dart';
 import 'package:realunit_wallet/packages/service/settings_service.dart';
 import 'package:realunit_wallet/packages/service/transaction_history_service.dart';
 import 'package:realunit_wallet/packages/service/wallet_service.dart';
+import 'package:realunit_wallet/packages/io/install_referrer_adapter.dart';
 import 'package:realunit_wallet/packages/storage/database.dart';
 import 'package:realunit_wallet/packages/storage/secure_storage.dart';
 import 'package:realunit_wallet/screens/home/bloc/home_bloc.dart';
@@ -48,6 +49,7 @@ import 'package:realunit_wallet/screens/pin/bloc/auth/pin_auth_cubit.dart';
 import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/setup/account_currency_sync.dart';
 import 'package:realunit_wallet/setup/database.dart';
+import 'package:realunit_wallet/setup/routing/capture_install_referrer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -96,6 +98,11 @@ Future<String> setupEssentials({
 }
 
 Future<void> finishSetup(String encryptionKey) async {
+  await captureInstallReferrer(
+    prefs: getIt<SharedPreferences>(),
+    port: const InstallReferrerAdapter(),
+  );
+
   getIt.registerSingleton(AppDatabase(encryptionKey));
   setupRepositories();
 

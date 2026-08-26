@@ -10,9 +10,9 @@ String? _pendingReferralCode;
 
 /// Persist [code] for post-unlock / post-KYC bind.
 ///
-/// Play Store install referrer is handled on the website (`&referrer=`); the
-/// app only needs the code when a custom-scheme or https App Link delivers it
-/// after install. If the OS drops the first open, the user re-taps the invite
+/// Sources: custom-scheme / https App Links, the registration field, and
+/// (Android) the Play install referrer captured once per install. If iOS
+/// drops the first open after a fresh install, the user re-taps the invite
 /// link and this stash is filled again — that re-tap path is intentional.
 Future<void> stashPendingReferralCode(String code) async {
   final trimmed = code.trim();
