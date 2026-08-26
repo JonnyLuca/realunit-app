@@ -8,11 +8,31 @@ import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referra
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_payout_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_terms_dto.dart';
 
 class RealUnitReferralService extends DFXAuthService {
   RealUnitReferralService(super.appStore, super.walletService);
 
   static const _basePath = '/v1/realunit/referral';
+
+  Future<ReferralTermsDto> getTerms() async {
+    final uri = buildUri(host, '$_basePath/terms');
+    final response = await authenticatedGet(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      throw ApiException.fromBody(
+        response.body,
+        httpStatusCode: response.statusCode,
+      );
+    }
+
+    return ReferralTermsDto.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
 
   Future<void> acceptTerms() async {
     final uri = buildUri(host, '$_basePath/terms/accept');

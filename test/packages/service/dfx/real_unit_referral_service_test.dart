@@ -145,4 +145,26 @@ void main() {
       );
     });
   });
+
+  group('$RealUnitReferralService.getTerms', () {
+    test('GETs /v1/realunit/referral/terms and parses markdown 1:1', () async {
+      String? path;
+      final client = MockClient((request) async {
+        path = request.url.path;
+        return http.Response(
+          jsonEncode({
+            'version': '2026-08-14',
+            'markdown': '# TB',
+            'markdownEn': '# Terms',
+          }),
+          200,
+        );
+      });
+
+      final terms = await build(client).getTerms();
+      expect(path, '/v1/realunit/referral/terms');
+      expect(terms.textForLang('de'), '# TB');
+      expect(terms.textForLang('en'), '# Terms');
+    });
+  });
 }

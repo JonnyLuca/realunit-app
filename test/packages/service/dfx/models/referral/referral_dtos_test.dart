@@ -4,6 +4,7 @@ import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referra
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_payout_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_terms_dto.dart';
 
 void main() {
   group('$ReferralSummaryDto.fromJson', () {
@@ -25,6 +26,40 @@ void main() {
       expect(dto.creditedCount, 1);
       expect(dto.realuSum, 20);
       expect(dto.chfSum, 246.5);
+      expect(dto.sharePriceLabel, isNull);
+    });
+
+    test('renders sharePriceLabel 1:1 when the API sends it', () {
+      final dto = ReferralSummaryDto.fromJson({
+        'eligible': true,
+        'termsAccepted': true,
+        'openCount': 0,
+        'creditedCount': 0,
+        'realuSum': 0,
+        'chfSum': 0,
+        'sharePriceLabel': 'Aktienkurs',
+      });
+      expect(dto.sharePriceLabel, 'Aktienkurs');
+    });
+  });
+
+  group('$ReferralTermsDto', () {
+    test('EN falls back to DE markdown', () {
+      final dto = ReferralTermsDto.fromJson({
+        'version': '2026-08-14',
+        'markdown': 'DE md',
+      });
+      expect(dto.textForLang('de'), 'DE md');
+      expect(dto.textForLang('en'), 'DE md');
+    });
+
+    test('EN prefers markdownEn', () {
+      final dto = ReferralTermsDto.fromJson({
+        'version': '2026-08-14',
+        'markdown': 'DE md',
+        'markdownEn': 'EN md',
+      });
+      expect(dto.textForLang('en'), 'EN md');
     });
   });
 

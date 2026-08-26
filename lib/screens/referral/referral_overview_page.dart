@@ -86,7 +86,7 @@ class ReferralOverviewPage extends StatelessWidget {
                       subtitle:
                           '${summary.realuSum.toStringAsFixed(0)} REALU\n'
                           '${chfFormat.format(summary.chfSum)}\n'
-                          '${s.referralSharePrice}',
+                          '${summary.sharePriceLabel ?? s.referralSharePrice}',
                     ),
                   ],
                 ),

@@ -9,6 +9,7 @@ class ReferralSummaryDto {
   final int creditedCount;
   final num realuSum;
   final num chfSum;
+  final String? sharePriceLabel;
 
   const ReferralSummaryDto({
     required this.eligible,
@@ -18,6 +19,7 @@ class ReferralSummaryDto {
     required this.creditedCount,
     required this.realuSum,
     required this.chfSum,
+    this.sharePriceLabel,
   });
 
   factory ReferralSummaryDto.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class ReferralSummaryDto {
       creditedCount: (json['creditedCount'] as num).toInt(),
       realuSum: json['realuSum'] as num,
       chfSum: json['chfSum'] as num,
+      sharePriceLabel: json['sharePriceLabel'] as String?,
     );
   }
 }

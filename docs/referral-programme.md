@@ -24,6 +24,19 @@ Authenticated routes use the existing Bearer session.
 `eligible` is the dashboard/settings gate. The app must not recompute
 shareholder status or the 70 REALU holding locally.
 
+### `GET /v1/realunit/referral/terms`
+
+```json
+{
+  "version": "2026-08-14",
+  "markdown": "…",
+  "markdownEn": "…"
+}
+```
+
+The app renders this 1:1. Bundled `assets/legal/referral_terms_*.md` is only
+a fallback when the call fails.
+
 ### `POST /v1/realunit/referral/terms/accept`
 
 Body: `{ "accepted": true }`.
