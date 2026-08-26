@@ -98,8 +98,9 @@ price.
 `realunit.app/invite/{code}` and `/promo/{code}` look up the public code
 route, greet by name or show the promo action text, open the app via the
 custom scheme, and show App Store / Play Store badges. The Play Store URL
-carries an install referrer so Android can keep the code across a fresh
-install. After iOS install, tap the link again or enter the code.
+carries an install referrer (`invite=<code>`). On first Android launch the
+app reads that referrer once and stashes the code for post-unlock bind.
+After iOS install, tap the link again or enter the code.
 
 ## Out of this repository
 
