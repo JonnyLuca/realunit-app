@@ -1,3 +1,5 @@
+import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
+
 /// Extracts an invite/promo code from a Play Store install-referrer string.
 ///
 /// The website attaches `referrer=invite=<code>`. Play delivers that as
@@ -14,9 +16,7 @@ String? parseInviteCodeFromReferrer(String? raw) {
   }
 
   final params = Uri.splitQueryString(decoded);
-  final rawCode = params['invite'] ?? params['promo'] ?? params['code'];
-  if (rawCode == null) return null;
-  final trimmed = rawCode.trim();
-  if (trimmed.isEmpty) return null;
-  return trimmed.length > 256 ? trimmed.substring(0, 256) : trimmed;
+  return normalizeReferralCode(
+    params['invite'] ?? params['promo'] ?? params['code'],
+  );
 }

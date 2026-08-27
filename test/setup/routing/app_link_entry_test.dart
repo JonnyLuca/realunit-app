@@ -591,6 +591,36 @@ void main() {
       );
     });
 
+    test('percent-decodes opaque custom-scheme codes', () {
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('realunit-wallet:invite/AB%2F12'),
+        ),
+        'AB/12',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('realunit-wallet://promo/AB%2F12'),
+        ),
+        'AB/12',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://realunit.app/invite/AB%2F12'),
+        ),
+        'AB/12',
+      );
+    });
+
+    test('rejects a whitespace-only decoded code', () {
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('realunit-wallet:invite/%20'),
+        ),
+        isNull,
+      );
+    });
+
     test('Android App Links pathPrefix uses a trailing slash', () {
       final xml = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
       final prefixes = RegExp(r'android:pathPrefix="([^"]+)"')

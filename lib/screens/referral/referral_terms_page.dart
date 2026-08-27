@@ -28,7 +28,7 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
   String? _markdown;
   bool _loadFailed = false;
   bool _accepted = false;
-  bool _loadStarted = false;
+  String? _loadedForLang;
 
   @override
   void initState() {
@@ -41,8 +41,17 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_loadStarted || widget.initialMarkdownContent != null) return;
-    _loadStarted = true;
+    if (widget.initialMarkdownContent != null) return;
+    final code = _languageCode();
+    if (_loadedForLang == code) return;
+    final reload = _loadedForLang != null;
+    _loadedForLang = code;
+    if (reload) {
+      setState(() {
+        _markdown = null;
+        _loadFailed = false;
+      });
+    }
     _loadMarkdown();
   }
 

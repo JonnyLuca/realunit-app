@@ -27,6 +27,11 @@ void main() {
     expect((await peekPendingReferralCode())!.length, 256);
   });
 
+  test('percent-decodes a stashed code', () async {
+    await stashPendingReferralCode('AB%2F12');
+    expect(await peekPendingReferralCode(), 'AB/12');
+  });
+
   test('clear drops both memory and prefs', () async {
     await stashPendingReferralCode('EVT1');
     await clearPendingReferralCode();

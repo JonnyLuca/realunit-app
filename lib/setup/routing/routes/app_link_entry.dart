@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:realunit_wallet/screens/pin/bloc/auth/pin_auth_cubit.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/boot_navigation.dart';
@@ -78,14 +79,14 @@ bool _isReferralPathKind(String? value) =>
 /// - `https://realunit.app/invite/{code}` and `/promo/{code}`
 ///   (Android App Links / iOS Universal Links)
 ///
-/// Returns the last path segment (trimmed, max 256) or null when not a
-/// referral/promo link. Invite and promo share one code field.
+/// Returns the last path segment (trimmed, percent-decoded, max 256) or
+/// null when not a referral/promo link. Invite and promo share one code field.
 String? extractReferralInviteCode(Uri uri) {
   if ((uri.scheme == 'https' || uri.scheme == 'http') &&
       _referralLinkHosts.contains(uri.host)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
     if (segments.length >= 2 && _isReferralPathKind(segments.first)) {
-      return _capReferralCode(segments[1]);
+      return normalizeReferralCode(segments[1]);
     }
     return null;
   }
@@ -95,7 +96,7 @@ String? extractReferralInviteCode(Uri uri) {
   // Prefer structured Uri parts when hierarchical (`://invite/{code}`).
   if (_isReferralPathKind(uri.host)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
-    if (segments.isNotEmpty) return _capReferralCode(segments.first);
+    if (segments.isNotEmpty) return normalizeReferralCode(segments.first);
   }
 
   // Fall back to raw-string parsing for opaque `realunit-wallet:invite/{code}`
@@ -108,15 +109,9 @@ String? extractReferralInviteCode(Uri uri) {
   final withoutQuery = remainder.split('?').first;
   final segments = withoutQuery.split('/').where((s) => s.isNotEmpty).toList();
   if (segments.length >= 2 && _isReferralPathKind(segments.first)) {
-    return _capReferralCode(segments[1]);
+    return normalizeReferralCode(segments[1]);
   }
   return null;
-}
-
-String? _capReferralCode(String raw) {
-  final trimmed = raw.trim();
-  if (trimmed.isEmpty) return null;
-  return trimmed.length > 256 ? trimmed.substring(0, 256) : trimmed;
 }
 
 /// Top-level go_router redirect for custom-scheme opens.

@@ -35,5 +35,10 @@ void main() {
       final long = 'x' * 300;
       expect(parseInviteCodeFromReferrer('invite=$long')!.length, 256);
     });
+
+    test('percent-decodes a slash in the code', () {
+      expect(parseInviteCodeFromReferrer('invite=AB%2F12'), 'AB/12');
+      expect(parseInviteCodeFromReferrer('promo=AB%2F12'), 'AB/12');
+    });
   });
 }

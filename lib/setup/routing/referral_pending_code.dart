@@ -1,3 +1,4 @@
+import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// SharedPreferences key for a referral/promo invite code delivered via
@@ -15,9 +16,8 @@ String? _pendingReferralCode;
 /// drops the first open after a fresh install, the user re-taps the invite
 /// link and this stash is filled again — that re-tap path is intentional.
 Future<void> stashPendingReferralCode(String code) async {
-  final trimmed = code.trim();
-  if (trimmed.isEmpty) return;
-  final capped = trimmed.length > 256 ? trimmed.substring(0, 256) : trimmed;
+  final capped = normalizeReferralCode(code);
+  if (capped == null) return;
   _pendingReferralCode = capped;
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString(pendingReferralCodeKey, capped);

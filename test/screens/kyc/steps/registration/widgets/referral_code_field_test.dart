@@ -126,6 +126,27 @@ void main() {
     expect(find.textContaining('Einladung von Björn erkannt'), findsOneWidget);
   });
 
+  testWidgets('looks up a percent-encoded code after decoding', (tester) async {
+    String? lookedUp;
+    final ctrl = TextEditingController(text: 'AB%2F12');
+    await pumpField(
+      tester,
+      controller: ctrl,
+      lookup: (code) async {
+        lookedUp = code;
+        return const ReferralCodeLookupDto(
+          kind: 'invite',
+          inviterName: 'Björn',
+        );
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(lookedUp, 'AB/12');
+    expect(find.textContaining('Einladung von Björn erkannt'), findsOneWidget);
+  });
+
   testWidgets('a lookup timeout is not shown as an invalid code', (tester) async {
     final ctrl = TextEditingController(text: 'AB12');
     await pumpField(

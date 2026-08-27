@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
+import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_code_lookup_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
@@ -69,8 +70,8 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
   }
 
   Future<void> _runLookup() async {
-    final code = widget.controller.text.trim();
-    if (code.isEmpty) {
+    final code = normalizeReferralCode(widget.controller.text);
+    if (code == null) {
       if (mounted) {
         setState(() {
           _result = null;
@@ -85,7 +86,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
     try {
       final result = await _lookup(code);
       if (!mounted) return;
-      if (widget.controller.text.trim() != code) return;
+      if (normalizeReferralCode(widget.controller.text) != code) return;
       setState(() {
         _result = result;
         _invalid = false;
@@ -96,7 +97,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       }
     } on ApiException {
       if (!mounted) return;
-      if (widget.controller.text.trim() != code) return;
+      if (normalizeReferralCode(widget.controller.text) != code) return;
       setState(() {
         _result = null;
         _invalid = true;
@@ -104,7 +105,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       });
     } catch (_) {
       if (!mounted) return;
-      if (widget.controller.text.trim() != code) return;
+      if (normalizeReferralCode(widget.controller.text) != code) return;
       setState(() {
         _result = null;
         _invalid = false;
