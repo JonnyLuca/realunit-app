@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -9,6 +10,7 @@ import 'package:realunit_wallet/packages/service/dfx/dfx_auth_service.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/history/dto/account_history_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_payout_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/transactions/dto/transactions_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:web3dart/credentials.dart';
 
 class TransactionHistoryService extends DFXAuthService {
@@ -101,7 +103,7 @@ class TransactionHistoryService extends DFXAuthService {
       final response = await authenticatedGet(
         uri,
         headers: {'Content-Type': 'application/json'},
-      );
+      ).timeout(RealUnitReferralService.lookupTimeout);
       if (response.statusCode != 200) return;
 
       final decoded = jsonDecode(response.body);

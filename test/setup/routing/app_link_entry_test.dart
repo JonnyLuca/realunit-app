@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -581,6 +582,25 @@ void main() {
           Uri.parse('https://realunit.app/confirm-aktionariat/'),
         ),
         isNull,
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://realunit.app/invitee/AB12'),
+        ),
+        isNull,
+      );
+    });
+
+    test('Android App Links pathPrefix uses a trailing slash', () {
+      final xml = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
+      final prefixes = RegExp(r'android:pathPrefix="([^"]+)"')
+          .allMatches(xml)
+          .map((m) => m.group(1)!)
+          .toList();
+      expect(prefixes, containsAll(['/invite/', '/promo/']));
+      expect(
+        prefixes.where((p) => p == '/invite' || p == '/promo'),
+        isEmpty,
       );
     });
   });
