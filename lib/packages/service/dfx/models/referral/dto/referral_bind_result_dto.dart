@@ -5,6 +5,7 @@ class ReferralBindResultDto {
   final String kind;
   final String? campaignText;
   final String? campaignTextEn;
+  final String? actionText;
   final num? minBuyRealu;
   final DateTime? validUntil;
   final num? redemptionCap;
@@ -13,6 +14,7 @@ class ReferralBindResultDto {
     required this.kind,
     this.campaignText,
     this.campaignTextEn,
+    this.actionText,
     this.minBuyRealu,
     this.validUntil,
     this.redemptionCap,
@@ -24,16 +26,17 @@ class ReferralBindResultDto {
   /// Locale-aware campaign wording. EN falls back to DE when the EN field is absent.
   String? campaignTextForLocale(String languageCode) {
     if (languageCode == 'en') {
-      return campaignTextEn ?? campaignText;
+      return campaignTextEn ?? campaignText ?? actionText;
     }
-    return campaignText ?? campaignTextEn;
+    return campaignText ?? actionText ?? campaignTextEn;
   }
 
   factory ReferralBindResultDto.fromJson(Map<String, dynamic> json) {
     return ReferralBindResultDto(
-      kind: json['kind'] as String,
+      kind: json['kind'] as String? ?? 'Invite',
       campaignText: json['campaignText'] as String?,
       campaignTextEn: json['campaignTextEn'] as String?,
+      actionText: json['actionText'] as String?,
       minBuyRealu: json['minBuyRealu'] as num?,
       validUntil: json['validUntil'] != null
           ? DateTime.parse(json['validUntil'] as String)

@@ -6,7 +6,6 @@ import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/pin/bloc/auth/pin_auth_cubit.dart';
-import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 
@@ -26,8 +25,8 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
     final ctx = router.routerDelegate.navigatorKey.currentContext;
     if (ctx == null || !ctx.mounted) return;
 
-    if (result.isPromo && getIt.isRegistered<SettingsBloc>()) {
-      final lang = getIt<SettingsBloc>().state.language.code;
+    if (result.isPromo) {
+      final lang = Localizations.localeOf(ctx).languageCode;
       final text = result.campaignTextForLocale(lang);
       if (text != null && text.isNotEmpty) {
         await showDialog<void>(

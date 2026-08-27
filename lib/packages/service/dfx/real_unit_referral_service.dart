@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:realunit_wallet/packages/config/api_config.dart';
@@ -116,13 +117,20 @@ class RealUnitReferralService extends DFXAuthService {
   }
 
   /// Public code lookup used by registration preview. No Bearer token —
-  /// the same route the website hits.
-  Future<ReferralCodeLookupDto> lookupCode(String code) async {
+  /// the same route the website hits. 15s matches the landing-page abort.
+  static const lookupTimeout = Duration(seconds: 15);
+
+  Future<ReferralCodeLookupDto> lookupCode(
+    String code, {
+    Duration timeout = lookupTimeout,
+  }) async {
     final uri = buildUri(host, '$_basePath/code/$code');
-    final response = await appStore.httpClient.get(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-    );
+    final response = await appStore.httpClient
+        .get(
+          uri,
+          headers: {'Content-Type': 'application/json'},
+        )
+        .timeout(timeout);
 
     if (response.statusCode != 200) {
       throw ApiException.fromBody(

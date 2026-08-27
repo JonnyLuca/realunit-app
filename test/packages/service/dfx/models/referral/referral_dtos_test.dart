@@ -93,6 +93,17 @@ void main() {
       expect(dto.campaignTextForLocale('en'), 'DE only');
     });
 
+    test('falls back to actionText and defaults a missing kind', () {
+      final dto = ReferralBindResultDto.fromJson({
+        'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      });
+      expect(dto.isInvite, isTrue);
+      expect(
+        dto.campaignTextForLocale('de'),
+        'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      );
+    });
+
     test('kind matching is case-insensitive', () {
       expect(
         ReferralBindResultDto.fromJson({'kind': 'promo'}).isPromo,

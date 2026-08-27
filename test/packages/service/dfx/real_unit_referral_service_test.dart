@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -140,6 +141,21 @@ void main() {
       expect(auth, isNull);
       expect(result.isInvite, isTrue);
       expect(result.inviterName, 'Björn');
+    });
+
+    test('aborts a stalled public lookup', () async {
+      final client = MockClient((request) async {
+        await Future<void>.delayed(const Duration(seconds: 30));
+        return http.Response('{}', 200);
+      });
+
+      await expectLater(
+        build(client).lookupCode(
+          'AB12',
+          timeout: const Duration(milliseconds: 20),
+        ),
+        throwsA(isA<TimeoutException>()),
+      );
     });
   });
 

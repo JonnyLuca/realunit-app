@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/setup/routing/referral_bind.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
+import 'package:realunit_wallet/styles/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockService extends Mock implements RealUnitReferralService {}
@@ -60,4 +63,46 @@ void main() {
     verify(() => service.bind(code: 'AB12CD')).called(1);
     expect(router.state.uri.path, '/');
   });
+
+  testWidgets(
+    'shows the API campaign text after a promo bind without SettingsBloc',
+    (tester) async {
+      await stashPendingReferralCode('EVT1');
+      when(() => service.bind(code: 'EVT1')).thenAnswer(
+        (_) async => const ReferralBindResultDto(
+          kind: 'Promo',
+          campaignText: 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          theme: realUnitTheme,
+          locale: const Locale('de'),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          routerConfig: router,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final pending = bindPendingReferralCode(router);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Aktion'), findsOneWidget);
+      expect(
+        find.text('Mit dem Code EVT1 schenken wir dir 20 Token.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Schließen'));
+      await tester.pumpAndSettle();
+      await pending;
+      expect(await peekPendingReferralCode(), isNull);
+    },
+  );
 }
