@@ -57,6 +57,30 @@ void main() {
     verify(() => service.bind(code: 'AB12CD')).called(1);
   });
 
+  test('keeps the stashed code when bind returns 401 or 429', () async {
+    when(() => service.bind(code: 'AB12CD')).thenThrow(
+      const ApiException(
+        statusCode: 401,
+        code: 'UNAUTHORIZED',
+        message: 'auth',
+      ),
+    );
+    await stashPendingReferralCode('AB12CD');
+    await bindPendingReferralCode(router);
+    expect(await peekPendingReferralCode(), 'AB12CD');
+
+    when(() => service.bind(code: 'AB12CD')).thenThrow(
+      const ApiException(
+        statusCode: 429,
+        code: 'RATE_LIMIT',
+        message: 'slow down',
+      ),
+    );
+    await bindPendingReferralCode(router);
+    expect(await peekPendingReferralCode(), 'AB12CD');
+    verify(() => service.bind(code: 'AB12CD')).called(2);
+  });
+
   test('keeps the stashed code when bind returns 408', () async {
     await stashPendingReferralCode('AB12CD');
     when(() => service.bind(code: 'AB12CD')).thenThrow(

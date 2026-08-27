@@ -196,6 +196,7 @@ void main() {
       initialState: const ReferralFailure(message: 'down'),
     );
     when(() => cubit.load()).thenAnswer((_) async {});
+    when(() => cubit.openCreate()).thenReturn(null);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -218,7 +219,9 @@ void main() {
     expect(find.text('down'), findsOneWidget);
     await tester.tap(find.byType(AppFilledButton));
     await tester.pump();
+    await tester.pump();
     verify(() => cubit.load()).called(1);
+    verify(() => cubit.openCreate()).called(1);
   });
 
   testWidgets('shows the API error on the name-entry form', (tester) async {
@@ -328,6 +331,7 @@ void main() {
       initialState: ReferralNeedsTerms(summary: _summary),
     );
     when(() => cubit.load()).thenAnswer((_) async {});
+    when(() => cubit.openCreate()).thenReturn(null);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -348,7 +352,9 @@ void main() {
     await tester.pump();
     await tester.tap(find.byType(AppFilledButton));
     await tester.pump();
+    await tester.pump();
     verify(() => cubit.load()).called(1);
+    verify(() => cubit.openCreate()).called(1);
   });
 
   testWidgets('app-bar back after create pops true so overview can refresh', (
