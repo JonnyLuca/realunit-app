@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:realunit_wallet/packages/config/api_config.dart';
+import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:realunit_wallet/packages/service/dfx/dfx_auth_service.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
@@ -143,12 +144,13 @@ class RealUnitReferralService extends DFXAuthService {
     String code, {
     Duration timeout = lookupTimeout,
   }) async {
+    final normalized = _requireCode(code);
     final template = buildUri(host, _basePath);
     final uri = template.replace(
       pathSegments: [
         ...template.pathSegments.where((s) => s.isNotEmpty),
         'code',
-        code,
+        normalized,
       ],
     );
     final response = await _timed(
@@ -175,12 +177,13 @@ class RealUnitReferralService extends DFXAuthService {
     required String code,
     Duration timeout = lookupTimeout,
   }) async {
+    final normalized = _requireCode(code);
     final uri = buildUri(host, '$_basePath/bind');
     final response = await _timed(
       authenticatedPost(
         uri,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'code': code}),
+        body: jsonEncode({'code': normalized}),
       ),
       timeout: timeout,
     );
@@ -217,5 +220,17 @@ class RealUnitReferralService extends DFXAuthService {
     return list
         .map((e) => ReferralPayoutDto.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  String _requireCode(String code) {
+    final normalized = normalizeReferralCode(code);
+    if (normalized == null) {
+      throw const ApiException(
+        statusCode: 400,
+        code: 'INVALID',
+        message: 'empty',
+      );
+    }
+    return normalized;
   }
 }

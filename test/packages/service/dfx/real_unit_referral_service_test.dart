@@ -157,6 +157,20 @@ void main() {
       expect(segments, ['v1', 'realunit', 'referral', 'code', 'AB/12']);
     });
 
+    test('percent-decodes the lookup path segment', () async {
+      List<String>? segments;
+      final client = MockClient((request) async {
+        segments = request.url.pathSegments;
+        return http.Response(
+          jsonEncode({'kind': 'invite', 'inviterName': 'Björn'}),
+          200,
+        );
+      });
+
+      await build(client).lookupCode('AB%2F12');
+      expect(segments, ['v1', 'realunit', 'referral', 'code', 'AB/12']);
+    });
+
     test('aborts a stalled public lookup', () async {
       final client = MockClient((request) async {
         await Future<void>.delayed(const Duration(seconds: 30));
@@ -199,6 +213,20 @@ void main() {
         result.campaignText,
         'Mit dem Code XY schenken wir dir 20 Token.',
       );
+    });
+
+    test('percent-decodes the bind code', () async {
+      Map<String, dynamic>? body;
+      final client = MockClient((request) async {
+        body = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({'kind': 'Invite'}),
+          200,
+        );
+      });
+
+      await build(client).bind(code: 'AB%2F12');
+      expect(body, {'code': 'AB/12'});
     });
 
     test('aborts a stalled bind', () async {
