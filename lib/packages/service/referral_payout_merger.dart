@@ -22,7 +22,9 @@ List<Transaction> mergeReferralPayouts({
     payoutTxs.add(
       Transaction(
         height: 0,
-        txId: hash?.isNotEmpty == true ? hash! : 'referral-payout-${payout.id}',
+        txId: hash != null && hash.isNotEmpty
+            ? hash.toLowerCase()
+            : 'referral-payout-${payout.id}',
         chainId: asset.chainId,
         senderAddress: '',
         receiverAddress: walletAddress,

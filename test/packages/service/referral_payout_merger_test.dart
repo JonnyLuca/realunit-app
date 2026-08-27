@@ -51,6 +51,29 @@ void main() {
       },
     );
 
+    test('drops an on-chain transfer when the payout hash differs only by case', () {
+      final payout = ReferralPayoutDto(
+        id: 7,
+        amount: 20,
+        chfValue: 246.5,
+        created: DateTime.utc(2026, 8, 24, 10),
+        kind: 'Invite',
+        status: 'Complete',
+        txHash: '0xABC',
+      );
+
+      final merged = mergeReferralPayouts(
+        onChain: [_onChain('0xabc')],
+        payouts: [payout],
+        asset: realUnitAsset,
+        walletAddress: _wallet,
+      );
+
+      expect(merged, hasLength(1));
+      expect(merged.single.txId, '0xabc');
+      expect(merged.single.type, TransactionTypes.referralPayout);
+    });
+
     test('uses a synthetic txId when a settled payout has no hash yet', () {
       final payout = ReferralPayoutDto(
         id: 3,
