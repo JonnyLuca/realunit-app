@@ -143,6 +143,20 @@ void main() {
       expect(result.inviterName, 'Björn');
     });
 
+    test('keeps a slash in the code as one path segment', () async {
+      List<String>? segments;
+      final client = MockClient((request) async {
+        segments = request.url.pathSegments;
+        return http.Response(
+          jsonEncode({'kind': 'invite', 'inviterName': 'Björn'}),
+          200,
+        );
+      });
+
+      await build(client).lookupCode('AB/12');
+      expect(segments, ['v1', 'realunit', 'referral', 'code', 'AB/12']);
+    });
+
     test('aborts a stalled public lookup', () async {
       final client = MockClient((request) async {
         await Future<void>.delayed(const Duration(seconds: 30));

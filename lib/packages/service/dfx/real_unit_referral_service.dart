@@ -143,7 +143,14 @@ class RealUnitReferralService extends DFXAuthService {
     String code, {
     Duration timeout = lookupTimeout,
   }) async {
-    final uri = buildUri(host, '$_basePath/code/$code');
+    final template = buildUri(host, _basePath);
+    final uri = template.replace(
+      pathSegments: [
+        ...template.pathSegments.where((s) => s.isNotEmpty),
+        'code',
+        code,
+      ],
+    );
     final response = await _timed(
       appStore.httpClient.get(
         uri,

@@ -27,25 +27,41 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
   String? _markdown;
   bool _loadFailed = false;
   bool _accepted = false;
+  bool _loadStarted = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialMarkdownContent != null) {
       _markdown = widget.initialMarkdownContent;
-    } else {
-      _loadMarkdown();
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loadStarted || widget.initialMarkdownContent != null) return;
+    _loadStarted = true;
+    _loadMarkdown();
+  }
+
+  String _languageCode() {
+    if (getIt.isRegistered<SettingsBloc>()) {
+      return getIt<SettingsBloc>().state.language.code;
+    }
+    return Localizations.localeOf(context).languageCode;
+  }
+
   Future<void> _loadMarkdown() async {
-    final code = context.read<SettingsBloc>().state.language.code;
+    final code = _languageCode();
     try {
-      final terms = await getIt<RealUnitReferralService>().getTerms();
-      final fromApi = terms.textForLang(code);
-      if (fromApi.isNotEmpty) {
-        if (mounted) setState(() => _markdown = fromApi);
-        return;
+      if (getIt.isRegistered<RealUnitReferralService>()) {
+        final terms = await getIt<RealUnitReferralService>().getTerms();
+        final fromApi = terms.textForLang(code);
+        if (fromApi.isNotEmpty) {
+          if (mounted) setState(() => _markdown = fromApi);
+          return;
+        }
       }
     } catch (_) {
       // Bundled TB 14.08 is the fallback when the API is unreachable.

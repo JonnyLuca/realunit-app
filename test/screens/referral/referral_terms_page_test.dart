@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_terms_page.dart';
 import 'package:realunit_wallet/styles/themes.dart';
@@ -79,4 +81,40 @@ void main() {
       verify(() => cubit.acceptTerms()).called(1);
     },
   );
+
+  testWidgets(
+    'falls back to bundled TB 14.08 when the terms API is unreachable',
+    (tester) async {
+      final service = _MockReferralService();
+      when(() => service.getTerms()).thenThrow(Exception('down'));
+      GetIt.instance.registerSingleton<RealUnitReferralService>(service);
+      addTearDown(() async {
+        await GetIt.instance.reset();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: realUnitTheme,
+          locale: const Locale('de'),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          home: BlocProvider<ReferralCubit>.value(
+            value: cubit,
+            child: const ReferralTermsPage(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('14.08.2026'), findsWidgets);
+      expect(find.textContaining('70 RealUnit-Aktientoken'), findsWidgets);
+    },
+  );
 }
+
+class _MockReferralService extends Mock implements RealUnitReferralService {}
