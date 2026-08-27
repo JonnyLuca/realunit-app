@@ -127,6 +127,16 @@ void main() {
   );
 
   blocTest<ReferralCubit, ReferralState>(
+    'openCreate moves from overview to the name-entry form',
+    build: () => ReferralCubit(service),
+    seed: () => ReferralOverviewLoaded(summary: _eligible, invites: const []),
+    act: (cubit) => cubit.openCreate(),
+    expect: () => [
+      ReferralCreateReady(summary: _eligible),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
     'load surfaces API errors',
     build: () {
       when(() => service.getSummary()).thenThrow(

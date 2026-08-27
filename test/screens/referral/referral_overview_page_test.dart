@@ -1,5 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -113,4 +114,85 @@ void main() {
       expect(find.text('Verifiziert'), findsNothing);
     },
   );
+
+  testWidgets('copy writes the open invite URL to the clipboard', (tester) async {
+    String? copied;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copied = (call.arguments as Map)['text'] as String?;
+      }
+      return null;
+    });
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    const summary = ReferralSummaryDto(
+      eligible: true,
+      termsAccepted: true,
+      openCount: 1,
+      creditedCount: 0,
+      realuSum: 0,
+      chfSum: 0,
+    );
+    final invites = [
+      ReferralInviteDto(
+        id: 1,
+        code: 'AAAA',
+        url: 'https://realunit.app/invite/AAAA',
+        guestName: 'Alice',
+        status: 'Open',
+        created: DateTime.utc(2026, 8, 1),
+      ),
+    ];
+    when(() => cubit.state).thenReturn(
+      ReferralOverviewLoaded(summary: summary, invites: invites),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralOverviewLoaded(summary: summary, invites: invites),
+    );
+
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => BlocProvider<ReferralCubit>.value(
+            value: cubit,
+            child: const ReferralOverviewPage(),
+          ),
+          routes: [
+            GoRoute(
+              name: SettingsRoutes.referralCreate,
+              path: 'create',
+              builder: (_, _) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Einladungslink kopieren'));
+    await tester.pump();
+
+    expect(copied, 'https://realunit.app/invite/AAAA');
+    expect(find.text('In die Zwischenablage kopiert'), findsOneWidget);
+  });
 }

@@ -52,10 +52,14 @@ void main() {
 
     expect(find.text('Überspringen'), findsOneWidget);
 
+    ctrl.text = 'NOPE';
     await tester.tap(find.text('Überspringen'));
+    expect(ctrl.text, isEmpty);
     verify(() => stepCubit.next()).called(1);
 
+    ctrl.text = 'AB12';
     await tester.tap(find.text('Weiter'));
+    expect(ctrl.text, 'AB12');
     verify(() => stepCubit.next()).called(2);
   });
 }

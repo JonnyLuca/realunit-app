@@ -21,8 +21,9 @@ class KycRegistrationReferralStep extends StatelessWidget {
     this.lookup,
   });
 
-  void _advance(BuildContext context) {
+  void _advance(BuildContext context, {required bool skip}) {
     FocusManager.instance.primaryFocus?.unfocus();
+    if (skip) referralCodeCtrl.clear();
     context.read<KycRegistrationStepCubit>().next();
   }
 
@@ -45,12 +46,12 @@ class KycRegistrationReferralStep extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8),
               child: AppFilledButton(
                 label: s.next,
-                onPressed: () => _advance(context),
+                onPressed: () => _advance(context, skip: false),
               ),
             ),
             AppTextButton(
               label: s.skip,
-              onPressed: () => _advance(context),
+              onPressed: () => _advance(context, skip: true),
             ),
           ],
         ),
