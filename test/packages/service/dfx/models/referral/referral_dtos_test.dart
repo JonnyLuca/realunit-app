@@ -462,6 +462,20 @@ void main() {
       expect(promo.campaignTextForLocale('en'), 'DE action');
     });
 
+    test('EN prefers actionTextEn and promo minBuyRealu defaults to 200', () {
+      final promo = ReferralCodeLookupDto.fromJson({
+        'kind': 'promo',
+        'actionText': 'DE action',
+        'actionTextEn': 'EN action',
+      });
+      expect(promo.campaignTextForLocale('en'), 'EN action');
+      expect(promo.minBuyRealu, 200);
+      expect(
+        ReferralCodeLookupDto.fromJson({'kind': 'invite'}).minBuyRealu,
+        isNull,
+      );
+    });
+
     test('infers promo from action text when kind is omitted', () {
       final promo = ReferralCodeLookupDto.fromJson({
         'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
