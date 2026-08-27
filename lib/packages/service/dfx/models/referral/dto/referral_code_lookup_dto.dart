@@ -9,16 +9,24 @@ class ReferralCodeLookupDto {
   final String? inviterName;
   final String? inviteeName;
   final String? actionText;
+  final String? actionTextEn;
   final String? campaignText;
   final String? campaignTextEn;
+  final num? minBuyRealu;
+  final DateTime? validUntil;
+  final num? redemptionCap;
 
   const ReferralCodeLookupDto({
     required this.kind,
     this.inviterName,
     this.inviteeName,
     this.actionText,
+    this.actionTextEn,
     this.campaignText,
     this.campaignTextEn,
+    this.minBuyRealu,
+    this.validUntil,
+    this.redemptionCap,
   });
 
   bool get isPromo => kind.toLowerCase() == 'promo';
@@ -31,19 +39,35 @@ class ReferralCodeLookupDto {
   /// field is absent or empty.
   String? campaignTextForLocale(String languageCode) {
     if (languageCode == 'en') {
-      return firstNonEmpty([campaignTextEn, campaignText, actionText]);
+      return firstNonEmpty([
+        campaignTextEn,
+        actionTextEn,
+        campaignText,
+        actionText,
+      ]);
     }
-    return firstNonEmpty([actionText, campaignText, campaignTextEn]);
+    return firstNonEmpty([
+      actionText,
+      campaignText,
+      campaignTextEn,
+      actionTextEn,
+    ]);
   }
 
   factory ReferralCodeLookupDto.fromJson(Map<String, dynamic> json) {
+    final kind = inferReferralKind(json);
+    final minBuy = referralJsonNum(json['minBuyRealu']);
     return ReferralCodeLookupDto(
-      kind: inferReferralKind(json),
+      kind: kind,
       inviterName: referralJsonString(json['inviterName']),
       inviteeName: referralJsonString(json['inviteeName']),
       actionText: referralJsonString(json['actionText']),
+      actionTextEn: referralJsonString(json['actionTextEn']),
       campaignText: referralJsonString(json['campaignText']),
       campaignTextEn: referralJsonString(json['campaignTextEn']),
+      minBuyRealu: minBuy ?? (kind.toLowerCase() == 'promo' ? 200 : null),
+      validUntil: referralJsonDate(json['validUntil']),
+      redemptionCap: referralJsonNum(json['redemptionCap']),
     );
   }
 }

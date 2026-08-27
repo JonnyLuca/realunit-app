@@ -10,6 +10,7 @@ class ReferralBindResultDto {
   final String? campaignText;
   final String? campaignTextEn;
   final String? actionText;
+  final String? actionTextEn;
   final num? minBuyRealu;
   final DateTime? validUntil;
   final num? redemptionCap;
@@ -19,6 +20,7 @@ class ReferralBindResultDto {
     this.campaignText,
     this.campaignTextEn,
     this.actionText,
+    this.actionTextEn,
     this.minBuyRealu,
     this.validUntil,
     this.redemptionCap,
@@ -31,9 +33,19 @@ class ReferralBindResultDto {
   /// absent or empty.
   String? campaignTextForLocale(String languageCode) {
     if (languageCode == 'en') {
-      return firstNonEmpty([campaignTextEn, campaignText, actionText]);
+      return firstNonEmpty([
+        campaignTextEn,
+        actionTextEn,
+        campaignText,
+        actionText,
+      ]);
     }
-    return firstNonEmpty([campaignText, actionText, campaignTextEn]);
+    return firstNonEmpty([
+      campaignText,
+      actionText,
+      campaignTextEn,
+      actionTextEn,
+    ]);
   }
 
   factory ReferralBindResultDto.fromJson(Map<String, dynamic> json) {
@@ -44,6 +56,7 @@ class ReferralBindResultDto {
       campaignText: referralJsonString(json['campaignText']),
       campaignTextEn: referralJsonString(json['campaignTextEn']),
       actionText: referralJsonString(json['actionText']),
+      actionTextEn: referralJsonString(json['actionTextEn']),
       // Promo first-purchase floor. Spec default is 200 REALU when omitted.
       minBuyRealu: minBuy ?? (kind.toLowerCase() == 'promo' ? 200 : null),
       validUntil: referralJsonDate(json['validUntil']),

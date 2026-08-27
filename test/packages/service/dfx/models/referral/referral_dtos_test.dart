@@ -209,6 +209,16 @@ void main() {
       expect(dto.campaignTextForLocale('en'), 'DE only');
     });
 
+    test('EN prefers actionTextEn when campaignTextEn is empty', () {
+      final dto = ReferralBindResultDto.fromJson({
+        'kind': 'Promo',
+        'campaignText': 'DE only',
+        'campaignTextEn': '',
+        'actionTextEn': 'EN action',
+      });
+      expect(dto.campaignTextForLocale('en'), 'EN action');
+    });
+
     test('falls back to actionText and treats campaign copy without kind as promo', () {
       final dto = ReferralBindResultDto.fromJson({
         'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
