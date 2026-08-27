@@ -401,6 +401,29 @@ void main() {
       expect(payouts, hasLength(1));
       expect(payouts.single.chfValue, 246.5);
     });
+
+    test('skips a malformed payout row and keeps the valid prize', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode([
+            {'id': 1, 'created': '2026-08-24T10:00:00Z'},
+            {
+              'id': 2,
+              'amount': '20',
+              'chfValue': '246.5',
+              'created': '2026-08-24T10:00:00Z',
+              'status': 'Complete',
+            },
+          ]),
+          200,
+        ),
+      );
+
+      final payouts = await build(client).getPayouts();
+      expect(payouts, hasLength(1));
+      expect(payouts.single.id, 2);
+      expect(payouts.single.amount, 20);
+    });
   });
 
   group('$RealUnitReferralService.getTerms', () {

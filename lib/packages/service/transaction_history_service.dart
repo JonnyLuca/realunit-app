@@ -114,7 +114,12 @@ class TransactionHistoryService extends DFXAuthService {
       final asset = appStore.apiConfig.asset;
       final walletAddress = appStore.primaryAddress;
       for (final raw in rows) {
-        final payout = ReferralPayoutDto.fromJson(raw);
+        final ReferralPayoutDto payout;
+        try {
+          payout = ReferralPayoutDto.fromJson(raw);
+        } catch (_) {
+          continue;
+        }
         if (!payout.isSettled) continue;
         final hash = payout.txHash;
         var txId = (hash != null && hash.isNotEmpty)

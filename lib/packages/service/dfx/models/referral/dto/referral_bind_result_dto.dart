@@ -1,4 +1,5 @@
 import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_kind.dart';
 
 /// Response from `POST /v1/realunit/referral/bind`.
@@ -37,7 +38,7 @@ class ReferralBindResultDto {
 
   factory ReferralBindResultDto.fromJson(Map<String, dynamic> json) {
     final kind = inferReferralKind(json);
-    final minBuy = json['minBuyRealu'] as num?;
+    final minBuy = referralJsonNum(json['minBuyRealu']);
     return ReferralBindResultDto(
       kind: kind,
       campaignText: json['campaignText'] as String?,
@@ -48,7 +49,7 @@ class ReferralBindResultDto {
       validUntil: json['validUntil'] != null
           ? DateTime.parse(json['validUntil'] as String)
           : null,
-      redemptionCap: json['redemptionCap'] as num?,
+      redemptionCap: referralJsonNum(json['redemptionCap']),
     );
   }
 }

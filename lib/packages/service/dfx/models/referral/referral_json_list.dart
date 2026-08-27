@@ -21,3 +21,14 @@ List<Map<String, dynamic>> referralJsonList(dynamic decoded) {
   }
   return const [];
 }
+
+/// JSON numbers sometimes arrive as strings (`"20"`, `"246.50"`). Missing or
+/// non-numeric values are null so a prize row is not silently shown as 0.
+num? referralJsonNum(dynamic value) {
+  if (value is num) return value;
+  if (value is String) return num.tryParse(value.trim());
+  return null;
+}
+
+int referralJsonInt(dynamic value, {int orElse = 0}) =>
+    referralJsonNum(value)?.round() ?? orElse;

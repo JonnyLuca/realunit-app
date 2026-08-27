@@ -1,3 +1,5 @@
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
+
 /// One referral payout row from `GET /v1/realunit/referral/payouts`.
 /// [chfValue] is the CHF amount frozen at credit — never recompute from current price.
 class ReferralPayoutDto {
@@ -32,10 +34,15 @@ class ReferralPayoutDto {
   }
 
   factory ReferralPayoutDto.fromJson(Map<String, dynamic> json) {
+    final amount = referralJsonNum(json['amount']);
+    final chfValue = referralJsonNum(json['chfValue']);
+    if (amount == null || chfValue == null) {
+      throw FormatException('referral payout missing amount/chfValue');
+    }
     return ReferralPayoutDto(
-      id: (json['id'] as num).toInt(),
-      amount: json['amount'] as num,
-      chfValue: json['chfValue'] as num,
+      id: referralJsonInt(json['id']),
+      amount: amount,
+      chfValue: chfValue,
       created: DateTime.parse(json['created'] as String),
       kind: json['kind'] as String? ?? '',
       status: json['status'] as String? ?? 'Complete',

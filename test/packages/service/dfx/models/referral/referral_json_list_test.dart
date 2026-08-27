@@ -64,4 +64,15 @@ void main() {
     expect(referralJsonList('nope'), isEmpty);
     expect(referralJsonList({'count': 0}), isEmpty);
   });
+
+  test('referralJsonNum reads JSON numbers and numeric strings', () {
+    expect(referralJsonNum(20), 20);
+    expect(referralJsonNum(246.5), 246.5);
+    expect(referralJsonNum('20'), 20);
+    expect(referralJsonNum(' 246.50 '), 246.5);
+    expect(referralJsonNum(''), isNull);
+    expect(referralJsonNum(null), isNull);
+    expect(referralJsonInt('3'), 3);
+    expect(referralJsonInt(null), 0);
+  });
 }

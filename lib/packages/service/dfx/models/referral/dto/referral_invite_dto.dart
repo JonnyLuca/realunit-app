@@ -1,4 +1,5 @@
 import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
 
 /// One invite row from `GET /v1/realunit/referral/invites`.
 /// Status values from the API: `Open` / `Bound` / `Credited` / `Deleted`.
@@ -36,7 +37,7 @@ class ReferralInviteDto {
 
   factory ReferralInviteDto.fromJson(Map<String, dynamic> json) {
     return ReferralInviteDto(
-      id: (json['id'] as num).toInt(),
+      id: referralJsonInt(json['id']),
       code: json['code'] as String,
       url: json['url'] as String,
       guestName: json['guestName'] as String,

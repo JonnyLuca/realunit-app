@@ -30,6 +30,23 @@ void main() {
       expect(dto.sharePriceLabel, isNull);
     });
 
+    test('reads counts and sums from numeric strings', () {
+      final dto = ReferralSummaryDto.fromJson({
+        'eligible': true,
+        'termsAccepted': true,
+        'minHolding': '70',
+        'openCount': '2',
+        'creditedCount': '1',
+        'realuSum': '40',
+        'chfSum': '512.4',
+      });
+      expect(dto.minHolding, 70);
+      expect(dto.openCount, 2);
+      expect(dto.creditedCount, 1);
+      expect(dto.realuSum, 40);
+      expect(dto.chfSum, 512.4);
+    });
+
     test('renders sharePriceLabel 1:1 when the API sends it', () {
       final dto = ReferralSummaryDto.fromJson({
         'eligible': true,
@@ -126,6 +143,16 @@ void main() {
       expect(dto.redemptionCap, 100);
       expect(dto.campaignTextForLocale('en'), 'EN text');
       expect(dto.campaignTextForLocale('de'), 'DE text');
+    });
+
+    test('reads minBuyRealu from a numeric string', () {
+      final dto = ReferralBindResultDto.fromJson({
+        'kind': 'Promo',
+        'minBuyRealu': '250',
+        'redemptionCap': '80',
+      });
+      expect(dto.minBuyRealu, 250);
+      expect(dto.redemptionCap, 80);
     });
 
     test('promo minBuyRealu defaults to 200 when the API omits it', () {
@@ -248,6 +275,20 @@ void main() {
       expect(dto.chfValue, 246.5);
       expect(dto.txHash, '0xabc');
       expect(dto.isSettled, isTrue);
+    });
+
+    test('reads amount and frozen CHF when the API sends numeric strings', () {
+      final dto = ReferralPayoutDto.fromJson({
+        'id': '9',
+        'amount': '20',
+        'chfValue': '246.50',
+        'created': '2026-08-24T10:00:00Z',
+        'kind': 'Invite',
+        'status': 'Complete',
+      });
+      expect(dto.id, 9);
+      expect(dto.amount, 20);
+      expect(dto.chfValue, 246.5);
     });
 
     test('pending and failed payouts are not settled; missing status is', () {

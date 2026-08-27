@@ -216,9 +216,15 @@ class RealUnitReferralService extends DFXAuthService {
       );
     }
 
-    return referralJsonList(jsonDecode(response.body))
-        .map(ReferralPayoutDto.fromJson)
-        .toList();
+    final payouts = <ReferralPayoutDto>[];
+    for (final row in referralJsonList(jsonDecode(response.body))) {
+      try {
+        payouts.add(ReferralPayoutDto.fromJson(row));
+      } catch (_) {
+        // Skip a malformed row so one bad prize cannot hide the rest.
+      }
+    }
+    return payouts;
   }
 
   String _requireCode(String code) {

@@ -1,4 +1,5 @@
 import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
 
 /// Server-side referral programme summary for the current wallet
 /// (`GET /v1/realunit/referral/summary`). `eligible` is the authoritative
@@ -37,11 +38,11 @@ class ReferralSummaryDto {
     return ReferralSummaryDto(
       eligible: json['eligible'] as bool,
       termsAccepted: json['termsAccepted'] as bool,
-      minHolding: json['minHolding'] as num?,
-      openCount: (json['openCount'] as num).toInt(),
-      creditedCount: (json['creditedCount'] as num).toInt(),
-      realuSum: json['realuSum'] as num,
-      chfSum: json['chfSum'] as num,
+      minHolding: referralJsonNum(json['minHolding']),
+      openCount: referralJsonInt(json['openCount']),
+      creditedCount: referralJsonInt(json['creditedCount']),
+      realuSum: referralJsonNum(json['realuSum']) ?? 0,
+      chfSum: referralJsonNum(json['chfSum']) ?? 0,
       sharePriceLabel: firstNonEmpty([json['sharePriceLabel'] as String?]),
     );
   }
