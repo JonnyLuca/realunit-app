@@ -320,5 +320,34 @@ void main() {
       expect(captured.amount, BigInt.from(20));
       expect(captured.data, '246.5');
     });
+
+    test('does not write pending referral payouts into history', () async {
+      sessionCache.setAuthToken('jwt-1');
+      final client = MockClient((request) async {
+        if (request.url.path.endsWith('/history')) {
+          return http.Response(jsonEncode(_accountHistory([])), 200);
+        }
+        if (request.url.path.contains('/referral/payouts')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 9,
+                'amount': 20,
+                'chfValue': 246.5,
+                'created': '2026-08-24T10:00:00Z',
+                'kind': 'Invite',
+                'status': 'Pending',
+              },
+            ]),
+            200,
+          );
+        }
+        return http.Response('[]', 200);
+      });
+
+      await build(client).apiBasedSync();
+
+      verifyNever(() => txRepo.insertTransaction(any()));
+    });
   });
 }

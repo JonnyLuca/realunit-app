@@ -26,7 +26,7 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
     final ctx = router.routerDelegate.navigatorKey.currentContext;
     if (ctx == null || !ctx.mounted) return;
 
-    if (result.isPromo) {
+    if (result.isPromo && getIt.isRegistered<SettingsBloc>()) {
       final lang = getIt<SettingsBloc>().state.language.code;
       final text = result.campaignTextForLocale(lang);
       if (text != null && text.isNotEmpty) {
