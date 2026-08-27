@@ -211,6 +211,10 @@ void main() {
       await tester.pump();
 
       expect(find.byType(KycRegistrationPersonalStep).hitTestable(), findsOne);
+      expect(
+        find.text('Einladungs- oder Promo-Code (optional)'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders $KycRegistrationAddressStep', (tester) async {

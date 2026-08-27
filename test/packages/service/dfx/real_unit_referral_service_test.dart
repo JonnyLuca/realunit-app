@@ -146,6 +146,34 @@ void main() {
     });
   });
 
+  group('$RealUnitReferralService.getPayouts', () {
+    test('GETs /v1/realunit/referral/payouts and keeps chfValue frozen', () async {
+      String? path;
+      final client = MockClient((request) async {
+        path = request.url.path;
+        return http.Response(
+          jsonEncode([
+            {
+              'id': 1,
+              'amount': 20,
+              'chfValue': 246.5,
+              'created': '2026-08-24T10:00:00Z',
+              'kind': 'Invite',
+              'status': 'Complete',
+            },
+          ]),
+          200,
+        );
+      });
+
+      final payouts = await build(client).getPayouts();
+      expect(path, '/v1/realunit/referral/payouts');
+      expect(payouts, hasLength(1));
+      expect(payouts.single.chfValue, 246.5);
+      expect(payouts.single.amount, 20);
+    });
+  });
+
   group('$RealUnitReferralService.getTerms', () {
     test('GETs /v1/realunit/referral/terms and parses markdown 1:1', () async {
       String? path;
