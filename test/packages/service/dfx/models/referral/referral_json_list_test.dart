@@ -134,6 +134,36 @@ void main() {
       }),
       {'data': ['not-a-map'], 'eligible': true},
     );
+    expect(
+      referralJsonObject(
+        {
+          'eligible': true,
+          'data': {'kind': 'Promo'},
+        },
+        markers: const ['eligible'],
+      ),
+      {
+        'eligible': true,
+        'data': {'kind': 'Promo'},
+      },
+    );
+    expect(
+      referralJsonObject(
+        {
+          'invite': {
+            'code': 'AB12',
+            'url': 'https://realunit.app/invite/AB12',
+            'guestName': 'Alice',
+          },
+        },
+        markers: const ['code', 'url', 'guestName'],
+      ),
+      {
+        'code': 'AB12',
+        'url': 'https://realunit.app/invite/AB12',
+        'guestName': 'Alice',
+      },
+    );
   });
 
   test('referralJsonString trims, stringifies numbers, and drops blanks', () {

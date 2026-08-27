@@ -106,6 +106,27 @@ void main() {
       expect(summary.termsAccepted, isTrue);
     });
 
+    test('keeps eligible when a sibling data object is present', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'eligible': true,
+            'termsAccepted': true,
+            'openCount': 1,
+            'creditedCount': 0,
+            'realuSum': 0,
+            'chfSum': 0,
+            'data': {'kind': 'Promo'},
+          }),
+          200,
+        ),
+      );
+
+      final summary = await build(client).getSummary();
+      expect(summary.eligible, isTrue);
+      expect(summary.openCount, 1);
+    });
+
     test('throws ApiException on a non-200 response', () async {
       final client = MockClient(
         (_) async => http.Response(
@@ -137,6 +158,25 @@ void main() {
 
       expect(body, {'guestName': 'Alice', 'termsAccepted': true});
       expect(created.url, 'https://realunit.app/invite/AB12');
+    });
+
+    test('unwraps an {invite: {...}} create payload', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'invite': {
+              'code': 'AB12',
+              'url': 'https://realunit.app/invite/AB12',
+              'guestName': 'Alice',
+            },
+          }),
+          201,
+        ),
+      );
+
+      final created = await build(client).createInvite(guestName: 'Alice');
+      expect(created.code, 'AB12');
+      expect(created.guestName, 'Alice');
     });
   });
 

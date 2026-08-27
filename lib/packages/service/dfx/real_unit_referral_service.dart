@@ -49,7 +49,10 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralTermsDto.fromJson(
-      referralJsonObject(jsonDecode(response.body)),
+      referralJsonObject(
+        jsonDecode(response.body),
+        markers: const ['markdown', 'markdownEn', 'version'],
+      ),
     );
   }
 
@@ -88,7 +91,10 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralSummaryDto.fromJson(
-      referralJsonObject(jsonDecode(response.body)),
+      referralJsonObject(
+        jsonDecode(response.body),
+        markers: const ['eligible', 'termsAccepted'],
+      ),
     );
   }
 
@@ -115,7 +121,10 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralCreatedInviteDto.fromJson(
-      referralJsonObject(jsonDecode(response.body)),
+      referralJsonObject(
+        jsonDecode(response.body),
+        markers: const ['code', 'url', 'guestName'],
+      ),
     );
   }
 
@@ -175,7 +184,17 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralCodeLookupDto.fromJson(
-      referralJsonObject(jsonDecode(response.body)),
+      referralJsonObject(
+        jsonDecode(response.body),
+        markers: const [
+          'kind',
+          'inviterName',
+          'inviteeName',
+          'campaignText',
+          'actionText',
+          'actionTextEn',
+        ],
+      ),
     );
   }
 
@@ -202,7 +221,10 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralBindResultDto.fromJson(
-      referralJsonObject(jsonDecode(response.body)),
+      referralJsonObject(
+        jsonDecode(response.body),
+        markers: const ['kind', 'campaignText', 'actionText', 'actionTextEn'],
+      ),
     );
   }
 

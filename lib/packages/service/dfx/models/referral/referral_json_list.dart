@@ -76,13 +76,30 @@ bool referralJsonBool(dynamic value, {bool orElse = false}) {
   return orElse;
 }
 
-/// Unwraps `{ summary|data|item|result: { ... } }` when the API wraps a
-/// single object. A bare map is returned as-is.
-Map<String, dynamic> referralJsonObject(dynamic decoded) {
+/// Unwraps `{ summary|data|item|result|invite: { ... } }` only when the outer
+/// map lacks [markers]. A sibling `data` object must not hide `eligible`.
+Map<String, dynamic> referralJsonObject(
+  dynamic decoded, {
+  List<String> markers = const [],
+}) {
   if (decoded is! Map<String, dynamic>) return const {};
-  for (final key in const ['summary', 'data', 'item', 'result']) {
+  if (markers.any(decoded.containsKey)) return decoded;
+  for (final key in const [
+    'summary',
+    'data',
+    'item',
+    'result',
+    'invite',
+    'createdInvite',
+    'lookup',
+    'bind',
+    'terms',
+  ]) {
     final inner = decoded[key];
-    if (inner is Map<String, dynamic>) return inner;
+    if (inner is Map<String, dynamic> &&
+        (markers.isEmpty || markers.any(inner.containsKey))) {
+      return inner;
+    }
   }
   return decoded;
 }
