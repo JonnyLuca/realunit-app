@@ -2,12 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
-import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
+import 'package:realunit_wallet/screens/referral/open_referral_create.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/scrollable_actions_layout.dart';
@@ -110,14 +109,7 @@ class ReferralOverviewPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: AppFilledButton(
                       label: s.referralCreateInvite,
-                      onPressed: () async {
-                        final created = await context.pushNamed<bool>(
-                          SettingsRoutes.referralCreate,
-                        );
-                        if (created == true && context.mounted) {
-                          await context.read<ReferralCubit>().refreshOverview();
-                        }
-                      },
+                      onPressed: () => openReferralCreateAndRefresh(context),
                     ),
                   ),
                 ],
