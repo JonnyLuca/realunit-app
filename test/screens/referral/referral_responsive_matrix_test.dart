@@ -13,7 +13,9 @@ import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_create_page.dart';
 import 'package:realunit_wallet/screens/referral/referral_overview_page.dart';
 import 'package:realunit_wallet/screens/referral/referral_terms_page.dart';
+import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
+import 'package:realunit_wallet/styles/language.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 
@@ -21,6 +23,9 @@ import '../../helper/helper.dart';
 
 class _MockReferralCubit extends MockCubit<ReferralState>
     implements ReferralCubit {}
+
+class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState>
+    implements SettingsBloc {}
 
 const _summary = ReferralSummaryDto(
   eligible: true,
@@ -43,8 +48,9 @@ final _openInvite = ReferralInviteDto(
 Future<void> _pumpScreen(
   WidgetTester tester,
   Widget widget,
-  MediaQueryData mediaQuery,
-) async {
+  MediaQueryData mediaQuery, {
+  required SettingsBloc settings,
+}) async {
   await tester.binding.setSurfaceSize(mediaQuery.size);
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final router = GoRouter(
@@ -52,7 +58,10 @@ Future<void> _pumpScreen(
     routes: [
       GoRoute(
         path: '/',
-        builder: (_, _) => widget,
+        builder: (_, _) => BlocProvider<SettingsBloc>.value(
+          value: settings,
+          child: widget,
+        ),
         routes: [
           GoRoute(
             name: SettingsRoutes.referralCreate,
@@ -86,11 +95,20 @@ Future<void> _pumpScreen(
 
 void main() {
   late _MockReferralCubit cubit;
+  late _MockSettingsBloc settings;
 
   setUp(() {
     cubit = _MockReferralCubit();
     when(() => cubit.acceptTerms()).thenAnswer((_) async {});
     when(() => cubit.load()).thenAnswer((_) async {});
+    settings = _MockSettingsBloc();
+    const settingsState = SettingsState(language: Language.de);
+    when(() => settings.state).thenReturn(settingsState);
+    whenListen(
+      settings,
+      const Stream<SettingsState>.empty(),
+      initialState: settingsState,
+    );
   });
 
   group('ReferralTermsPage responsive matrix', () {
@@ -117,6 +135,7 @@ void main() {
                   ),
                 ),
                 cell.mediaQuery,
+                settings: settings,
               );
             },
             reason: 'overflow on ${cell.label}',
@@ -158,6 +177,7 @@ void main() {
                   child: const ReferralOverviewPage(),
                 ),
                 cell.mediaQuery,
+                settings: settings,
               );
             },
             reason: 'overflow on ${cell.label}',
@@ -196,6 +216,7 @@ void main() {
                   child: const ReferralCreateView(),
                 ),
                 cell.mediaQuery,
+                settings: settings,
               );
             },
             reason: 'overflow on ${cell.label}',

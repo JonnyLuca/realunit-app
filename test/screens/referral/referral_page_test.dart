@@ -8,18 +8,32 @@ import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_page.dart';
+import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
+import 'package:realunit_wallet/styles/language.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 
 class _MockReferralCubit extends MockCubit<ReferralState>
     implements ReferralCubit {}
 
+class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState>
+    implements SettingsBloc {}
+
 void main() {
   late _MockReferralCubit cubit;
+  late _MockSettingsBloc settings;
 
   setUp(() {
     cubit = _MockReferralCubit();
     when(() => cubit.load()).thenAnswer((_) async {});
+    settings = _MockSettingsBloc();
+    const settingsState = SettingsState(language: Language.de);
+    when(() => settings.state).thenReturn(settingsState);
+    whenListen(
+      settings,
+      const Stream<SettingsState>.empty(),
+      initialState: settingsState,
+    );
   });
 
   Future<void> pumpGate(WidgetTester tester, ReferralState state) async {
@@ -39,8 +53,11 @@ void main() {
           GlobalWidgetsLocalizations.delegate,
         ],
         supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<ReferralCubit>.value(value: cubit),
+            BlocProvider<SettingsBloc>.value(value: settings),
+          ],
           child: const ReferralGateView(),
         ),
       ),
