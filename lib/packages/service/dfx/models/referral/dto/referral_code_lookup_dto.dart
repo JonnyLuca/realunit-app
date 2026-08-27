@@ -30,7 +30,7 @@ class ReferralCodeLookupDto {
 
   factory ReferralCodeLookupDto.fromJson(Map<String, dynamic> json) {
     return ReferralCodeLookupDto(
-      kind: json['kind'] as String,
+      kind: json['kind'] as String? ?? 'invite',
       inviterName: json['inviterName'] as String?,
       inviteeName: json['inviteeName'] as String?,
       actionText: json['actionText'] as String?,

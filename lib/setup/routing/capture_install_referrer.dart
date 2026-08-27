@@ -7,8 +7,9 @@ import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 const String installReferrerConsumedKey = 'install_referrer_consumed';
 
 /// Reads the Play install referrer once per install and stashes an invite
-/// or promo code for post-unlock bind. Failures do not set the consumed
-/// flag, so the next cold start can retry.
+/// or promo code for post-unlock bind. Failures and a null read (Play not
+/// ready / timeout) do not set the consumed flag, so the next cold start
+/// can retry.
 Future<void> captureInstallReferrer({
   required SharedPreferences prefs,
   required InstallReferrerPort port,
@@ -21,6 +22,10 @@ Future<void> captureInstallReferrer({
   } catch (_) {
     return;
   }
+
+  // Native replies null on timeout / Play not ready. Do not consume — the
+  // next cold start must retry or a late referrer is lost forever.
+  if (raw == null) return;
 
   await prefs.setBool(installReferrerConsumedKey, true);
   final code = parseInviteCodeFromReferrer(raw);

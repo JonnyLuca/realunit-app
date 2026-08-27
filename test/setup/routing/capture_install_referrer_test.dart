@@ -54,4 +54,13 @@ void main() {
     expect(prefs.getBool(installReferrerConsumedKey), isNot(true));
     expect(port.calls, 1);
   });
+
+  test('does not consume a null referrer (Play timeout) so the next launch retries', () async {
+    final prefs = await SharedPreferences.getInstance();
+    final port = _FakePort(null);
+
+    await captureInstallReferrer(prefs: prefs, port: port);
+    expect(prefs.getBool(installReferrerConsumedKey), isNot(true));
+    expect(peekPendingReferralCodeSync(), isNull);
+  });
 }
