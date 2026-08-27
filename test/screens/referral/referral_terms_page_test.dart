@@ -82,6 +82,39 @@ void main() {
     },
   );
 
+  testWidgets('shows the API error from a failed terms accept', (tester) async {
+    when(() => cubit.state).thenReturn(
+      ReferralNeedsTerms(summary: _summary, errorMessage: 'nope'),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralNeedsTerms(summary: _summary, errorMessage: 'nope'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: BlocProvider<ReferralCubit>.value(
+          value: cubit,
+          child: const ReferralTermsPage(
+            initialMarkdownContent: '# Teilnahmebedingungen',
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('nope'), findsOneWidget);
+  });
+
   testWidgets(
     'falls back to bundled TB 14.08 when the terms API is unreachable',
     (tester) async {

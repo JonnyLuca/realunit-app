@@ -222,4 +222,68 @@ void main() {
     );
     expect(find.byType(AppFilledButton), findsNothing);
   });
+
+  testWidgets('does not create an invite when the guest name is empty', (tester) async {
+    when(() => cubit.state).thenReturn(ReferralCreateReady(summary: _summary));
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralCreateReady(summary: _summary),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: BlocProvider<ReferralCubit>.value(
+          value: cubit,
+          child: const ReferralCreateView(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Einladungslink erstellen'));
+    await tester.pump();
+
+    verifyNever(() => cubit.createInvite(guestName: any(named: 'guestName')));
+  });
+
+  testWidgets('needs-terms offers retry that reloads the summary', (tester) async {
+    when(() => cubit.state).thenReturn(
+      ReferralNeedsTerms(summary: _summary),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralNeedsTerms(summary: _summary),
+    );
+    when(() => cubit.load()).thenAnswer((_) async {});
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: BlocProvider<ReferralCubit>.value(
+          value: cubit,
+          child: const ReferralCreateView(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(AppFilledButton));
+    await tester.pump();
+    verify(() => cubit.load()).called(1);
+  });
 }

@@ -100,6 +100,43 @@ void main() {
   );
 
   blocTest<ReferralCubit, ReferralState>(
+    'acceptTerms returns to the checkbox with the API error',
+    build: () {
+      when(() => service.acceptTerms()).thenThrow(
+        const ApiException(code: 'FAILED', message: 'nope'),
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralNeedsTerms(summary: _needsTerms),
+    act: (cubit) => cubit.acceptTerms(),
+    expect: () => [
+      ReferralTermsAccepting(summary: _needsTerms),
+      ReferralNeedsTerms(summary: _needsTerms, errorMessage: 'nope'),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'refreshOverview reloads counts after a new invite',
+    build: () {
+      when(() => service.getSummary()).thenAnswer((_) async => _eligible);
+      when(() => service.getInvites()).thenAnswer((_) async => []);
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralInviteCreated(
+      summary: _eligible,
+      invite: const ReferralCreatedInviteDto(
+        code: 'AB12',
+        url: 'https://realunit.app/invite/AB12',
+        guestName: 'Alice',
+      ),
+    ),
+    act: (cubit) => cubit.refreshOverview(),
+    expect: () => [
+      ReferralOverviewLoaded(summary: _eligible, invites: const []),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
     'createInvite emits the created invite from the API',
     build: () {
       when(() => service.createInvite(guestName: 'Alice')).thenAnswer(

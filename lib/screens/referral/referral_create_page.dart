@@ -82,7 +82,10 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
               );
             }
 
-            if (state is ReferralFailure) {
+            if (state is ReferralFailure || state is ReferralNeedsTerms) {
+              final message = state is ReferralFailure
+                  ? state.message
+                  : (state as ReferralNeedsTerms).errorMessage;
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -90,7 +93,8 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 16,
                     children: [
-                      Text(state.message, textAlign: TextAlign.center),
+                      if (message != null && message.isNotEmpty)
+                        Text(message, textAlign: TextAlign.center),
                       AppFilledButton(
                         label: s.retry,
                         onPressed: () => context.read<ReferralCubit>().load(),
