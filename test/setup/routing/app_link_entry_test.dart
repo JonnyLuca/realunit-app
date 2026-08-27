@@ -562,6 +562,12 @@ void main() {
         ),
         'EVT1',
       );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://dev.realunit.app/invite/AbCd1234'),
+        ),
+        'AbCd1234',
+      );
     });
 
     test('returns null for the canonical open and for other https paths', () {
