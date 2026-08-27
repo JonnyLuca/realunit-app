@@ -483,6 +483,13 @@ void main() {
       expect(promo.isPromo, isTrue);
     });
 
+    test('infers promo from actionTextEn when kind and DE copy are omitted', () {
+      final promo = ReferralCodeLookupDto.fromJson({
+        'actionTextEn': 'With code EVT1 we give you 20 tokens.',
+      });
+      expect(promo.isPromo, isTrue);
+    });
+
     test('infers invite from inviterName when kind is omitted', () {
       final invite = ReferralCodeLookupDto.fromJson({
         'inviterName': 'Björn',

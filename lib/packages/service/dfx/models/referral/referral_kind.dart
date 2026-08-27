@@ -16,6 +16,7 @@ String inferReferralKind(
         referralJsonString(json['campaignText']),
         referralJsonString(json['campaignTextEn']),
         referralJsonString(json['actionText']),
+        referralJsonString(json['actionTextEn']),
       ]) !=
       null) {
     return 'promo';
