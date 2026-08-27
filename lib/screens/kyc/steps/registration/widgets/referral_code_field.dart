@@ -46,7 +46,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerChanged);
-    if (widget.controller.text.trim().isNotEmpty) {
+    if (normalizeReferralCode(widget.controller.text) != null) {
       _scheduleLookup();
     }
   }

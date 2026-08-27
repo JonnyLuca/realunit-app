@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_terms_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_terms_page.dart';
@@ -148,6 +151,42 @@ void main() {
       expect(find.textContaining('70 RealUnit-Aktientoken'), findsWidgets);
     },
   );
+
+  testWidgets('checkbox stays disabled until the TB markdown has loaded', (
+    tester,
+  ) async {
+    final service = _MockReferralService();
+    when(() => service.getTerms()).thenAnswer(
+      (_) => Completer<ReferralTermsDto>().future,
+    );
+    GetIt.instance.registerSingleton<RealUnitReferralService>(service);
+    addTearDown(() async {
+      await GetIt.instance.reset();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: BlocProvider<ReferralCubit>.value(
+          value: cubit,
+          child: const ReferralTermsPage(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final tile = tester.widget<CheckboxListTile>(find.byType(CheckboxListTile));
+    expect(tile.onChanged, isNull);
+    final button = tester.widget<AppFilledButton>(find.byType(AppFilledButton));
+    expect(button.onPressed, isNull);
+  });
 }
 
 class _MockReferralService extends Mock implements RealUnitReferralService {}

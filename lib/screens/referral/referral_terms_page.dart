@@ -105,9 +105,23 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 16,
                   children: [
-                    if (_loadFailed)
-                      Text(s.legalDocumentLoadFailed)
-                    else if (_markdown == null)
+                    if (_loadFailed) ...[
+                      Text(s.legalDocumentLoadFailed),
+                      AppFilledButton(
+                        label: s.retry,
+                        variant: FilledButtonVariant.secondary,
+                        onPressed: accepting
+                            ? null
+                            : () {
+                                setState(() {
+                                  _loadFailed = false;
+                                  _accepted = false;
+                                  _markdown = null;
+                                });
+                                _loadMarkdown();
+                              },
+                      ),
+                    ] else if (_markdown == null)
                       const Center(child: CupertinoActivityIndicator())
                     else
                       MarkdownBody(data: _markdown!),
@@ -120,7 +134,7 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
                       contentPadding: EdgeInsets.zero,
                       controlAffinity: ListTileControlAffinity.leading,
                       value: _accepted,
-                      onChanged: accepting
+                      onChanged: accepting || _markdown == null || _loadFailed
                           ? null
                           : (v) => setState(() => _accepted = v ?? false),
                       title: Text(s.referralTermsCheckbox),
@@ -135,7 +149,11 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
                       state: accepting
                           ? FilledButtonState.loading
                           : FilledButtonState.idle,
-                      onPressed: _accepted && !accepting
+                      onPressed:
+                          _accepted &&
+                              !accepting &&
+                              _markdown != null &&
+                              !_loadFailed
                           ? () => context.read<ReferralCubit>().acceptTerms()
                           : null,
                     ),
