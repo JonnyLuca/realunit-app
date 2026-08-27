@@ -76,7 +76,10 @@ class RealUnitReferralService extends DFXAuthService {
     final response = await authenticatedPost(
       uri,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'guestName': guestName}),
+      body: jsonEncode({
+        'guestName': guestName,
+        'termsAccepted': true,
+      }),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {

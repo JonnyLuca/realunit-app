@@ -112,7 +112,7 @@ void main() {
 
       final created = await build(client).createInvite(guestName: 'Alice');
 
-      expect(body, {'guestName': 'Alice'});
+      expect(body, {'guestName': 'Alice', 'termsAccepted': true});
       expect(created.url, 'https://realunit.app/invite/AB12');
     });
   });
