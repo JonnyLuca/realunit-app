@@ -127,6 +127,22 @@ void main() {
   );
 
   blocTest<ReferralCubit, ReferralState>(
+    'createInvite surfaces the API error on the name-entry form',
+    build: () {
+      when(() => service.createInvite(guestName: 'Alice')).thenThrow(
+        const ApiException(code: 'QUOTA', message: 'limit'),
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralCreateReady(summary: _eligible),
+    act: (cubit) => cubit.createInvite(guestName: 'Alice'),
+    expect: () => [
+      ReferralCreating(summary: _eligible, guestName: 'Alice'),
+      ReferralCreateReady(summary: _eligible, errorMessage: 'limit'),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
     'openCreate moves from overview to the name-entry form',
     build: () => ReferralCubit(service),
     seed: () => ReferralOverviewLoaded(summary: _eligible, invites: const []),

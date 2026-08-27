@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/models/transaction.dart';
+import 'package:realunit_wallet/screens/referral/format_frozen_chf.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/styles/icons.dart';
 import 'package:realunit_wallet/widgets/hide_amount_text.dart';
@@ -127,7 +128,10 @@ class ReferralPayoutTransactionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chf = transaction.data;
+    final rawChf = transaction.data;
+    final chf = rawChf == null || rawChf.isEmpty
+        ? null
+        : formatFrozenChfAmount(rawChf);
     return InkWell(
       child: Container(
         decoration: BoxDecoration(

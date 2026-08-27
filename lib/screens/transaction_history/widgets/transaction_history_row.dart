@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/models/transaction.dart';
+import 'package:realunit_wallet/screens/referral/format_frozen_chf.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_pdf_service.dart';
 import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/screens/transaction_history/cubits/receipt/transaction_history_receipt_cubit.dart';
@@ -130,7 +131,9 @@ class TransactionHistoryRowView extends StatelessWidget {
                             transaction.data != null &&
                             transaction.data!.isNotEmpty)
                           Text(
-                            S.of(context).referralPayoutChf(transaction.data!),
+                            S.of(context).referralPayoutChf(
+                              formatFrozenChfAmount(transaction.data!),
+                            ),
                             style: const TextStyle(
                               fontSize: 12,
                               height: 16 / 12,

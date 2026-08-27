@@ -157,6 +157,37 @@ void main() {
     verify(() => cubit.load()).called(1);
   });
 
+  testWidgets('shows the API error on the name-entry form', (tester) async {
+    when(() => cubit.state).thenReturn(
+      ReferralCreateReady(summary: _summary, errorMessage: 'limit'),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralCreateReady(summary: _summary, errorMessage: 'limit'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: BlocProvider<ReferralCubit>.value(
+          value: cubit,
+          child: const ReferralCreateView(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('limit'), findsOneWidget);
+  });
+
   testWidgets('hides the form when the API gate is closed', (tester) async {
     when(() => cubit.state).thenReturn(const ReferralNotEligible());
     whenListen(

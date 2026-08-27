@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
-import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_created_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
@@ -105,11 +104,4 @@ class ReferralCubit extends Cubit<ReferralState> {
     }
   }
 
-  Future<ReferralBindResultDto?> bindCode(String code) async {
-    try {
-      return await _service.bind(code: code);
-    } on ApiException {
-      rethrow;
-    }
-  }
 }
