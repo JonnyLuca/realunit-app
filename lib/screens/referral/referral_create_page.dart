@@ -70,6 +70,37 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
               return const Center(child: CupertinoActivityIndicator());
             }
 
+            if (state is ReferralNotEligible) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    s.referralNotEligible,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            }
+
+            if (state is ReferralFailure) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 16,
+                    children: [
+                      Text(state.message, textAlign: TextAlign.center),
+                      AppFilledButton(
+                        label: s.retry,
+                        onPressed: () => context.read<ReferralCubit>().load(),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
             if (state is ReferralInviteCreated) {
               final lang = Localizations.localeOf(context).languageCode;
               final text = _shareText(
