@@ -71,6 +71,12 @@ const _referralLinkHosts = {
 bool _isReferralPathKind(String? value) =>
     value == 'invite' || value == 'promo';
 
+bool _isWebReferralLink(Uri uri) =>
+    (uri.scheme == 'https' ||
+        uri.scheme == 'http' ||
+        uri.scheme == 'intent') &&
+    _referralLinkHosts.contains(uri.host);
+
 /// Extracts a referral/promo invite code from a custom-scheme or https App Link.
 ///
 /// Matches:
@@ -78,6 +84,7 @@ bool _isReferralPathKind(String? value) =>
 /// - `realunit-wallet:invite/{code}` and `realunit-wallet:promo/{code}`
 /// - `https://realunit.app/invite/{code}` and `/promo/{code}`
 ///   (Android App Links / iOS Universal Links)
+/// - `intent://realunit.app/invite/{code}#Intent;scheme=https;…` (Chrome)
 ///
 /// Returns the last path segment (trimmed, percent-decoded, max 256) or
 /// null when not a referral/promo link. Invite and promo share one code field.
@@ -117,8 +124,7 @@ String? extractReferralInviteCode(Uri uri) {
 }
 
 String? _extractReferralInviteCode(Uri uri) {
-  if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-      _referralLinkHosts.contains(uri.host)) {
+  if (_isWebReferralLink(uri)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
     if (segments.isEmpty || !_isReferralPathKind(segments.first)) {
       return null;
@@ -244,8 +250,12 @@ String? appLinkSchemeRedirect(
   GoRouter router,
 ) {
   // https App Links for /invite/{code} (Android) — go_router may receive them
-  // as hierarchical https URIs rather than the custom scheme.
-  if (state.uri.scheme == 'https' || state.uri.scheme == 'http') {
+  // as hierarchical https URIs rather than the custom scheme. Chrome intent
+  // URLs (`intent://realunit.app/invite/{code}#Intent;scheme=https;…`) are
+  // the same App Link once the fragment is ignored.
+  if (state.uri.scheme == 'https' ||
+      state.uri.scheme == 'http' ||
+      state.uri.scheme == 'intent') {
     final httpsCode = extractReferralInviteCode(state.uri);
     if (httpsCode != null) {
       final current = Uri.parse(currentLocation);

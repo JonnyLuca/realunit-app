@@ -540,6 +540,25 @@ void main() {
       );
     });
 
+    test('reads the code from a Chrome intent:// App Link', () {
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'intent://realunit.app/invite/AB12CD#Intent;scheme=https;package=swiss.realunit.app;end',
+          ),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'intent://realunit.app/promo/EVT1#Intent;scheme=https;package=swiss.realunit.app;end',
+          ),
+        ),
+        'EVT1',
+      );
+    });
+
     test('reads promo codes from custom-scheme and https App Links', () {
       expect(
         extractReferralInviteCode(
