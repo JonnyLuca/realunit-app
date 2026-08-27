@@ -86,3 +86,14 @@ Map<String, dynamic> referralJsonObject(dynamic decoded) {
   }
   return decoded;
 }
+
+/// Trims JSON strings. Numbers are stringified so a numeric `code` / `txHash`
+/// does not drop the row. Empty / whitespace-only values are null.
+String? referralJsonString(dynamic value) {
+  if (value is String) {
+    final text = value.trim();
+    return text.isEmpty ? null : text;
+  }
+  if (value is num) return value.toString();
+  return null;
+}

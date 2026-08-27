@@ -135,4 +135,12 @@ void main() {
       {'data': ['not-a-map'], 'eligible': true},
     );
   });
+
+  test('referralJsonString trims, stringifies numbers, and drops blanks', () {
+    expect(referralJsonString('  AB12  '), 'AB12');
+    expect(referralJsonString(12), '12');
+    expect(referralJsonString('   '), isNull);
+    expect(referralJsonString(null), isNull);
+    expect(referralJsonString(true), isNull);
+  });
 }

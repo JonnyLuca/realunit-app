@@ -257,6 +257,19 @@ void main() {
       expect(open.copyTextForLocale('de'), isNull);
     });
 
+    test('stringifies a numeric code and trims guestName', () {
+      final dto = ReferralInviteDto.fromJson({
+        'id': 1,
+        'code': 12,
+        'url': 'https://realunit.app/invite/12',
+        'guestName': '  Alice  ',
+        'status': 'Open',
+        'created': '2026-08-24T10:00:00Z',
+      });
+      expect(dto.code, '12');
+      expect(dto.guestName, 'Alice');
+    });
+
     test('status matching is case-insensitive', () {
       expect(
         ReferralInviteDto.fromJson({
@@ -324,6 +337,18 @@ void main() {
         'status': 'Complete',
       });
       expect(dto.created, DateTime.utc(2026, 8, 24, 10));
+    });
+
+    test('stringifies a numeric txHash', () {
+      final dto = ReferralPayoutDto.fromJson({
+        'id': 9,
+        'amount': 20,
+        'chfValue': 1,
+        'created': '2026-08-24T10:00:00Z',
+        'status': 'Complete',
+        'txHash': 123,
+      });
+      expect(dto.txHash, '123');
     });
 
     test('pending and failed payouts are not settled; missing status is', () {

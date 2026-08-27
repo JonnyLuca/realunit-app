@@ -45,9 +45,9 @@ class ReferralPayoutDto {
       amount: amount,
       chfValue: chfValue,
       created: created,
-      kind: json['kind'] as String? ?? '',
-      status: json['status'] as String? ?? 'Complete',
-      txHash: json['txHash'] as String?,
+      kind: referralJsonString(json['kind']) ?? '',
+      status: referralJsonString(json['status']) ?? 'Complete',
+      txHash: referralJsonString(json['txHash']),
     );
   }
 }

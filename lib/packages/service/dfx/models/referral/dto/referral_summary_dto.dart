@@ -43,7 +43,7 @@ class ReferralSummaryDto {
       creditedCount: referralJsonInt(json['creditedCount']),
       realuSum: referralJsonNum(json['realuSum']) ?? 0,
       chfSum: referralJsonNum(json['chfSum']) ?? 0,
-      sharePriceLabel: firstNonEmpty([json['sharePriceLabel'] as String?]),
+      sharePriceLabel: referralJsonString(json['sharePriceLabel']),
     );
   }
 }

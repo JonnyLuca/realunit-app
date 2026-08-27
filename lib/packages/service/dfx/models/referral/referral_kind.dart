@@ -1,4 +1,5 @@
 import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
 
 /// Resolves Invite vs Promo when the API omits `kind`.
 /// Explicit `kind` always wins. Otherwise an inviter name is an invite;
@@ -7,14 +8,14 @@ String inferReferralKind(
   Map<String, dynamic> json, {
   String fallback = 'invite',
 }) {
-  final raw = json['kind'] as String?;
-  if (raw != null && raw.trim().isNotEmpty) return raw.trim();
-  final inviter = json['inviterName'] as String?;
-  if (inviter != null && inviter.trim().isNotEmpty) return 'invite';
+  final raw = referralJsonString(json['kind']);
+  if (raw != null) return raw;
+  final inviter = referralJsonString(json['inviterName']);
+  if (inviter != null) return 'invite';
   if (firstNonEmpty([
-        json['campaignText'] as String?,
-        json['campaignTextEn'] as String?,
-        json['actionText'] as String?,
+        referralJsonString(json['campaignText']),
+        referralJsonString(json['campaignTextEn']),
+        referralJsonString(json['actionText']),
       ]) !=
       null) {
     return 'promo';

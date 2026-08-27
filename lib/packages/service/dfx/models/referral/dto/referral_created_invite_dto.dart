@@ -1,4 +1,5 @@
 import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
 
 /// Response from `POST /v1/realunit/referral/invites`.
 /// The server generates the personalised share text; the app renders it 1:1.
@@ -27,12 +28,18 @@ class ReferralCreatedInviteDto {
   }
 
   factory ReferralCreatedInviteDto.fromJson(Map<String, dynamic> json) {
+    final code = referralJsonString(json['code']);
+    final url = referralJsonString(json['url']);
+    final guestName = referralJsonString(json['guestName']);
+    if (code == null || url == null || guestName == null) {
+      throw FormatException('referral created invite missing fields');
+    }
     return ReferralCreatedInviteDto(
-      code: json['code'] as String,
-      url: json['url'] as String,
-      guestName: json['guestName'] as String,
-      copyText: json['copyText'] as String?,
-      copyTextEn: json['copyTextEn'] as String?,
+      code: code,
+      url: url,
+      guestName: guestName,
+      copyText: referralJsonString(json['copyText']),
+      copyTextEn: referralJsonString(json['copyTextEn']),
     );
   }
 }
