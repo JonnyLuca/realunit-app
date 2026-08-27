@@ -62,6 +62,15 @@ void main() {
       });
       expect(dto.textForLang('en'), 'EN md');
     });
+
+    test('EN ignores empty markdownEn and uses DE', () {
+      final dto = ReferralTermsDto.fromJson({
+        'version': '2026-08-14',
+        'markdown': 'DE md',
+        'markdownEn': '  ',
+      });
+      expect(dto.textForLang('en'), 'DE md');
+    });
   });
 
   group('$ReferralBindResultDto', () {
@@ -90,6 +99,15 @@ void main() {
       });
 
       expect(dto.isInvite, isTrue);
+      expect(dto.campaignTextForLocale('en'), 'DE only');
+    });
+
+    test('EN falls back to DE when campaignTextEn is empty', () {
+      final dto = ReferralBindResultDto.fromJson({
+        'kind': 'Promo',
+        'campaignText': 'DE only',
+        'campaignTextEn': '',
+      });
       expect(dto.campaignTextForLocale('en'), 'DE only');
     });
 
@@ -234,6 +252,17 @@ void main() {
       expect(dto.copyTextForLocale('en'), 'Hey Alice, Björn is inviting you');
       expect(dto.copyTextForLocale('de'), 'Hey Alice, Björn lädt dich ein');
     });
+
+    test('EN share text ignores empty copyTextEn', () {
+      final dto = ReferralCreatedInviteDto.fromJson({
+        'code': 'AB12',
+        'url': 'https://realunit.app/invite/AB12',
+        'guestName': 'Alice',
+        'copyText': 'Hey Alice, Björn lädt dich ein',
+        'copyTextEn': '',
+      });
+      expect(dto.copyTextForLocale('en'), 'Hey Alice, Björn lädt dich ein');
+    });
   });
 
   group('$ReferralCodeLookupDto.fromJson', () {
@@ -254,6 +283,15 @@ void main() {
       expect(promo.isPromo, isTrue);
       expect(promo.campaignTextForLocale('en'), 'EN campaign');
       expect(promo.campaignTextForLocale('de'), 'DE action');
+    });
+
+    test('EN campaign text ignores empty campaignTextEn', () {
+      final promo = ReferralCodeLookupDto.fromJson({
+        'kind': 'promo',
+        'actionText': 'DE action',
+        'campaignTextEn': '   ',
+      });
+      expect(promo.campaignTextForLocale('en'), 'DE action');
     });
   });
 }

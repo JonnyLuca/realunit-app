@@ -6,6 +6,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
+import 'package:realunit_wallet/screens/referral/load_referral_terms.dart';
 import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/styles/colors.dart';
@@ -54,24 +55,25 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
 
   Future<void> _loadMarkdown() async {
     final code = _languageCode();
+    String? apiText;
     try {
       if (getIt.isRegistered<RealUnitReferralService>()) {
         final terms = await getIt<RealUnitReferralService>().getTerms();
-        final fromApi = terms.textForLang(code);
-        if (fromApi.isNotEmpty) {
-          if (mounted) setState(() => _markdown = fromApi);
-          return;
-        }
+        apiText = terms.textForLang(code);
       }
     } catch (_) {
       // Bundled TB 14.08 is the fallback when the API is unreachable.
     }
-    final assetPath = 'assets/legal/referral_terms_$code.md';
-    try {
-      final content = await rootBundle.loadString(assetPath, cache: false);
-      if (mounted) setState(() => _markdown = content);
-    } catch (_) {
-      if (mounted) setState(() => _loadFailed = true);
+    final content = await loadReferralTermsMarkdown(
+      languageCode: code,
+      loadAsset: (path) => rootBundle.loadString(path, cache: false),
+      apiText: apiText,
+    );
+    if (!mounted) return;
+    if (content != null) {
+      setState(() => _markdown = content);
+    } else {
+      setState(() => _loadFailed = true);
     }
   }
 

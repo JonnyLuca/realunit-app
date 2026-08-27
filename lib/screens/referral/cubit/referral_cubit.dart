@@ -39,11 +39,21 @@ class ReferralCubit extends Cubit<ReferralState> {
     emit(ReferralTermsAccepting(summary: summary));
     try {
       await _service.acceptTerms();
-      await _emitFromSummary(await _service.getSummary());
     } on ApiException catch (e) {
       emit(ReferralNeedsTerms(summary: summary, errorMessage: e.message));
+      return;
     } catch (e) {
       emit(ReferralNeedsTerms(summary: summary, errorMessage: e.toString()));
+      return;
+    }
+    // Accept already posted. A later summary/invite-list failure must not
+    // send the user back to the checkbox as if they still need to accept.
+    try {
+      await _emitFromSummary(await _service.getSummary());
+    } on ApiException catch (e) {
+      emit(ReferralFailure(message: e.message));
+    } catch (e) {
+      emit(ReferralFailure(message: e.toString()));
     }
   }
 

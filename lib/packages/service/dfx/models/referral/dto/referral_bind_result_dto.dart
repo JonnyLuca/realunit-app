@@ -1,3 +1,5 @@
+import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+
 /// Response from `POST /v1/realunit/referral/bind`.
 /// For `kind == Promo`, [campaignText] / [campaignTextEn] carry the prescribed
 /// wording from the API — do not compose campaign copy in the app.
@@ -23,12 +25,13 @@ class ReferralBindResultDto {
   bool get isPromo => kind.toLowerCase() == 'promo';
   bool get isInvite => kind.toLowerCase() == 'invite';
 
-  /// Locale-aware campaign wording. EN falls back to DE when the EN field is absent.
+  /// Locale-aware campaign wording. EN falls back to DE when the EN field is
+  /// absent or empty.
   String? campaignTextForLocale(String languageCode) {
     if (languageCode == 'en') {
-      return campaignTextEn ?? campaignText ?? actionText;
+      return firstNonEmpty([campaignTextEn, campaignText, actionText]);
     }
-    return campaignText ?? actionText ?? campaignTextEn;
+    return firstNonEmpty([campaignText, actionText, campaignTextEn]);
   }
 
   factory ReferralBindResultDto.fromJson(Map<String, dynamic> json) {

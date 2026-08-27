@@ -1,3 +1,5 @@
+import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+
 /// One invite row from `GET /v1/realunit/referral/invites`.
 /// Status values from the API: `Open` / `Bound` / `Credited` / `Deleted`.
 /// The UI only surfaces Open as "offen" and Credited as "gutgeschrieben".
@@ -27,9 +29,9 @@ class ReferralInviteDto {
 
   String? copyTextForLocale(String languageCode) {
     if (languageCode == 'en') {
-      return copyTextEn ?? copyText;
+      return firstNonEmpty([copyTextEn, copyText]);
     }
-    return copyText ?? copyTextEn;
+    return firstNonEmpty([copyText, copyTextEn]);
   }
 
   factory ReferralInviteDto.fromJson(Map<String, dynamic> json) {

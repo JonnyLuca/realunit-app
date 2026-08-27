@@ -1,3 +1,5 @@
+import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+
 /// `GET /v1/realunit/referral/terms`. Markdown is authored on the API;
 /// the app renders it 1:1. Bundled assets are a fallback only.
 class ReferralTermsDto {
@@ -12,7 +14,9 @@ class ReferralTermsDto {
   });
 
   String textForLang(String languageCode) {
-    if (languageCode == 'en') return markdownEn ?? markdown;
+    if (languageCode == 'en') {
+      return firstNonEmpty([markdownEn, markdown]) ?? '';
+    }
     return markdown;
   }
 

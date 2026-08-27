@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -122,5 +124,22 @@ void main() {
 
     expect(find.textContaining('Einladung von Stale erkannt'), findsNothing);
     expect(find.textContaining('Einladung von Björn erkannt'), findsOneWidget);
+  });
+
+  testWidgets('a lookup timeout is not shown as an invalid code', (tester) async {
+    final ctrl = TextEditingController(text: 'AB12');
+    await pumpField(
+      tester,
+      controller: ctrl,
+      lookup: (_) async => throw TimeoutException('lookup'),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      find.text('Dieser Code ist ungültig oder abgelaufen.'),
+      findsNothing,
+    );
+    expect(ctrl.text, 'AB12');
   });
 }

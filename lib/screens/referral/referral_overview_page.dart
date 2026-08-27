@@ -7,6 +7,7 @@ import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/open_referral_create.dart';
+import 'package:realunit_wallet/screens/referral/referral_share_text.dart';
 import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
@@ -188,12 +189,11 @@ class _OpenInviteTile extends StatelessWidget {
 
   String _shareText(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
-    final fromApi = invite.copyTextForLocale(lang);
-    if (fromApi != null && fromApi.isNotEmpty) return fromApi;
-    return S.of(context).referralShareText(
-      invite.guestName,
-      'RealUnit',
-      invite.url,
+    return referralShareText(
+      fromApi: invite.copyTextForLocale(lang),
+      guestName: invite.guestName,
+      url: invite.url,
+      fallback: S.of(context).referralShareText,
     );
   }
 

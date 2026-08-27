@@ -349,4 +349,66 @@ void main() {
 
     expect(popped, isTrue);
   });
+
+  testWidgets('Done after create pops true so overview can refresh', (
+    tester,
+  ) async {
+    const created = ReferralCreatedInviteDto(
+      code: 'AB12CD',
+      url: 'https://realunit.app/invite/AB12CD',
+      guestName: 'Alice',
+    );
+    when(() => cubit.state).thenReturn(
+      ReferralInviteCreated(summary: _summary, invite: created),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralInviteCreated(summary: _summary, invite: created),
+    );
+
+    bool? popped;
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, _) => TextButton(
+            onPressed: () async {
+              popped = await context.push<bool>('/create');
+            },
+            child: const Text('go'),
+          ),
+        ),
+        GoRoute(
+          path: '/create',
+          builder: (_, _) => BlocProvider<ReferralCubit>.value(
+            value: cubit,
+            child: const ReferralCreateView(),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.tap(find.text('go'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Erledigt'));
+    await tester.pumpAndSettle();
+
+    expect(popped, isTrue);
+  });
 }

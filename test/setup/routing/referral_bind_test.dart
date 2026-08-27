@@ -125,4 +125,43 @@ void main() {
       expect(await peekPendingReferralCode(), isNull);
     },
   );
+
+  testWidgets('shows campaignTextEn after a promo bind in English', (
+    tester,
+  ) async {
+    await stashPendingReferralCode('EVT1');
+    when(() => service.bind(code: 'EVT1')).thenAnswer(
+      (_) async => const ReferralBindResultDto(
+        kind: 'Promo',
+        campaignText: 'DE Aktion',
+        campaignTextEn: 'EN campaign from the API',
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('en'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final pending = bindPendingReferralCode(router);
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('EN campaign from the API'), findsOneWidget);
+    expect(find.text('DE Aktion'), findsNothing);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    await pending;
+    expect(await peekPendingReferralCode(), isNull);
+  });
 }

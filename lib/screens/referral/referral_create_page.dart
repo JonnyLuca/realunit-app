@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
+import 'package:realunit_wallet/screens/referral/referral_share_text.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
@@ -53,8 +54,12 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
     required String url,
     required String? copyText,
   }) {
-    if (copyText != null && copyText.isNotEmpty) return copyText;
-    return S.of(context).referralShareText(guestName, 'RealUnit', url);
+    return referralShareText(
+      fromApi: copyText,
+      guestName: guestName,
+      url: url,
+      fallback: S.of(context).referralShareText,
+    );
   }
 
   @override

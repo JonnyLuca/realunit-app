@@ -190,6 +190,54 @@ void main() {
   );
 
   blocTest<ReferralCubit, ReferralState>(
+    'openCreate moves from a created invite back to the name-entry form',
+    build: () => ReferralCubit(service),
+    seed: () => ReferralInviteCreated(
+      summary: _eligible,
+      invite: const ReferralCreatedInviteDto(
+        code: 'AB12',
+        url: 'https://realunit.app/invite/AB12',
+        guestName: 'Alice',
+      ),
+    ),
+    act: (cubit) => cubit.openCreate(),
+    expect: () => [
+      ReferralCreateReady(summary: _eligible),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'acceptTerms surfaces a post-accept invite-list failure without the checkbox',
+    build: () {
+      when(() => service.acceptTerms()).thenAnswer((_) async {});
+      when(() => service.getSummary()).thenAnswer((_) async => _eligible);
+      when(() => service.getInvites()).thenThrow(
+        const ApiException(code: 'SERVER_ERROR', message: 'invites down'),
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralNeedsTerms(summary: _needsTerms),
+    act: (cubit) => cubit.acceptTerms(),
+    expect: () => [
+      ReferralTermsAccepting(summary: _needsTerms),
+      const ReferralFailure(message: 'invites down'),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'refreshOverview returns to terms when the API withdraws acceptance',
+    build: () {
+      when(() => service.getSummary()).thenAnswer((_) async => _needsTerms);
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralOverviewLoaded(summary: _eligible, invites: const []),
+    act: (cubit) => cubit.refreshOverview(),
+    expect: () => [
+      ReferralNeedsTerms(summary: _needsTerms),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
     'acceptTerms hides the programme when the refreshed gate is closed',
     build: () {
       when(() => service.acceptTerms()).thenAnswer((_) async {});

@@ -1,3 +1,5 @@
+import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+
 /// Public `GET /v1/realunit/referral/code/:code` payload for registration
 /// preview and the website landing. Accepts `Invite`/`Promo` in either case.
 class ReferralCodeLookupDto {
@@ -20,12 +22,13 @@ class ReferralCodeLookupDto {
   bool get isPromo => kind.toLowerCase() == 'promo';
   bool get isInvite => kind.toLowerCase() == 'invite';
 
-  /// Locale-aware campaign / action wording. EN falls back to DE.
+  /// Locale-aware campaign / action wording. EN falls back to DE when the EN
+  /// field is absent or empty.
   String? campaignTextForLocale(String languageCode) {
     if (languageCode == 'en') {
-      return campaignTextEn ?? campaignText ?? actionText;
+      return firstNonEmpty([campaignTextEn, campaignText, actionText]);
     }
-    return actionText ?? campaignText ?? campaignTextEn;
+    return firstNonEmpty([actionText, campaignText, campaignTextEn]);
   }
 
   factory ReferralCodeLookupDto.fromJson(Map<String, dynamic> json) {
