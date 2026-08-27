@@ -295,7 +295,8 @@ String? _handleReferralInviteRedirect({
   if (isInAppRoute) {
     if (getIt<PinAuthCubit>().state.isPinVerified &&
         getIt<PinAuthCubit>().state.isPinSetup) {
-      unawaited(stashPendingReferralCode(code));
+      // Unlocked: schedule stashes then take-binds once. Do not stash here or
+      // a dashboard boot bind can take the same code in parallel.
       scheduleReferralBind(router, code);
       return null;
     }

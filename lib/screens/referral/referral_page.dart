@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,16 +20,26 @@ class ReferralPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => ReferralCubit(getIt<RealUnitReferralService>())..load(),
-      child: BlocListener<ReferralCubit, ReferralState>(
-        listenWhen: (previous, current) =>
-            (previous is ReferralNeedsTerms ||
-                previous is ReferralTermsAccepting) &&
-            current is ReferralOverviewLoaded,
-        listener: (context, _) {
-          openReferralCreateAndRefresh(context);
-        },
-        child: const ReferralGateView(),
-      ),
+      child: const ReferralGate(),
+    );
+  }
+}
+
+/// Terms-accept → create-invite. Extracted so tests can inject [ReferralCubit].
+class ReferralGate extends StatelessWidget {
+  const ReferralGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<ReferralCubit, ReferralState>(
+      listenWhen: (previous, current) =>
+          (previous is ReferralNeedsTerms ||
+              previous is ReferralTermsAccepting) &&
+          current is ReferralOverviewLoaded,
+      listener: (context, _) {
+        unawaited(openReferralCreateAndRefresh(context));
+      },
+      child: const ReferralGateView(),
     );
   }
 }

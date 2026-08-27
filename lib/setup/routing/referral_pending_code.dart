@@ -9,6 +9,10 @@ const String pendingReferralCodeKey = 'pending_referral_code';
 /// no queue. Survives warm-locked PIN screens within the same process.
 String? _pendingReferralCode;
 
+/// Guards [takePendingReferralCode] across the first `await` so a parallel
+/// boot bind cannot read prefs after memory was claimed.
+bool _takingPendingReferralCode = false;
+
 /// Persist [code] for post-unlock / post-KYC bind.
 ///
 /// Sources: custom-scheme / https App Links, the registration field, and
@@ -25,35 +29,45 @@ Future<void> stashPendingReferralCode(String code) async {
 
 /// Returns and clears the pending code (memory + SharedPreferences).
 Future<String?> takePendingReferralCode() async {
-  final inMemory = _pendingReferralCode;
-  _pendingReferralCode = null;
-  final prefs = await SharedPreferences.getInstance();
-  final stored = prefs.getString(pendingReferralCodeKey);
-  await prefs.remove(pendingReferralCodeKey);
-  final code = inMemory ?? stored;
-  if (code == null || code.isEmpty) return null;
-  return code;
+  if (_takingPendingReferralCode) return null;
+  _takingPendingReferralCode = true;
+  try {
+    final inMemory = _pendingReferralCode;
+    _pendingReferralCode = null;
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(pendingReferralCodeKey);
+    await prefs.remove(pendingReferralCodeKey);
+    return normalizeReferralCode(inMemory ?? stored);
+  } finally {
+    _takingPendingReferralCode = false;
+  }
 }
 
 /// Clears any stashed code without returning it.
 Future<void> clearPendingReferralCode() async {
   _pendingReferralCode = null;
+  _takingPendingReferralCode = false;
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove(pendingReferralCodeKey);
 }
 
 /// Read-only peek (memory first, then SharedPreferences). Does not clear.
+/// Percent-decodes values written before stash-time normalize.
 Future<String?> peekPendingReferralCode() async {
-  if (_pendingReferralCode != null) return _pendingReferralCode;
+  if (_pendingReferralCode != null) {
+    return normalizeReferralCode(_pendingReferralCode);
+  }
   final prefs = await SharedPreferences.getInstance();
-  return prefs.getString(pendingReferralCodeKey);
+  return normalizeReferralCode(prefs.getString(pendingReferralCodeKey));
 }
 
 /// Synchronous in-memory peek for redirect tests / warm paths that already
 /// stashed in this process. Does not read SharedPreferences.
-String? peekPendingReferralCodeSync() => _pendingReferralCode;
+String? peekPendingReferralCodeSync() =>
+    normalizeReferralCode(_pendingReferralCode);
 
 /// Test-only: seed the in-memory stash without touching SharedPreferences.
 void debugSetPendingReferralCodeSync(String? code) {
   _pendingReferralCode = code;
+  _takingPendingReferralCode = false;
 }

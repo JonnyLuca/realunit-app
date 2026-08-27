@@ -32,6 +32,15 @@ void main() {
     expect(await peekPendingReferralCode(), 'AB/12');
   });
 
+  test('peek and take decode a pre-normalize prefs value', () async {
+    debugSetPendingReferralCodeSync(null);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(pendingReferralCodeKey, 'AB%2F12');
+    expect(await peekPendingReferralCode(), 'AB/12');
+    expect(await takePendingReferralCode(), 'AB/12');
+    expect(await peekPendingReferralCode(), isNull);
+  });
+
   test('clear drops both memory and prefs', () async {
     await stashPendingReferralCode('EVT1');
     await clearPendingReferralCode();
