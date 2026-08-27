@@ -13,8 +13,10 @@ import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 /// Shows the API campaign text for promo binds. Invite binds stay silent —
 /// the invitee is not sent to the referrer overview (they are not the host).
 ///
-/// The stash is consumed only after a successful bind. A 4xx/5xx or transport
-/// failure puts the code back so the next dashboard landing can retry.
+/// The stash is consumed after a successful bind. Transport / 5xx / 401 / 429
+/// put the code back so the next dashboard landing can retry. 4xx business
+/// rejections (invalid, self-referral, already bound, stacking) drop it —
+/// retrying those on every unlock would loop forever.
 Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
   final resolved = code ?? await peekPendingReferralCode();
   if (resolved == null || resolved.isEmpty) return;
@@ -44,11 +46,20 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
         );
       }
     }
-  } on ApiException {
-    await stashPendingReferralCode(resolved);
-  } catch (_) {
-    await stashPendingReferralCode(resolved);
+  } catch (error) {
+    if (_shouldRetryBind(error)) {
+      await stashPendingReferralCode(resolved);
+    } else {
+      await clearPendingReferralCode();
+    }
   }
+}
+
+bool _shouldRetryBind(Object error) {
+  if (error is! ApiException) return true;
+  final status = error.statusCode;
+  if (status == null) return true;
+  return status >= 500 || status == 401 || status == 408 || status == 429;
 }
 
 /// Deferred bind used from redirects — re-checks PIN unlock at execution time.

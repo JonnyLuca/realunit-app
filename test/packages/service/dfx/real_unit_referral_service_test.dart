@@ -186,6 +186,21 @@ void main() {
         'Mit dem Code XY schenken wir dir 20 Token.',
       );
     });
+
+    test('aborts a stalled bind', () async {
+      final client = MockClient((request) async {
+        await Future<void>.delayed(const Duration(seconds: 30));
+        return http.Response('{}', 200);
+      });
+
+      await expectLater(
+        build(client).bind(
+          code: 'XY',
+          timeout: const Duration(milliseconds: 20),
+        ),
+        throwsA(isA<TimeoutException>()),
+      );
+    });
   });
 
   group('$RealUnitReferralService.getPayouts', () {

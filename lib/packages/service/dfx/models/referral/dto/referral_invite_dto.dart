@@ -22,8 +22,8 @@ class ReferralInviteDto {
     this.copyTextEn,
   });
 
-  bool get isOpen => status == 'Open';
-  bool get isCredited => status == 'Credited';
+  bool get isOpen => status.toLowerCase() == 'open';
+  bool get isCredited => status.toLowerCase() == 'credited';
 
   String? copyTextForLocale(String languageCode) {
     if (languageCode == 'en') {

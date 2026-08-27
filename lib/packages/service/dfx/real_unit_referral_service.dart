@@ -144,13 +144,16 @@ class RealUnitReferralService extends DFXAuthService {
     );
   }
 
-  Future<ReferralBindResultDto> bind({required String code}) async {
+  Future<ReferralBindResultDto> bind({
+    required String code,
+    Duration timeout = lookupTimeout,
+  }) async {
     final uri = buildUri(host, '$_basePath/bind');
     final response = await authenticatedPost(
       uri,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'code': code}),
-    );
+    ).timeout(timeout);
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw ApiException.fromBody(

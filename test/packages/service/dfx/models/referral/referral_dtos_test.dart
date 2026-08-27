@@ -140,6 +140,31 @@ void main() {
       expect(credited.isCredited, isTrue);
       expect(open.copyTextForLocale('de'), isNull);
     });
+
+    test('status matching is case-insensitive', () {
+      expect(
+        ReferralInviteDto.fromJson({
+          'id': 1,
+          'code': 'AB12',
+          'url': 'https://realunit.app/invite/AB12',
+          'guestName': 'Alice',
+          'status': 'open',
+          'created': '2026-08-24T10:00:00Z',
+        }).isOpen,
+        isTrue,
+      );
+      expect(
+        ReferralInviteDto.fromJson({
+          'id': 2,
+          'code': 'CD34',
+          'url': 'https://realunit.app/invite/CD34',
+          'guestName': 'Bob',
+          'status': 'CREDITED',
+          'created': '2026-08-24T10:00:00Z',
+        }).isCredited,
+        isTrue,
+      );
+    });
   });
 
   group('$ReferralPayoutDto.fromJson', () {

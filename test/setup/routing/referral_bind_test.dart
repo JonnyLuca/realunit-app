@@ -39,15 +39,35 @@ void main() {
     await GetIt.instance.reset();
   });
 
-  test('keeps the stashed code when bind fails', () async {
+  test('keeps the stashed code when bind fails with a retryable error', () async {
     await stashPendingReferralCode('AB12CD');
     when(() => service.bind(code: 'AB12CD')).thenThrow(
-      const ApiException(code: 'UNAVAILABLE', message: 'down'),
+      const ApiException(
+        statusCode: 503,
+        code: 'UNAVAILABLE',
+        message: 'down',
+      ),
     );
 
     await bindPendingReferralCode(router);
 
     expect(await peekPendingReferralCode(), 'AB12CD');
+    verify(() => service.bind(code: 'AB12CD')).called(1);
+  });
+
+  test('drops the stash on a 4xx business rejection', () async {
+    await stashPendingReferralCode('AB12CD');
+    when(() => service.bind(code: 'AB12CD')).thenThrow(
+      const ApiException(
+        statusCode: 409,
+        code: 'ALREADY_BOUND',
+        message: 'already bound',
+      ),
+    );
+
+    await bindPendingReferralCode(router);
+
+    expect(await peekPendingReferralCode(), isNull);
     verify(() => service.bind(code: 'AB12CD')).called(1);
   });
 
