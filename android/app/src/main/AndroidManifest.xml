@@ -56,9 +56,10 @@
             </intent-filter>
             <!-- HTTPS App Links for invite and promo codes (verified against
                  Digital Asset Links for host realunit.app). Trailing slash on
-                 pathPrefix is required: "/invite" would also match "/invitee".
-                 Custom-scheme filter above still covers
-                 realunit-wallet://invite|promo/{code}. -->
+                 pathPrefix is required: "/invite" as a prefix would also match
+                 "/invitee". Exact android:path="/invite" covers bare
+                 /invite?code= without matching /invitee. Custom-scheme filter
+                 above still covers realunit-wallet://invite|promo/{code}. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -73,6 +74,14 @@
                     android:pathPrefix="/promo/"/>
                 <data
                     android:scheme="https"
+                    android:host="realunit.app"
+                    android:path="/invite"/>
+                <data
+                    android:scheme="https"
+                    android:host="realunit.app"
+                    android:path="/promo"/>
+                <data
+                    android:scheme="https"
                     android:host="www.realunit.app"
                     android:pathPrefix="/invite/"/>
                 <data
@@ -81,12 +90,28 @@
                     android:pathPrefix="/promo/"/>
                 <data
                     android:scheme="https"
+                    android:host="www.realunit.app"
+                    android:path="/invite"/>
+                <data
+                    android:scheme="https"
+                    android:host="www.realunit.app"
+                    android:path="/promo"/>
+                <data
+                    android:scheme="https"
                     android:host="dev.realunit.app"
                     android:pathPrefix="/invite/"/>
                 <data
                     android:scheme="https"
                     android:host="dev.realunit.app"
                     android:pathPrefix="/promo/"/>
+                <data
+                    android:scheme="https"
+                    android:host="dev.realunit.app"
+                    android:path="/invite"/>
+                <data
+                    android:scheme="https"
+                    android:host="dev.realunit.app"
+                    android:path="/promo"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

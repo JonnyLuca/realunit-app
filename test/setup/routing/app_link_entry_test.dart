@@ -665,6 +665,11 @@ void main() {
         prefixes.where((p) => p == '/invite' || p == '/promo'),
         isEmpty,
       );
+      final exact = RegExp(r'android:path="([^"]+)"')
+          .allMatches(xml)
+          .map((m) => m.group(1)!)
+          .toList();
+      expect(exact, containsAll(['/invite', '/promo']));
     });
   });
 }
