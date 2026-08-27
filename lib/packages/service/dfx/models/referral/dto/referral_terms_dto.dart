@@ -17,7 +17,7 @@ class ReferralTermsDto {
     if (languageCode == 'en') {
       return firstNonEmpty([markdownEn, markdown]) ?? '';
     }
-    return markdown;
+    return firstNonEmpty([markdown, markdownEn]) ?? '';
   }
 
   factory ReferralTermsDto.fromJson(Map<String, dynamic> json) {

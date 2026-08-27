@@ -102,7 +102,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       if (normalizeReferralCode(widget.controller.text) != code) return;
       setState(() {
         _result = null;
-        _invalid = isReferralLookupInvalidStatus(error.statusCode);
+        _invalid = isReferralLookupInvalid(error);
         _loading = false;
       });
     } catch (_) {

@@ -171,6 +171,28 @@ void main() {
       expect(segments, ['v1', 'realunit', 'referral', 'code', 'AB/12']);
     });
 
+    test('rejects an empty code without calling the network', () async {
+      var called = false;
+      final client = MockClient((request) async {
+        called = true;
+        return http.Response('{}', 200);
+      });
+
+      await expectLater(
+        build(client).lookupCode('   '),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'statusCode', 400)
+              .having((e) => e.code, 'code', 'INVALID'),
+        ),
+      );
+      await expectLater(
+        build(client).lookupCode('%20'),
+        throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 400)),
+      );
+      expect(called, isFalse);
+    });
+
     test('aborts a stalled public lookup', () async {
       final client = MockClient((request) async {
         await Future<void>.delayed(const Duration(seconds: 30));
@@ -215,6 +237,24 @@ void main() {
       );
     });
 
+    test('rejects an empty code without calling the network', () async {
+      var called = false;
+      final client = MockClient((request) async {
+        called = true;
+        return http.Response('{}', 200);
+      });
+
+      await expectLater(
+        build(client).bind(code: '  '),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'statusCode', 400)
+              .having((e) => e.message, 'message', 'empty'),
+        ),
+      );
+      expect(called, isFalse);
+    });
+
     test('percent-decodes the bind code', () async {
       Map<String, dynamic>? body;
       final client = MockClient((request) async {
@@ -242,6 +282,49 @@ void main() {
         ),
         throwsA(isA<TimeoutException>()),
       );
+    });
+  });
+
+  group('$RealUnitReferralService.acceptTerms', () {
+    test('POSTs accepted:true and accepts 200 or 201', () async {
+      Map<String, dynamic>? body;
+      final client = MockClient((request) async {
+        body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(request.url.path, '/v1/realunit/referral/terms/accept');
+        expect(request.headers['Authorization'], 'Bearer jwt-1');
+        return http.Response('{}', 201);
+      });
+
+      await build(client).acceptTerms();
+      expect(body, {'accepted': true});
+    });
+  });
+
+  group('$RealUnitReferralService.getInvites', () {
+    test('GETs /v1/realunit/referral/invites and parses open rows', () async {
+      String? path;
+      final client = MockClient((request) async {
+        path = request.url.path;
+        return http.Response(
+          jsonEncode([
+            {
+              'id': 1,
+              'code': 'AB12',
+              'url': 'https://realunit.app/invite/AB12',
+              'guestName': 'Alice',
+              'status': 'Open',
+              'created': '2026-08-24T10:00:00Z',
+            },
+          ]),
+          200,
+        );
+      });
+
+      final invites = await build(client).getInvites();
+      expect(path, '/v1/realunit/referral/invites');
+      expect(invites, hasLength(1));
+      expect(invites.single.isOpen, isTrue);
+      expect(invites.single.guestName, 'Alice');
     });
   });
 

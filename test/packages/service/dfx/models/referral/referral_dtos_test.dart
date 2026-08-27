@@ -71,6 +71,15 @@ void main() {
       });
       expect(dto.textForLang('en'), 'DE md');
     });
+
+    test('DE ignores empty markdown and uses EN', () {
+      final dto = ReferralTermsDto.fromJson({
+        'version': '2026-08-14',
+        'markdown': '  ',
+        'markdownEn': 'EN md',
+      });
+      expect(dto.textForLang('de'), 'EN md');
+    });
   });
 
   group('$ReferralBindResultDto', () {

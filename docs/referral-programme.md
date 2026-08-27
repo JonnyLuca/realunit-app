@@ -98,7 +98,9 @@ stacking. Promo credit is only the first successful purchase of at least
 Landing payload for `realunit.app/invite/…` and `/promo/…`.
 HTTP 400/404/409/410/422 mean the code is invalid or spent. 5xx, 401, 408
 and 429 are transport failures — the registration field must not show
-«invalid», and the landing shows «unavailable».
+«invalid», and the landing shows «unavailable». A NestJS 404 whose
+message starts with `Cannot GET` / `Cannot POST` means the route is not
+mounted yet: treat it as unavailable and keep a stashed code for retry.
 
 ### `GET /v1/realunit/referral/payouts`
 

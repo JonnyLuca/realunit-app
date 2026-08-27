@@ -92,6 +92,30 @@ void main() {
     );
   });
 
+  testWidgets(
+    'a NestJS unmounted-route 404 is not shown as an invalid code',
+    (tester) async {
+      final ctrl = TextEditingController(text: 'AB12');
+      await pumpField(
+        tester,
+        controller: ctrl,
+        lookup: (_) async => throw const ApiException(
+          statusCode: 404,
+          code: 'UNKNOWN',
+          message: 'Cannot GET /v1/realunit/referral/code/AB12',
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        find.text('Dieser Code ist ungültig oder abgelaufen.'),
+        findsNothing,
+      );
+      expect(ctrl.text, 'AB12');
+    },
+  );
+
   testWidgets('a 500 lookup is not shown as an invalid code', (tester) async {
     final ctrl = TextEditingController(text: 'AB12');
     await pumpField(

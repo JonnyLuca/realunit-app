@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
+import 'package:realunit_wallet/packages/service/dfx/referral_lookup_status.dart';
 import 'package:realunit_wallet/screens/pin/bloc/auth/pin_auth_cubit.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
@@ -14,10 +15,11 @@ import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 /// the invitee is not sent to the referrer overview (they are not the host).
 ///
 /// The stash is taken before POST so a dashboard boot bind cannot send the
-/// same code in parallel. Transport / 5xx / 401 / 429 put the code back so
-/// the next dashboard landing can retry. 4xx business rejections (invalid,
-/// self-referral, already bound, stacking) drop it — retrying those on every
-/// unlock would loop forever.
+/// same code in parallel. Transport / 5xx / 401 / 429 and an unmounted
+/// NestJS route (`Cannot POST …`) put the code back so the next dashboard
+/// landing can retry. 4xx business rejections (invalid, self-referral,
+/// already bound, stacking) drop it — retrying those on every unlock would
+/// loop forever.
 Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
   if (code != null) {
     await stashPendingReferralCode(code);
@@ -59,6 +61,7 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
 
 bool _shouldRetryBind(Object error) {
   if (error is! ApiException) return true;
+  if (isReferralRouteMissing(error.message)) return true;
   final status = error.statusCode;
   if (status == null) return true;
   return status >= 500 || status == 401 || status == 408 || status == 429;

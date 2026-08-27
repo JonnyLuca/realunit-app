@@ -109,6 +109,22 @@ void main() {
     verify(() => service.bind(code: 'AB12CD')).called(1);
   });
 
+  test('keeps the stash when bind hits an unmounted NestJS route', () async {
+    await stashPendingReferralCode('AB12CD');
+    when(() => service.bind(code: 'AB12CD')).thenThrow(
+      const ApiException(
+        statusCode: 404,
+        code: 'UNKNOWN',
+        message: 'Cannot POST /v1/realunit/referral/bind',
+      ),
+    );
+
+    await bindPendingReferralCode(router);
+
+    expect(await peekPendingReferralCode(), 'AB12CD');
+    verify(() => service.bind(code: 'AB12CD')).called(1);
+  });
+
   test('drops the stash on a 4xx business rejection', () async {
     await stashPendingReferralCode('AB12CD');
     when(() => service.bind(code: 'AB12CD')).thenThrow(
@@ -123,6 +139,21 @@ void main() {
 
     expect(await peekPendingReferralCode(), isNull);
     verify(() => service.bind(code: 'AB12CD')).called(1);
+  });
+
+  test('drops the stash on a business 404 (code not found)', () async {
+    await stashPendingReferralCode('NOPE');
+    when(() => service.bind(code: 'NOPE')).thenThrow(
+      const ApiException(
+        statusCode: 404,
+        code: 'NOT_FOUND',
+        message: 'missing',
+      ),
+    );
+
+    await bindPendingReferralCode(router);
+
+    expect(await peekPendingReferralCode(), isNull);
   });
 
   test('does not bind the same stash twice concurrently', () async {

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/referral_lookup_status.dart';
 
 void main() {
@@ -15,5 +16,40 @@ void main() {
     expect(isReferralLookupInvalidStatus(429), isFalse);
     expect(isReferralLookupInvalidStatus(500), isFalse);
     expect(isReferralLookupInvalidStatus(503), isFalse);
+  });
+
+  test('NestJS unmounted-route 404 is not an expired code', () {
+    expect(
+      isReferralRouteMissing('Cannot GET /v1/realunit/referral/code/TEST'),
+      isTrue,
+    );
+    expect(
+      isReferralRouteMissing('Cannot POST /v1/realunit/referral/bind'),
+      isTrue,
+    );
+    expect(isReferralRouteMissing('Not found'), isFalse);
+    expect(isReferralRouteMissing(null), isFalse);
+    expect(isReferralRouteMissing(''), isFalse);
+
+    expect(
+      isReferralLookupInvalid(
+        const ApiException(
+          statusCode: 404,
+          code: 'UNKNOWN',
+          message: 'Cannot GET /v1/realunit/referral/code/TEST',
+        ),
+      ),
+      isFalse,
+    );
+    expect(
+      isReferralLookupInvalid(
+        const ApiException(
+          statusCode: 404,
+          code: 'NOT_FOUND',
+          message: 'missing',
+        ),
+      ),
+      isTrue,
+    );
   });
 }
