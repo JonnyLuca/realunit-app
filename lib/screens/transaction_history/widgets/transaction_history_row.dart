@@ -113,7 +113,13 @@ class TransactionHistoryRowView extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          DateFormat('MMM dd, yyyy | H:mm').format(transaction.timestamp.toLocal()),
+                          transaction.type == TransactionTypes.referralPayout
+                              ? DateFormat('dd.MM.yyyy | H:mm').format(
+                                  transaction.timestamp.toLocal(),
+                                )
+                              : DateFormat('MMM dd, yyyy | H:mm').format(
+                                  transaction.timestamp.toLocal(),
+                                ),
                           style: const TextStyle(
                             fontSize: 12,
                             height: 16 / 12,

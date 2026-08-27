@@ -41,5 +41,6 @@ void main() {
 
     expect(find.text('Empfehlungsprämie'), findsOneWidget);
     expect(find.textContaining('246.5'), findsOneWidget);
+    expect(find.textContaining('24.08.2026'), findsOneWidget);
   });
 }

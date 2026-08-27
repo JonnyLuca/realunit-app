@@ -101,8 +101,9 @@ price.
 - Terms page; create-invite button after checkbox
   «Ich habe die Teilnahmebedingungen gelesen und akzeptiert»
 - Overview: open / credited counts, total REALU, CHF, label «Aktienkurs»
-- Registration: optional invite/promo code field (same field). After
-  lookup the invite recognition copy or the promo campaign dialog is shown.
+- Registration: dedicated optional step (skip allowed) with the same
+  field for invite and promo. After lookup the invite recognition copy
+  or the promo campaign dialog is shown.
 - History: referral payouts with amount, date, frozen CHF
 - Deeplinks: `realunit-wallet://invite|promo/{code}` and
   `https://realunit.app/invite|promo/{code}`

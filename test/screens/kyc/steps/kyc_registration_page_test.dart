@@ -34,9 +34,11 @@ import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registrati
 import 'package:realunit_wallet/screens/kyc/steps/registration/kyc_registration_page.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_address_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_personal_step.dart';
+import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_referral_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_tax_step.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
+import 'package:realunit_wallet/widgets/buttons/app_text_button.dart';
 import 'package:realunit_wallet/widgets/form/labeled_text_field.dart';
 
 import '../../../helper/helper.dart';
@@ -213,8 +215,28 @@ void main() {
       expect(find.byType(KycRegistrationPersonalStep).hitTestable(), findsOne);
       expect(
         find.text('Einladungs- oder Promo-Code (optional)'),
-        findsOneWidget,
+        findsNothing,
       );
+    });
+
+    testWidgets('renders $KycRegistrationReferralStep with skip', (tester) async {
+      final state = const KycRegistrationStepState(
+        step: KycRegistrationStep.referral,
+        steps: [
+          KycRegistrationStep.referral,
+          KycRegistrationStep.personal,
+        ],
+      );
+      when(() => registrationStepCubit.state).thenReturn(state);
+
+      await tester.pumpApp(buildSubject(const KycRegistrationView()));
+      await tester.pump();
+
+      (tester.widget(find.byType(PageView)) as PageView).controller?.jumpToPage(state.index);
+      await tester.pump();
+
+      expect(find.byType(KycRegistrationReferralStep).hitTestable(), findsOne);
+      expect(find.byType(AppTextButton), findsOneWidget);
     });
 
     testWidgets('renders $KycRegistrationAddressStep', (tester) async {

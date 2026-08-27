@@ -86,7 +86,7 @@ class SettingsPage extends StatelessWidget {
                           SettingOption(
                             title: S.of(context).referrals,
                             leading: const Icon(
-                              Icons.people_outline,
+                              Icons.card_giftcard_outlined,
                               size: 24,
                               color: RealUnitColors.realUnitBlue,
                             ),

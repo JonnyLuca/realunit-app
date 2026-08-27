@@ -24,6 +24,7 @@ import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registrati
 import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registration_submit/kyc_registration_submit_cubit.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_address_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_personal_step.dart';
+import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_referral_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_tax_step.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
@@ -293,7 +294,12 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
                   PageView(
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
-                    children: KycRegistrationStep.values.map(_buildStep).toList(),
+                    children: context
+                        .read<KycRegistrationStepCubit>()
+                        .state
+                        .steps
+                        .map(_buildStep)
+                        .toList(),
                   ),
                   BlocBuilder<KycRegistrationSubmitCubit, KycRegistrationSubmitState>(
                     builder: (context, state) {
@@ -319,6 +325,11 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
 
   Widget _buildStep(KycRegistrationStep step) {
     switch (step) {
+      case KycRegistrationStep.referral:
+        return KycRegistrationReferralStep(
+          referralCodeCtrl: referralCodeCtrl,
+        );
+
       case KycRegistrationStep.personal:
         return KycRegistrationPersonalStep(
           typeCtrl: typeCtrl,
@@ -327,7 +338,6 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
           nationalityCtrl: nationalityCtrl,
           phoneCtrl: phoneCtrl,
           birthdayCtrl: birthdayCtrl,
-          referralCodeCtrl: referralCodeCtrl,
           initialNationality: _initialNationality,
         );
 

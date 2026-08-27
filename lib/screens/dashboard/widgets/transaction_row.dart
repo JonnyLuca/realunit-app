@@ -159,7 +159,9 @@ class ReferralPayoutTransactionRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    DateFormat('MMM dd, yyyy | H:mm').format(transaction.timestamp.toLocal()),
+                    DateFormat('dd.MM.yyyy | H:mm').format(
+                      transaction.timestamp.toLocal(),
+                    ),
                     style: const TextStyle(
                       fontSize: 12,
                       height: 16 / 12,
