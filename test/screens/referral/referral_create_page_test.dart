@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_created_invite_dto.dart';
@@ -285,5 +286,67 @@ void main() {
     await tester.tap(find.byType(AppFilledButton));
     await tester.pump();
     verify(() => cubit.load()).called(1);
+  });
+
+  testWidgets('app-bar back after create pops true so overview can refresh', (
+    tester,
+  ) async {
+    const created = ReferralCreatedInviteDto(
+      code: 'AB12CD',
+      url: 'https://realunit.app/invite/AB12CD',
+      guestName: 'Alice',
+    );
+    when(() => cubit.state).thenReturn(
+      ReferralInviteCreated(summary: _summary, invite: created),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralInviteCreated(summary: _summary, invite: created),
+    );
+
+    bool? popped;
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, _) => TextButton(
+            onPressed: () async {
+              popped = await context.push<bool>('/create');
+            },
+            child: const Text('go'),
+          ),
+        ),
+        GoRoute(
+          path: '/create',
+          builder: (_, _) => BlocProvider<ReferralCubit>.value(
+            value: cubit,
+            child: const ReferralCreateView(),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.tap(find.text('go'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(popped, isTrue);
   });
 }

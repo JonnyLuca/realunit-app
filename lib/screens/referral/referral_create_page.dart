@@ -61,9 +61,18 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(s.referralCreateInvite)),
-      body: SafeArea(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (!context.mounted) return;
+        final created =
+            context.read<ReferralCubit>().state is ReferralInviteCreated;
+        Navigator.of(context).pop(created);
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text(s.referralCreateInvite)),
+        body: SafeArea(
         child: BlocBuilder<ReferralCubit, ReferralState>(
           builder: (context, state) {
             if (state is ReferralLoading || state is ReferralInitial) {
@@ -243,6 +252,7 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
           },
         ),
       ),
+    ),
     );
   }
 }
