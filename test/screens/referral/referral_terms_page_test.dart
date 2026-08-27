@@ -60,6 +60,11 @@ void main() {
       );
       await tester.pump();
 
+      expect(
+        find.text('Teilnahmebedingungen Referral-Programm'),
+        findsOneWidget,
+      );
+
       final button = tester.widget<AppFilledButton>(find.byType(AppFilledButton));
       expect(button.onPressed, isNull);
 

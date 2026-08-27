@@ -25,6 +25,7 @@ void main() {
     await GetIt.instance.reset();
     GetIt.instance.registerSingleton<RealUnitReferralService>(service);
     router = GoRouter(
+      navigatorKey: GlobalKey<NavigatorState>(),
       routes: [
         GoRoute(path: '/', builder: (_, _) => const SizedBox()),
       ],

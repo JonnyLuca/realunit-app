@@ -63,7 +63,7 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
   Widget build(BuildContext context) {
     final s = S.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(s.referrals)),
+      appBar: AppBar(title: Text(s.referralTermsTitle)),
       body: SafeArea(
         child: BlocBuilder<ReferralCubit, ReferralState>(
           builder: (context, state) {

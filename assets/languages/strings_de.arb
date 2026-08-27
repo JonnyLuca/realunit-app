@@ -292,6 +292,7 @@
   "referralStatusCredited": "Gutgeschrieben",
   "referralStatusOpen": "Offen",
   "referralTermsCheckbox": "Ich habe die Teilnahmebedingungen gelesen und akzeptiert",
+  "referralTermsTitle": "Teilnahmebedingungen Referral-Programm",
   "referralTotalReceived": "Insgesamt erhalten",
   "referralYourInviteFor": "Deine Einladung für ${guestName}",
   "refresh": "Aktualisieren",

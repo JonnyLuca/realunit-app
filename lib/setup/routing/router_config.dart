@@ -49,6 +49,7 @@ import 'package:realunit_wallet/screens/transaction_history/transaction_history_
 import 'package:realunit_wallet/screens/verify_seed/verify_seed_page.dart';
 import 'package:realunit_wallet/screens/web_view/web_view_page.dart';
 import 'package:realunit_wallet/screens/welcome/welcome_page.dart';
+import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/boot_navigation.dart';
 import 'package:realunit_wallet/setup/routing/routes/app_link_entry.dart';
 import 'package:realunit_wallet/setup/routing/routes/app_routes.dart';
@@ -59,6 +60,7 @@ import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 import 'package:realunit_wallet/setup/routing/routes/support_routes.dart';
 
 final GoRouter routerConfig = GoRouter(
+  navigatorKey: navigatorKey,
   initialLocation: '/home',
   // Custom-scheme opens (realunit-wallet://…, canonical realunit-wallet://open)
   // only foreground the app; they must not force any navigation. Cold start:

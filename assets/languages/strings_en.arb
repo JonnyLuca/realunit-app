@@ -292,6 +292,7 @@
   "referralStatusCredited": "Credited",
   "referralStatusOpen": "Open",
   "referralTermsCheckbox": "I have read and accepted the terms of participation",
+  "referralTermsTitle": "Referral programme terms of participation",
   "referralTotalReceived": "Total received",
   "referralYourInviteFor": "Your invitation for ${guestName}",
   "refresh": "Refresh",
