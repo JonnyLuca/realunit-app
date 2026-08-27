@@ -32,3 +32,30 @@ num? referralJsonNum(dynamic value) {
 
 int referralJsonInt(dynamic value, {int orElse = 0}) =>
     referralJsonNum(value)?.round() ?? orElse;
+
+DateTime _fromEpoch(num value) {
+  final n = value.toInt();
+  if (n.abs() >= 100000000000) {
+    return DateTime.fromMillisecondsSinceEpoch(n, isUtc: true);
+  }
+  return DateTime.fromMillisecondsSinceEpoch(n * 1000, isUtc: true);
+}
+
+/// ISO-8601 strings or Unix seconds/milliseconds. Null if missing/unparseable.
+DateTime? referralJsonDate(dynamic value) {
+  if (value == null) return null;
+  if (value is DateTime) return value;
+  if (value is num) return _fromEpoch(value);
+  if (value is String) {
+    final text = value.trim();
+    if (text.isEmpty) return null;
+    try {
+      return DateTime.parse(text);
+    } catch (_) {
+      final n = num.tryParse(text);
+      if (n != null) return _fromEpoch(n);
+      return null;
+    }
+  }
+  return null;
+}

@@ -291,6 +291,17 @@ void main() {
       expect(dto.chfValue, 246.5);
     });
 
+    test('reads created from a Unix timestamp', () {
+      final dto = ReferralPayoutDto.fromJson({
+        'id': 9,
+        'amount': 20,
+        'chfValue': 246.5,
+        'created': 1787565600,
+        'status': 'Complete',
+      });
+      expect(dto.created, DateTime.utc(2026, 8, 24, 10));
+    });
+
     test('pending and failed payouts are not settled; missing status is', () {
       expect(
         ReferralPayoutDto.fromJson({

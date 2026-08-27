@@ -46,9 +46,7 @@ class ReferralBindResultDto {
       actionText: json['actionText'] as String?,
       // Promo first-purchase floor. Spec default is 200 REALU when omitted.
       minBuyRealu: minBuy ?? (kind.toLowerCase() == 'promo' ? 200 : null),
-      validUntil: json['validUntil'] != null
-          ? DateTime.parse(json['validUntil'] as String)
-          : null,
+      validUntil: referralJsonDate(json['validUntil']),
       redemptionCap: referralJsonNum(json['redemptionCap']),
     );
   }

@@ -36,14 +36,15 @@ class ReferralPayoutDto {
   factory ReferralPayoutDto.fromJson(Map<String, dynamic> json) {
     final amount = referralJsonNum(json['amount']);
     final chfValue = referralJsonNum(json['chfValue']);
-    if (amount == null || chfValue == null) {
-      throw FormatException('referral payout missing amount/chfValue');
+    final created = referralJsonDate(json['created']);
+    if (amount == null || chfValue == null || created == null) {
+      throw FormatException('referral payout missing amount/chfValue/created');
     }
     return ReferralPayoutDto(
       id: referralJsonInt(json['id']),
       amount: amount,
       chfValue: chfValue,
-      created: DateTime.parse(json['created'] as String),
+      created: created,
       kind: json['kind'] as String? ?? '',
       status: json['status'] as String? ?? 'Complete',
       txHash: json['txHash'] as String?,

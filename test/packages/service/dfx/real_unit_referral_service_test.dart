@@ -350,6 +350,30 @@ void main() {
       expect(invites, hasLength(1));
       expect(invites.single.guestName, 'Alice');
     });
+
+    test('skips a malformed invite row and keeps the valid open invite', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode([
+            {'id': 1, 'code': 'BAD'},
+            {
+              'id': 2,
+              'code': 'AB12',
+              'url': 'https://realunit.app/invite/AB12',
+              'guestName': 'Alice',
+              'status': 'Open',
+              'created': 1787565600,
+            },
+          ]),
+          200,
+        ),
+      );
+
+      final invites = await build(client).getInvites();
+      expect(invites, hasLength(1));
+      expect(invites.single.guestName, 'Alice');
+      expect(invites.single.created, DateTime.utc(2026, 8, 24, 10));
+    });
   });
 
   group('$RealUnitReferralService.getPayouts', () {

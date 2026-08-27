@@ -135,9 +135,15 @@ class RealUnitReferralService extends DFXAuthService {
       );
     }
 
-    return referralJsonList(jsonDecode(response.body))
-        .map(ReferralInviteDto.fromJson)
-        .toList();
+    final invites = <ReferralInviteDto>[];
+    for (final row in referralJsonList(jsonDecode(response.body))) {
+      try {
+        invites.add(ReferralInviteDto.fromJson(row));
+      } catch (_) {
+        // Skip a malformed row so one bad invite cannot hide copy/share.
+      }
+    }
+    return invites;
   }
 
   Future<ReferralCodeLookupDto> lookupCode(

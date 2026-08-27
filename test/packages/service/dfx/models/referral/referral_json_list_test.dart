@@ -75,4 +75,23 @@ void main() {
     expect(referralJsonInt('3'), 3);
     expect(referralJsonInt(null), 0);
   });
+
+  test('referralJsonDate reads ISO strings and Unix seconds or milliseconds', () {
+    expect(
+      referralJsonDate('2026-08-24T10:00:00Z'),
+      DateTime.utc(2026, 8, 24, 10),
+    );
+    expect(
+      referralJsonDate(1787565600),
+      DateTime.utc(2026, 8, 24, 10),
+    );
+    expect(
+      referralJsonDate(1787565600000),
+      DateTime.utc(2026, 8, 24, 10),
+    );
+    expect(referralJsonDate(' 1787565600 '), DateTime.utc(2026, 8, 24, 10));
+    expect(referralJsonDate(null), isNull);
+    expect(referralJsonDate(''), isNull);
+    expect(referralJsonDate('nope'), isNull);
+  });
 }
