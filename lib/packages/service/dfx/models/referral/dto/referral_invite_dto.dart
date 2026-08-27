@@ -8,6 +8,8 @@ class ReferralInviteDto {
   final String guestName;
   final String status;
   final DateTime created;
+  final String? copyText;
+  final String? copyTextEn;
 
   const ReferralInviteDto({
     required this.id,
@@ -16,10 +18,19 @@ class ReferralInviteDto {
     required this.guestName,
     required this.status,
     required this.created,
+    this.copyText,
+    this.copyTextEn,
   });
 
   bool get isOpen => status == 'Open';
   bool get isCredited => status == 'Credited';
+
+  String? copyTextForLocale(String languageCode) {
+    if (languageCode == 'en') {
+      return copyTextEn ?? copyText;
+    }
+    return copyText ?? copyTextEn;
+  }
 
   factory ReferralInviteDto.fromJson(Map<String, dynamic> json) {
     return ReferralInviteDto(
@@ -29,6 +40,8 @@ class ReferralInviteDto {
       guestName: json['guestName'] as String,
       status: json['status'] as String,
       created: DateTime.parse(json['created'] as String),
+      copyText: json['copyText'] as String?,
+      copyTextEn: json['copyTextEn'] as String?,
     );
   }
 }

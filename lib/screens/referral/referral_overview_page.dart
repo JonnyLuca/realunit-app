@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/scrollable_actions_layout.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ReferralOverviewPage extends StatelessWidget {
   const ReferralOverviewPage({super.key});
@@ -46,6 +49,8 @@ class ReferralOverviewPage extends StatelessWidget {
             }
 
             final summary = state.summary;
+            final openInvites =
+                state.invites.where((invite) => invite.isOpen).toList();
             final chfFormat = NumberFormat.currency(
               locale: 'de_CH',
               symbol: 'CHF',
@@ -83,6 +88,8 @@ class ReferralOverviewPage extends StatelessWidget {
                         ),
                       ],
                     ),
+                    for (final invite in openInvites)
+                      _OpenInviteTile(invite: invite),
                     Text(
                       s.referralOpenInvitesExpire,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -163,6 +170,67 @@ class _TotalReceivedTile extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: RealUnitColors.neutral500,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OpenInviteTile extends StatelessWidget {
+  final ReferralInviteDto invite;
+
+  const _OpenInviteTile({required this.invite});
+
+  String _shareText(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
+    final fromApi = invite.copyTextForLocale(lang);
+    if (fromApi != null && fromApi.isNotEmpty) return fromApi;
+    return S.of(context).referralShareText(
+      invite.guestName,
+      'RealUnit',
+      invite.url,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: RealUnitColors.neutral200),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          Text(
+            s.referralYourInviteFor(invite.guestName),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          SelectableText(
+            invite.url,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: RealUnitColors.realUnitBlue,
+            ),
+          ),
+          AppFilledButton(
+            label: s.referralCopyInviteLink,
+            variant: FilledButtonVariant.secondary,
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: invite.url));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(s.copyClipboard)),
+                );
+              }
+            },
+          ),
+          AppFilledButton(
+            label: s.referralShareInviteLink,
+            onPressed: () => Share.share(_shareText(context)),
           ),
         ],
       ),

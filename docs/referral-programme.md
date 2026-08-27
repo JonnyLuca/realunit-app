@@ -101,7 +101,8 @@ price.
 - Terms page; create-invite button after checkbox
   «Ich habe die Teilnahmebedingungen gelesen und akzeptiert».
   Accepting terms opens the name-entry screen.
-- Overview: open / credited counts, total REALU, CHF, label «Aktienkurs»
+- Overview: open / credited counts, total REALU, CHF, label «Aktienkurs».
+  Open invites can be copied and shared again; credited names stay hidden.
 - Registration: dedicated optional step (skip allowed) with the same
   field for invite and promo. After lookup the invite recognition copy
   or the promo campaign dialog is shown.

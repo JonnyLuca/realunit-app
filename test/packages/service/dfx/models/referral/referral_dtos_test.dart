@@ -116,6 +116,7 @@ void main() {
       expect(open.isOpen, isTrue);
       expect(open.isCredited, isFalse);
       expect(credited.isCredited, isTrue);
+      expect(open.copyTextForLocale('de'), isNull);
     });
   });
 

@@ -24,7 +24,7 @@ void main() {
   });
 
   testWidgets(
-    'shows only open/credited counts and Aktienkurs, never invitee names',
+    'shows counts, Aktienkurs, and copy/share for open invites only',
     (tester) async {
       const summary = ReferralSummaryDto(
         eligible: true,
@@ -105,8 +105,12 @@ void main() {
       expect(find.text('INSGESAMT ERHALTEN'), findsOneWidget);
       expect(find.textContaining('Aktienkurs'), findsOneWidget);
       expect(find.text('Offene Einladungen verfallen nach 3 Monaten.'), findsOneWidget);
-      expect(find.text('AliceShouldNotAppear'), findsNothing);
+      expect(find.text('Deine Einladung für AliceShouldNotAppear'), findsOneWidget);
+      expect(find.text('Einladungslink kopieren'), findsOneWidget);
+      expect(find.text('Einladungslink versenden'), findsOneWidget);
       expect(find.text('BobShouldNotAppear'), findsNothing);
+      expect(find.text('Bound'), findsNothing);
+      expect(find.text('Verifiziert'), findsNothing);
     },
   );
 }
