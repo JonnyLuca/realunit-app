@@ -7,7 +7,6 @@ import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
-import 'package:realunit_wallet/widgets/outlined_tile.dart';
 import 'package:realunit_wallet/widgets/scrollable_actions_layout.dart';
 
 class ReferralOverviewPage extends StatelessWidget {
@@ -59,6 +58,14 @@ class ReferralOverviewPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 20,
                   children: [
+                    _TotalReceivedTile(
+                      realu: summary.realuSum,
+                      chfLabel: s.referralChfAtSharePrice(
+                        chfFormat.format(summary.chfSum),
+                        summary.sharePriceLabel ?? s.referralSharePrice,
+                      ),
+                      title: s.referralTotalReceived,
+                    ),
                     Row(
                       spacing: 12,
                       children: [
@@ -76,17 +83,17 @@ class ReferralOverviewPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    OutlinedTile(
-                      leading: const Icon(
-                        Icons.card_giftcard_outlined,
-                        color: RealUnitColors.realUnitBlue,
-                        size: 24,
+                    Text(
+                      s.referralOpenInvitesExpire,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: RealUnitColors.neutral500,
                       ),
-                      title: s.referralTotalReceived,
-                      subtitle:
-                          '${summary.realuSum.toStringAsFixed(0)} REALU\n'
-                          '${chfFormat.format(summary.chfSum)}\n'
-                          '${summary.sharePriceLabel ?? s.referralSharePrice}',
+                    ),
+                    Text(
+                      s.referralOverviewHint,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: RealUnitColors.neutral500,
+                      ),
                     ),
                   ],
                 ),
@@ -110,6 +117,54 @@ class ReferralOverviewPage extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _TotalReceivedTile extends StatelessWidget {
+  final num realu;
+  final String chfLabel;
+  final String title;
+
+  const _TotalReceivedTile({
+    required this.realu,
+    required this.chfLabel,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: RealUnitColors.brand700,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: RealUnitColors.realUnitBlue,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            '${realu.toStringAsFixed(0)} REALU',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          Text(
+            chfLabel,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: RealUnitColors.neutral500,
+            ),
+          ),
+        ],
       ),
     );
   }

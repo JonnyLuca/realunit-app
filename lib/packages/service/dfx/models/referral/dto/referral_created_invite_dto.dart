@@ -1,17 +1,27 @@
 /// Response from `POST /v1/realunit/referral/invites`.
-/// `copyText` is a German-only API fallback; prefer i18n share text when available.
+/// The server generates the personalised share text; the app renders it 1:1.
 class ReferralCreatedInviteDto {
   final String code;
   final String url;
   final String guestName;
   final String? copyText;
+  final String? copyTextEn;
 
   const ReferralCreatedInviteDto({
     required this.code,
     required this.url,
     required this.guestName,
     this.copyText,
+    this.copyTextEn,
   });
+
+  /// Locale-aware share wording. EN falls back to DE when the EN field is absent.
+  String? copyTextForLocale(String languageCode) {
+    if (languageCode == 'en') {
+      return copyTextEn ?? copyText;
+    }
+    return copyText ?? copyTextEn;
+  }
 
   factory ReferralCreatedInviteDto.fromJson(Map<String, dynamic> json) {
     return ReferralCreatedInviteDto(
@@ -19,6 +29,7 @@ class ReferralCreatedInviteDto {
       url: json['url'] as String,
       guestName: json['guestName'] as String,
       copyText: json['copyText'] as String?,
+      copyTextEn: json['copyTextEn'] as String?,
     );
   }
 }

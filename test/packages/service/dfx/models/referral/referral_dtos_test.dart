@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_code_lookup_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_created_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_payout_dto.dart';
@@ -149,6 +150,39 @@ void main() {
       expect(dto.url, 'https://realunit.app/invite/AB12');
       expect(dto.guestName, 'Alice');
       expect(dto.copyText, 'Hey Alice');
+    });
+
+    test('EN share text falls back to DE copyText', () {
+      final dto = ReferralCreatedInviteDto.fromJson({
+        'code': 'AB12',
+        'url': 'https://realunit.app/invite/AB12',
+        'guestName': 'Alice',
+        'copyText': 'Hey Alice, Björn lädt dich ein',
+        'copyTextEn': 'Hey Alice, Björn is inviting you',
+      });
+      expect(dto.copyTextForLocale('en'), 'Hey Alice, Björn is inviting you');
+      expect(dto.copyTextForLocale('de'), 'Hey Alice, Björn lädt dich ein');
+    });
+  });
+
+  group('$ReferralCodeLookupDto.fromJson', () {
+    test('maps invite recognition and promo campaign text', () {
+      final invite = ReferralCodeLookupDto.fromJson({
+        'kind': 'invite',
+        'inviterName': 'Björn',
+        'inviteeName': 'Alice',
+      });
+      expect(invite.isInvite, isTrue);
+      expect(invite.inviterName, 'Björn');
+
+      final promo = ReferralCodeLookupDto.fromJson({
+        'kind': 'Promo',
+        'actionText': 'DE action',
+        'campaignTextEn': 'EN campaign',
+      });
+      expect(promo.isPromo, isTrue);
+      expect(promo.campaignTextForLocale('en'), 'EN campaign');
+      expect(promo.campaignTextForLocale('de'), 'DE action');
     });
   });
 }

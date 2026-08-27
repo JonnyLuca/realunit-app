@@ -117,6 +117,32 @@ void main() {
     });
   });
 
+  group('$RealUnitReferralService.lookupCode', () {
+    test('GETs the public code route without a Bearer token', () async {
+      String? path;
+      String? auth;
+      final client = MockClient((request) async {
+        path = request.url.path;
+        auth = request.headers['Authorization'];
+        return http.Response(
+          jsonEncode({
+            'kind': 'invite',
+            'inviterName': 'Björn',
+            'inviteeName': 'Alice',
+          }),
+          200,
+        );
+      });
+
+      final result = await build(client).lookupCode('AB12');
+
+      expect(path, '/v1/realunit/referral/code/AB12');
+      expect(auth, isNull);
+      expect(result.isInvite, isTrue);
+      expect(result.inviterName, 'Björn');
+    });
+  });
+
   group('$RealUnitReferralService.bind', () {
     test('POSTs the code and returns promo campaign text 1:1', () async {
       Map<String, dynamic>? body;

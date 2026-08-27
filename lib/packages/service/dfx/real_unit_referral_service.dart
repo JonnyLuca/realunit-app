@@ -4,6 +4,7 @@ import 'package:realunit_wallet/packages/config/api_config.dart';
 import 'package:realunit_wallet/packages/service/dfx/dfx_auth_service.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_code_lookup_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_created_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_payout_dto.dart';
@@ -112,6 +113,27 @@ class RealUnitReferralService extends DFXAuthService {
     return list
         .map((e) => ReferralInviteDto.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// Public code lookup used by registration preview. No Bearer token —
+  /// the same route the website hits.
+  Future<ReferralCodeLookupDto> lookupCode(String code) async {
+    final uri = buildUri(host, '$_basePath/code/$code');
+    final response = await appStore.httpClient.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      throw ApiException.fromBody(
+        response.body,
+        httpStatusCode: response.statusCode,
+      );
+    }
+
+    return ReferralCodeLookupDto.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   Future<ReferralBindResultDto> bind({required String code}) async {

@@ -14,9 +14,9 @@ String? parseInviteCodeFromReferrer(String? raw) {
   }
 
   final params = Uri.splitQueryString(decoded);
-  final invite = params['invite'];
-  if (invite == null) return null;
-  final trimmed = invite.trim();
+  final rawCode = params['invite'] ?? params['promo'] ?? params['code'];
+  if (rawCode == null) return null;
+  final trimmed = rawCode.trim();
   if (trimmed.isEmpty) return null;
   return trimmed.length > 256 ? trimmed.substring(0, 256) : trimmed;
 }

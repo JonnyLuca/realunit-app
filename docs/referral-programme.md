@@ -101,7 +101,8 @@ price.
 - Terms page; create-invite button after checkbox
   «Ich habe die Teilnahmebedingungen gelesen und akzeptiert»
 - Overview: open / credited counts, total REALU, CHF, label «Aktienkurs»
-- Registration: optional invite/promo code field (same field)
+- Registration: optional invite/promo code field (same field). After
+  lookup the invite recognition copy or the promo campaign dialog is shown.
 - History: referral payouts with amount, date, frozen CHF
 - Deeplinks: `realunit-wallet://invite|promo/{code}` and
   `https://realunit.app/invite|promo/{code}`
@@ -113,7 +114,8 @@ route, greet by name or show the promo action text, open the app via the
 custom scheme, and show App Store / Play Store badges. The Play Store URL
 carries an install referrer (`invite=<code>`). On first Android launch the
 app reads that referrer once and stashes the code for post-unlock bind.
-After iOS install, tap the link again or enter the code.
+The landing greets the invitee by name and tells iOS users to tap the
+link again after a fresh install (Play Install Referrer covers Android).
 
 ## Out of this repository
 

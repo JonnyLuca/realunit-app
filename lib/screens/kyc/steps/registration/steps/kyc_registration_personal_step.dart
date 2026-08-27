@@ -5,6 +5,7 @@ import 'package:realunit_wallet/packages/service/dfx/models/country/country.dart
 import 'package:realunit_wallet/packages/service/dfx/models/registration/registration_user_type.dart';
 import 'package:realunit_wallet/packages/utils/swiss_payment_text.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registration_step/kyc_registration_step_cubit.dart';
+import 'package:realunit_wallet/screens/kyc/steps/registration/widgets/referral_code_field.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/form/birthday_field.dart';
 import 'package:realunit_wallet/widgets/form/country_field.dart';
@@ -108,12 +109,7 @@ class KycRegistrationPersonalStep extends StatelessWidget {
                   onChanged: (country) => nationalityCtrl.value = country,
                 ),
                 if (referralCodeCtrl != null)
-                  LabeledTextField(
-                    label: S.of(context).referralCodeOptional,
-                    hintText: S.of(context).referralCodeHint,
-                    controller: referralCodeCtrl!,
-                    textCapitalization: TextCapitalization.characters,
-                  ),
+                  ReferralCodeField(controller: referralCodeCtrl!),
                 Padding(
                   padding: const .symmetric(vertical: 16.0),
                   child: AppFilledButton(

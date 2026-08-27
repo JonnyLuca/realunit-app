@@ -53,11 +53,8 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
     required String url,
     required String? copyText,
   }) {
-    final s = S.of(context);
-    final hostName = 'RealUnit';
-    return s.referralShareText(guestName, hostName, url).isNotEmpty
-        ? s.referralShareText(guestName, hostName, url)
-        : (copyText ?? url);
+    if (copyText != null && copyText.isNotEmpty) return copyText;
+    return S.of(context).referralShareText(guestName, 'RealUnit', url);
   }
 
   @override
@@ -73,10 +70,11 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
             }
 
             if (state is ReferralInviteCreated) {
+              final lang = Localizations.localeOf(context).languageCode;
               final text = _shareText(
                 guestName: state.invite.guestName,
                 url: state.invite.url,
-                copyText: state.invite.copyText,
+                copyText: state.invite.copyTextForLocale(lang),
               );
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -86,7 +84,7 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                     spacing: 16,
                     children: [
                       Text(
-                        s.referralInviteUrlLabel,
+                        s.referralYourInviteFor(state.invite.guestName),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       SelectableText(

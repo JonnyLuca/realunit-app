@@ -36,7 +36,7 @@ class _ReferralEntryCardView extends StatelessWidget {
         final s = S.of(context);
         return OutlinedTile(
           leading: const Icon(
-            Icons.people_outline,
+            Icons.card_giftcard_outlined,
             color: RealUnitColors.realUnitBlue,
             size: 24,
           ),

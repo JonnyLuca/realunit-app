@@ -18,6 +18,11 @@ void main() {
       );
     });
 
+    test('reads promo=<code> and code=<code>', () {
+      expect(parseInviteCodeFromReferrer('promo=EVT1'), 'EVT1');
+      expect(parseInviteCodeFromReferrer('code=AB12CD'), 'AB12CD');
+    });
+
     test('returns null for missing, empty, or unrelated referrers', () {
       expect(parseInviteCodeFromReferrer(null), isNull);
       expect(parseInviteCodeFromReferrer(''), isNull);

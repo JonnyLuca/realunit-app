@@ -65,6 +65,7 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.text('Deine Einladung für Alice'), findsOneWidget);
     expect(find.text('https://realunit.app/invite/AB12CD'), findsOneWidget);
     expect(find.text('Einladungslink kopieren'), findsOneWidget);
     expect(find.text('Einladungslink versenden'), findsOneWidget);
