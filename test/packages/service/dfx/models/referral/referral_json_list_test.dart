@@ -94,4 +94,45 @@ void main() {
     expect(referralJsonDate(''), isNull);
     expect(referralJsonDate('nope'), isNull);
   });
+
+  test('referralJsonBool is fail-closed except true/1/yes', () {
+    expect(referralJsonBool(true), isTrue);
+    expect(referralJsonBool(false), isFalse);
+    expect(referralJsonBool(1), isTrue);
+    expect(referralJsonBool(0), isFalse);
+    expect(referralJsonBool('true'), isTrue);
+    expect(referralJsonBool('  YES  '), isTrue);
+    expect(referralJsonBool('1'), isTrue);
+    expect(referralJsonBool('false'), isFalse);
+    expect(referralJsonBool('0'), isFalse);
+    expect(referralJsonBool('no'), isFalse);
+    expect(referralJsonBool(''), isFalse);
+    expect(referralJsonBool('maybe'), isFalse);
+    expect(referralJsonBool(null), isFalse);
+  });
+
+  test('referralJsonObject unwraps summary/data/item/result maps', () {
+    expect(referralJsonObject(null), isEmpty);
+    expect(referralJsonObject(['x']), isEmpty);
+    expect(
+      referralJsonObject({
+        'summary': {'eligible': true},
+      }),
+      {'eligible': true},
+    );
+    expect(
+      referralJsonObject({
+        'data': {'kind': 'Promo'},
+      }),
+      {'kind': 'Promo'},
+    );
+    expect(referralJsonObject({'eligible': true}), {'eligible': true});
+    expect(
+      referralJsonObject({
+        'data': ['not-a-map'],
+        'eligible': true,
+      }),
+      {'data': ['not-a-map'], 'eligible': true},
+    );
+  });
 }

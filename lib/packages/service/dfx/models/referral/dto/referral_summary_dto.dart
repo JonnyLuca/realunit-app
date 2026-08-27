@@ -36,8 +36,8 @@ class ReferralSummaryDto {
 
   factory ReferralSummaryDto.fromJson(Map<String, dynamic> json) {
     return ReferralSummaryDto(
-      eligible: json['eligible'] as bool,
-      termsAccepted: json['termsAccepted'] as bool,
+      eligible: referralJsonBool(json['eligible']),
+      termsAccepted: referralJsonBool(json['termsAccepted']),
       minHolding: referralJsonNum(json['minHolding']),
       openCount: referralJsonInt(json['openCount']),
       creditedCount: referralJsonInt(json['creditedCount']),

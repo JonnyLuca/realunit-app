@@ -49,7 +49,7 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralTermsDto.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      referralJsonObject(jsonDecode(response.body)),
     );
   }
 
@@ -88,7 +88,7 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralSummaryDto.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      referralJsonObject(jsonDecode(response.body)),
     );
   }
 
@@ -115,7 +115,7 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralCreatedInviteDto.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      referralJsonObject(jsonDecode(response.body)),
     );
   }
 
@@ -175,7 +175,7 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralCodeLookupDto.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      referralJsonObject(jsonDecode(response.body)),
     );
   }
 
@@ -202,7 +202,7 @@ class RealUnitReferralService extends DFXAuthService {
     }
 
     return ReferralBindResultDto.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+      referralJsonObject(jsonDecode(response.body)),
     );
   }
 

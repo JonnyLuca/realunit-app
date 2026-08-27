@@ -59,3 +59,30 @@ DateTime? referralJsonDate(dynamic value) {
   }
   return null;
 }
+
+/// Fail-closed for the dashboard/settings gate: only an explicit true/1/"true"
+/// opens the programme. A TypeError on `as bool` would otherwise fail summary
+/// load and show retry instead of hiding the card.
+bool referralJsonBool(dynamic value, {bool orElse = false}) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    final text = value.trim().toLowerCase();
+    if (text == 'true' || text == '1' || text == 'yes') return true;
+    if (text == 'false' || text == '0' || text == 'no' || text.isEmpty) {
+      return false;
+    }
+  }
+  return orElse;
+}
+
+/// Unwraps `{ summary|data|item|result: { ... } }` when the API wraps a
+/// single object. A bare map is returned as-is.
+Map<String, dynamic> referralJsonObject(dynamic decoded) {
+  if (decoded is! Map<String, dynamic>) return const {};
+  for (final key in const ['summary', 'data', 'item', 'result']) {
+    final inner = decoded[key];
+    if (inner is Map<String, dynamic>) return inner;
+  }
+  return decoded;
+}

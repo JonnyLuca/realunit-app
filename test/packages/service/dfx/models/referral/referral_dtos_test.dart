@@ -30,6 +30,30 @@ void main() {
       expect(dto.sharePriceLabel, isNull);
     });
 
+    test('coerces eligible and termsAccepted from 1/true strings', () {
+      final dto = ReferralSummaryDto.fromJson({
+        'eligible': 1,
+        'termsAccepted': 'true',
+        'openCount': 0,
+        'creditedCount': 0,
+        'realuSum': 0,
+        'chfSum': 0,
+      });
+      expect(dto.eligible, isTrue);
+      expect(dto.termsAccepted, isTrue);
+
+      final closed = ReferralSummaryDto.fromJson({
+        'eligible': 'false',
+        'termsAccepted': 0,
+        'openCount': 0,
+        'creditedCount': 0,
+        'realuSum': 0,
+        'chfSum': 0,
+      });
+      expect(closed.eligible, isFalse);
+      expect(closed.termsAccepted, isFalse);
+    });
+
     test('reads counts and sums from numeric strings', () {
       final dto = ReferralSummaryDto.fromJson({
         'eligible': true,

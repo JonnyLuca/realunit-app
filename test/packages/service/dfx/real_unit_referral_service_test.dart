@@ -84,6 +84,28 @@ void main() {
       expect(summary.eligible, isTrue);
     });
 
+    test('unwraps a {summary: {...}} payload and coerces eligible:1', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'summary': {
+              'eligible': 1,
+              'termsAccepted': 'yes',
+              'openCount': 0,
+              'creditedCount': 0,
+              'realuSum': 0,
+              'chfSum': 0,
+            },
+          }),
+          200,
+        ),
+      );
+
+      final summary = await build(client).getSummary();
+      expect(summary.eligible, isTrue);
+      expect(summary.termsAccepted, isTrue);
+    });
+
     test('throws ApiException on a non-200 response', () async {
       final client = MockClient(
         (_) async => http.Response(
