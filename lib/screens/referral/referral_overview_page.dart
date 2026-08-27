@@ -231,7 +231,15 @@ class _OpenInviteTile extends StatelessWidget {
           ),
           AppFilledButton(
             label: s.referralShareInviteLink,
-            onPressed: () => Share.share(_shareText(context)),
+            onPressed: () {
+              final box = context.findRenderObject() as RenderBox?;
+              Share.share(
+                _shareText(context),
+                sharePositionOrigin: box == null
+                    ? const Rect.fromLTWH(0, 0, 1, 1)
+                    : box.localToGlobal(Offset.zero) & box.size,
+              );
+            },
           ),
         ],
       ),

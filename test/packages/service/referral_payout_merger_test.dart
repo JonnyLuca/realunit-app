@@ -51,14 +51,14 @@ void main() {
       },
     );
 
-    test('uses a synthetic txId when the payout has no hash yet', () {
+    test('uses a synthetic txId when a settled payout has no hash yet', () {
       final payout = ReferralPayoutDto(
         id: 3,
         amount: 20,
         chfValue: 10,
         created: DateTime.utc(2026, 8, 24),
         kind: 'Promo',
-        status: 'Pending',
+        status: 'Complete',
       );
 
       final merged = mergeReferralPayouts(
@@ -70,6 +70,34 @@ void main() {
 
       expect(merged.single.txId, 'referral-payout-3');
       expect(merged.single.type, TransactionTypes.referralPayout);
+    });
+
+    test('omits pending and failed payouts from history', () {
+      final pending = ReferralPayoutDto(
+        id: 3,
+        amount: 20,
+        chfValue: 10,
+        created: DateTime.utc(2026, 8, 24),
+        kind: 'Promo',
+        status: 'Pending',
+      );
+      final failed = ReferralPayoutDto(
+        id: 4,
+        amount: 20,
+        chfValue: 10,
+        created: DateTime.utc(2026, 8, 25),
+        kind: 'Invite',
+        status: 'Failed',
+      );
+
+      final merged = mergeReferralPayouts(
+        onChain: [_onChain('0xkeep')],
+        payouts: [pending, failed],
+        asset: realUnitAsset,
+        walletAddress: _wallet,
+      );
+
+      expect(merged.map((t) => t.txId), ['0xkeep']);
     });
   });
 }

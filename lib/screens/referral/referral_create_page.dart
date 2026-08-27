@@ -113,7 +113,15 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                     ),
                     AppFilledButton(
                       label: s.referralShareInviteLink,
-                      onPressed: () => Share.share(text),
+                      onPressed: () {
+                        final box = context.findRenderObject() as RenderBox?;
+                        Share.share(
+                          text,
+                          sharePositionOrigin: box == null
+                              ? const Rect.fromLTWH(0, 0, 1, 1)
+                              : box.localToGlobal(Offset.zero) & box.size,
+                        );
+                      },
                     ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 20),

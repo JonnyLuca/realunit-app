@@ -94,7 +94,8 @@ Landing payload for `realunit.app/invite/…` and `/promo/…`.
 
 Each row carries `amount` (whole REALU), `created`, and `chfValue` frozen
 at credit. The app never recomputes that CHF amount from the live share
-price.
+price. Pending and failed payouts stay out of history until the transfer
+is confirmed.
 
 ## App surfaces
 

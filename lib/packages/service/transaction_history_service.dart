@@ -112,6 +112,7 @@ class TransactionHistoryService extends DFXAuthService {
       for (final raw in decoded) {
         if (raw is! Map<String, dynamic>) continue;
         final payout = ReferralPayoutDto.fromJson(raw);
+        if (!payout.isSettled) continue;
         final hash = payout.txHash;
         final txId = (hash != null && hash.isNotEmpty)
             ? hash

@@ -14,6 +14,7 @@ List<Transaction> mergeReferralPayouts({
   final payoutTxs = <Transaction>[];
 
   for (final payout in payouts) {
+    if (!payout.isSettled) continue;
     final hash = payout.txHash;
     if (hash != null && hash.isNotEmpty) {
       payoutTxHashes.add(hash.toLowerCase());

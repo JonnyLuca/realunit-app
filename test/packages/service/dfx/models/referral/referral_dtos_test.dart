@@ -146,6 +146,29 @@ void main() {
       expect(dto.amount, 20);
       expect(dto.chfValue, 246.5);
       expect(dto.txHash, '0xabc');
+      expect(dto.isSettled, isTrue);
+    });
+
+    test('pending and failed payouts are not settled; missing status is', () {
+      expect(
+        ReferralPayoutDto.fromJson({
+          'id': 1,
+          'amount': 20,
+          'chfValue': 1,
+          'created': '2026-08-24T10:00:00Z',
+          'status': 'Pending',
+        }).isSettled,
+        isFalse,
+      );
+      expect(
+        ReferralPayoutDto.fromJson({
+          'id': 2,
+          'amount': 20,
+          'chfValue': 1,
+          'created': '2026-08-24T10:00:00Z',
+        }).isSettled,
+        isTrue,
+      );
     });
   });
 
