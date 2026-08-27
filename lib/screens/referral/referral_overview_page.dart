@@ -79,7 +79,7 @@ class ReferralOverviewPage extends StatelessWidget {
                           hideAmounts: settings.hideAmounts,
                           chfLabel: s.referralChfAtSharePrice(
                             chf,
-                            summary.sharePriceLabel ?? s.referralSharePrice,
+                            summary.tileSharePriceLabel ?? s.referralSharePrice,
                           ),
                           title: s.referralTotalReceived,
                         );

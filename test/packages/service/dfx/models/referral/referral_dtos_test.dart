@@ -41,6 +41,33 @@ void main() {
         'sharePriceLabel': 'Aktienkurs',
       });
       expect(dto.sharePriceLabel, 'Aktienkurs');
+      expect(dto.tileSharePriceLabel, 'Aktienkurs');
+    });
+
+    test('empty and NAV sharePriceLabel fall back for the tile', () {
+      final empty = ReferralSummaryDto.fromJson({
+        'eligible': true,
+        'termsAccepted': true,
+        'openCount': 0,
+        'creditedCount': 0,
+        'realuSum': 0,
+        'chfSum': 0,
+        'sharePriceLabel': '  ',
+      });
+      expect(empty.sharePriceLabel, isNull);
+      expect(empty.tileSharePriceLabel, isNull);
+
+      final nav = ReferralSummaryDto.fromJson({
+        'eligible': true,
+        'termsAccepted': true,
+        'openCount': 0,
+        'creditedCount': 0,
+        'realuSum': 0,
+        'chfSum': 0,
+        'sharePriceLabel': 'aktueller NAV',
+      });
+      expect(nav.sharePriceLabel, 'aktueller NAV');
+      expect(nav.tileSharePriceLabel, isNull);
     });
   });
 
@@ -283,6 +310,7 @@ void main() {
       });
       expect(invite.isInvite, isTrue);
       expect(invite.inviterName, 'Björn');
+      expect(invite.displayInviterName, 'Björn');
 
       final promo = ReferralCodeLookupDto.fromJson({
         'kind': 'Promo',
@@ -292,6 +320,15 @@ void main() {
       expect(promo.isPromo, isTrue);
       expect(promo.campaignTextForLocale('en'), 'EN campaign');
       expect(promo.campaignTextForLocale('de'), 'DE action');
+    });
+
+    test('whitespace-only inviterName is not displayed', () {
+      final invite = ReferralCodeLookupDto.fromJson({
+        'kind': 'invite',
+        'inviterName': '   ',
+      });
+      expect(invite.isInvite, isTrue);
+      expect(invite.displayInviterName, isNull);
     });
 
     test('EN campaign text ignores empty campaignTextEn', () {

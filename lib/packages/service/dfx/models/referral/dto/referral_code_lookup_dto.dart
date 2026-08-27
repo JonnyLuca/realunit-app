@@ -23,6 +23,9 @@ class ReferralCodeLookupDto {
   bool get isPromo => kind.toLowerCase() == 'promo';
   bool get isInvite => kind.toLowerCase() == 'invite';
 
+  /// Inviter shown on registration. Whitespace-only API fields are absent.
+  String? get displayInviterName => firstNonEmpty([inviterName]);
+
   /// Locale-aware campaign / action wording. EN falls back to DE when the EN
   /// field is absent or empty.
   String? campaignTextForLocale(String languageCode) {

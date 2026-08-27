@@ -49,6 +49,24 @@ void main() {
     expect(find.textContaining('Einladung von Björn erkannt'), findsOneWidget);
   });
 
+  testWidgets('does not show invite recognition for a whitespace inviter', (
+    tester,
+  ) async {
+    final ctrl = TextEditingController(text: 'AB12');
+    await pumpField(
+      tester,
+      controller: ctrl,
+      lookup: (_) async => const ReferralCodeLookupDto(
+        kind: 'invite',
+        inviterName: '   ',
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.textContaining('Einladung von'), findsNothing);
+  });
+
   testWidgets('shows the API campaign text in a dialog for a promo code', (
     tester,
   ) async {

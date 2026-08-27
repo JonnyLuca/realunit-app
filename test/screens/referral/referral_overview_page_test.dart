@@ -132,6 +132,56 @@ void main() {
     },
   );
 
+  testWidgets(
+    'empty or NAV sharePriceLabel shows localized Aktienkurs',
+    (tester) async {
+      const summary = ReferralSummaryDto(
+        eligible: true,
+        termsAccepted: true,
+        openCount: 0,
+        creditedCount: 0,
+        realuSum: 20,
+        chfSum: 246.5,
+        sharePriceLabel: 'aktueller NAV',
+      );
+      when(() => cubit.state).thenReturn(
+        const ReferralOverviewLoaded(summary: summary, invites: []),
+      );
+      whenListen(
+        cubit,
+        const Stream<ReferralState>.empty(),
+        initialState: const ReferralOverviewLoaded(
+          summary: summary,
+          invites: [],
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: realUnitTheme,
+          locale: const Locale('de'),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<ReferralCubit>.value(value: cubit),
+              BlocProvider<SettingsBloc>.value(value: settings),
+            ],
+            child: const ReferralOverviewPage(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.textContaining('Aktienkurs'), findsOneWidget);
+      expect(find.textContaining('NAV'), findsNothing);
+    },
+  );
+
   testWidgets('hides an open invite with a blank guest name', (tester) async {
     const summary = ReferralSummaryDto(
       eligible: true,

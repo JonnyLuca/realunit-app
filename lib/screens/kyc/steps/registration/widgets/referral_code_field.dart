@@ -143,7 +143,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final inviter = _result?.inviterName;
+    final inviter = _result?.displayInviterName;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 8,
@@ -178,7 +178,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
             s.referralCodeInvalid,
             style: TextStyle(color: RealUnitColors.status.red600),
           ),
-        if (_result != null && _result!.isInvite && inviter != null && inviter.isNotEmpty)
+        if (_result != null && _result!.isInvite && inviter != null)
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(

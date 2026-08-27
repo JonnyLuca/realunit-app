@@ -1,3 +1,5 @@
+import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+
 /// Server-side referral programme summary for the current wallet
 /// (`GET /v1/realunit/referral/summary`). `eligible` is the authoritative
 /// entry gate — see CONTRIBUTING.md "API as Decision Authority".
@@ -22,6 +24,15 @@ class ReferralSummaryDto {
     this.sharePriceLabel,
   });
 
+  /// Tile label. Empty API fields and «NAV» copy (Offerte draft 5) fall back
+  /// to the localized «Aktienkurs» (Mail Dani 24.08.2026 17:42).
+  String? get tileSharePriceLabel {
+    final raw = firstNonEmpty([sharePriceLabel]);
+    if (raw == null) return null;
+    if (RegExp(r'NAV', caseSensitive: false).hasMatch(raw)) return null;
+    return raw;
+  }
+
   factory ReferralSummaryDto.fromJson(Map<String, dynamic> json) {
     return ReferralSummaryDto(
       eligible: json['eligible'] as bool,
@@ -31,7 +42,7 @@ class ReferralSummaryDto {
       creditedCount: (json['creditedCount'] as num).toInt(),
       realuSum: json['realuSum'] as num,
       chfSum: json['chfSum'] as num,
-      sharePriceLabel: json['sharePriceLabel'] as String?,
+      sharePriceLabel: firstNonEmpty([json['sharePriceLabel'] as String?]),
     );
   }
 }
