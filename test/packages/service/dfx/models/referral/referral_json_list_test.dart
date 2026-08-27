@@ -143,4 +143,28 @@ void main() {
     expect(referralJsonString(null), isNull);
     expect(referralJsonString(true), isNull);
   });
+
+  test('referralInviteUrl resolves relative and missing urls', () {
+    expect(
+      referralInviteUrl(url: 'https://realunit.app/invite/AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(
+      referralInviteUrl(url: '/invite/AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(
+      referralInviteUrl(url: 'http://realunit.app/invite/AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(
+      referralInviteUrl(code: 'AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(
+      referralInviteUrl(url: 'https://dev.realunit.app/invite/AB12'),
+      'https://dev.realunit.app/invite/AB12',
+    );
+    expect(referralInviteUrl(), isNull);
+  });
 }

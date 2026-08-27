@@ -38,7 +38,7 @@ class ReferralInviteDto {
   factory ReferralInviteDto.fromJson(Map<String, dynamic> json) {
     final created = referralJsonDate(json['created']);
     final code = referralJsonString(json['code']);
-    final url = referralJsonString(json['url']);
+    final url = referralInviteUrl(url: json['url'], code: code);
     final guestName = referralJsonString(json['guestName']);
     if (created == null || code == null || url == null || guestName == null) {
       throw FormatException('referral invite missing fields');

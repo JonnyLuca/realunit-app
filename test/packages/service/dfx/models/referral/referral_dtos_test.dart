@@ -280,6 +280,17 @@ void main() {
       expect(dto.guestName, 'Alice');
     });
 
+    test('fills the invite url from the code when url is omitted', () {
+      final dto = ReferralInviteDto.fromJson({
+        'id': 1,
+        'code': 'AB12',
+        'guestName': 'Alice',
+        'status': 'Open',
+        'created': '2026-08-24T10:00:00Z',
+      });
+      expect(dto.url, 'https://realunit.app/invite/AB12');
+    });
+
     test('status matching is case-insensitive', () {
       expect(
         ReferralInviteDto.fromJson({
@@ -397,6 +408,21 @@ void main() {
       expect(dto.url, 'https://realunit.app/invite/AB12');
       expect(dto.guestName, 'Alice');
       expect(dto.copyText, 'Hey Alice');
+    });
+
+    test('fills https://realunit.app/invite/{code} when url is relative or missing', () {
+      final relative = ReferralCreatedInviteDto.fromJson({
+        'code': 'AB12',
+        'url': '/invite/AB12',
+        'guestName': 'Alice',
+      });
+      expect(relative.url, 'https://realunit.app/invite/AB12');
+
+      final missing = ReferralCreatedInviteDto.fromJson({
+        'code': 'AB12',
+        'guestName': 'Alice',
+      });
+      expect(missing.url, 'https://realunit.app/invite/AB12');
     });
 
     test('EN share text falls back to DE copyText', () {

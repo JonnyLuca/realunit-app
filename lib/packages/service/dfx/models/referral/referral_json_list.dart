@@ -97,3 +97,32 @@ String? referralJsonString(dynamic value) {
   if (value is num) return value.toString();
   return null;
 }
+
+const referralInviteOrigin = 'https://realunit.app';
+
+const _referralInviteHosts = {
+  'realunit.app',
+  'www.realunit.app',
+  'dev.realunit.app',
+};
+
+/// Share/copy URL. Relative paths and a missing `url` become
+/// `https://realunit.app/invite/{code}`. `http://` on a RealUnit host is
+/// upgraded so the shared link matches Offerte Entwurf 3.
+String? referralInviteUrl({dynamic url, String? code}) {
+  final raw = referralJsonString(url);
+  if (raw != null) {
+    final uri = Uri.tryParse(raw);
+    if (uri != null && uri.hasScheme) {
+      if (uri.scheme == 'http' && _referralInviteHosts.contains(uri.host)) {
+        return uri.replace(scheme: 'https').toString();
+      }
+      return raw;
+    }
+    if (raw.startsWith('/')) return '$referralInviteOrigin$raw';
+  }
+  if (code != null && code.isNotEmpty) {
+    return '$referralInviteOrigin/invite/${Uri.encodeComponent(code)}';
+  }
+  return null;
+}
