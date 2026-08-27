@@ -1,4 +1,5 @@
 import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_kind.dart';
 
 /// Public `GET /v1/realunit/referral/code/:code` payload for registration
 /// preview and the website landing. Accepts `Invite`/`Promo` in either case.
@@ -33,7 +34,7 @@ class ReferralCodeLookupDto {
 
   factory ReferralCodeLookupDto.fromJson(Map<String, dynamic> json) {
     return ReferralCodeLookupDto(
-      kind: json['kind'] as String? ?? 'invite',
+      kind: inferReferralKind(json),
       inviterName: json['inviterName'] as String?,
       inviteeName: json['inviteeName'] as String?,
       actionText: json['actionText'] as String?,

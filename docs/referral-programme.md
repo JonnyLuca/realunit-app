@@ -85,7 +85,9 @@ Body: `{ "code": "AB12CD" }`. Binds an invite or promo code.
 }
 ```
 
-`kind` is `Invite` or `Promo`. Promo `campaignText` is shown 1:1 in a
+`kind` is `Invite` or `Promo`. If `kind` is omitted, campaign/action text
+without an inviter name is treated as promo so the confirmation dialog
+still appears. Promo `campaignText` is shown 1:1 in a
 dialog. The API rejects self-referral, double-bind, and promo+invite
 stacking. Promo credit is only the first successful purchase of at least
 `minBuyRealu` (default 200). A first buy below N creates no later claim.

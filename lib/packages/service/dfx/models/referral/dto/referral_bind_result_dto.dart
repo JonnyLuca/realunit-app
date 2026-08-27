@@ -1,4 +1,5 @@
 import 'package:realunit_wallet/packages/service/dfx/models/referral/locale_text.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_kind.dart';
 
 /// Response from `POST /v1/realunit/referral/bind`.
 /// For `kind == Promo`, [campaignText] / [campaignTextEn] carry the prescribed
@@ -36,7 +37,7 @@ class ReferralBindResultDto {
 
   factory ReferralBindResultDto.fromJson(Map<String, dynamic> json) {
     return ReferralBindResultDto(
-      kind: json['kind'] as String? ?? 'Invite',
+      kind: inferReferralKind(json),
       campaignText: json['campaignText'] as String?,
       campaignTextEn: json['campaignTextEn'] as String?,
       actionText: json['actionText'] as String?,

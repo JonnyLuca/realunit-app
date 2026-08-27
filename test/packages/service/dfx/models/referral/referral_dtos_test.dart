@@ -111,11 +111,11 @@ void main() {
       expect(dto.campaignTextForLocale('en'), 'DE only');
     });
 
-    test('falls back to actionText and defaults a missing kind', () {
+    test('falls back to actionText and treats campaign copy without kind as promo', () {
       final dto = ReferralBindResultDto.fromJson({
         'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
       });
-      expect(dto.isInvite, isTrue);
+      expect(dto.isPromo, isTrue);
       expect(
         dto.campaignTextForLocale('de'),
         'Mit dem Code EVT1 schenken wir dir 20 Token.',
@@ -292,6 +292,20 @@ void main() {
         'campaignTextEn': '   ',
       });
       expect(promo.campaignTextForLocale('en'), 'DE action');
+    });
+
+    test('infers promo from action text when kind is omitted', () {
+      final promo = ReferralCodeLookupDto.fromJson({
+        'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      });
+      expect(promo.isPromo, isTrue);
+    });
+
+    test('infers invite from inviterName when kind is omitted', () {
+      final invite = ReferralCodeLookupDto.fromJson({
+        'inviterName': 'Björn',
+      });
+      expect(invite.isInvite, isTrue);
     });
   });
 }
