@@ -40,6 +40,7 @@ import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/buttons/app_text_button.dart';
 import 'package:realunit_wallet/widgets/form/labeled_text_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helper/helper.dart';
 
@@ -118,6 +119,7 @@ void main() {
   late HomeBloc homeBloc;
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     registrationStepCubit = MockRegistrationStepCubit();
     registrationSubmitCubit = MockRegistrationSubmitCubit();
     kycCubit = MockKycCubit();
@@ -553,7 +555,10 @@ void main() {
         await tester.pumpApp(const KycRegistrationPage(initialUserData: _fixtureUserData));
         // Scalars seed synchronously in initState; the two country lookups
         // resolve through the fixture-backed DfxCountryService and setState on
-        // completion.
+        // completion. The live pager starts on the optional referral step.
+        await tester.pumpAndSettle();
+        // Live cubit order: referral, personal, address, tax.
+        (tester.widget(find.byType(PageView)) as PageView).controller?.jumpToPage(1);
         await tester.pumpAndSettle();
 
         expect(find.text('Ada'), findsOneWidget);
@@ -582,7 +587,7 @@ void main() {
 
         // Reveal the address step and confirm its residence field resolved the
         // address country too.
-        (tester.widget(find.byType(PageView)) as PageView).controller?.jumpToPage(1);
+        (tester.widget(find.byType(PageView)) as PageView).controller?.jumpToPage(2);
         await tester.pumpAndSettle();
         final resField = tester.widget<DropdownButtonFormField<Country>>(
           find.descendant(
@@ -609,6 +614,8 @@ void main() {
       });
 
       await tester.pumpApp(const KycRegistrationPage(initialUserData: _fixtureUserData));
+      await tester.pumpAndSettle();
+      (tester.widget(find.byType(PageView)) as PageView).controller?.jumpToPage(1);
       await tester.pumpAndSettle();
 
       // The scalar prefill still applies. The lookup failure is swallowed by
