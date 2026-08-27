@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -42,7 +43,7 @@ class ReferralGateView extends StatelessWidget {
         if (state is ReferralLoading || state is ReferralInitial) {
           return Scaffold(
             appBar: AppBar(title: Text(S.of(context).referrals)),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const Center(child: CupertinoActivityIndicator()),
           );
         }
         if (state is ReferralNotEligible) {

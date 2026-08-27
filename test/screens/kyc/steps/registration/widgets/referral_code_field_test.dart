@@ -89,4 +89,38 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('ignores a stale lookup after the field changes', (tester) async {
+    final ctrl = TextEditingController(text: 'OLD1');
+    var firstLookupStarted = false;
+    await pumpField(
+      tester,
+      controller: ctrl,
+      lookup: (code) async {
+        if (code == 'OLD1') {
+          firstLookupStarted = true;
+          await Future<void>.delayed(const Duration(milliseconds: 800));
+          return const ReferralCodeLookupDto(
+            kind: 'invite',
+            inviterName: 'Stale',
+          );
+        }
+        return const ReferralCodeLookupDto(
+          kind: 'invite',
+          inviterName: 'Björn',
+        );
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(firstLookupStarted, isTrue);
+
+    ctrl.text = 'NEW1';
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 800));
+
+    expect(find.textContaining('Einladung von Stale erkannt'), findsNothing);
+    expect(find.textContaining('Einladung von Björn erkannt'), findsOneWidget);
+  });
 }

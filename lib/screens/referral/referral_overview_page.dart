@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +25,7 @@ class ReferralOverviewPage extends StatelessWidget {
         child: BlocBuilder<ReferralCubit, ReferralState>(
           builder: (context, state) {
             if (state is ReferralLoading || state is ReferralInitial) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CupertinoActivityIndicator());
             }
             if (state is ReferralFailure) {
               return Center(

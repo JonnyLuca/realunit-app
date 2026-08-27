@@ -85,6 +85,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
     try {
       final result = await _lookup(code);
       if (!mounted) return;
+      if (widget.controller.text.trim() != code) return;
       setState(() {
         _result = result;
         _invalid = false;
@@ -95,6 +96,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       }
     } on ApiException {
       if (!mounted) return;
+      if (widget.controller.text.trim() != code) return;
       setState(() {
         _result = null;
         _invalid = true;
@@ -102,6 +104,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       });
     } catch (_) {
       if (!mounted) return;
+      if (widget.controller.text.trim() != code) return;
       setState(() {
         _result = null;
         _invalid = false;

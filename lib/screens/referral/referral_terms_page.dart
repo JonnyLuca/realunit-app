@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -80,7 +81,7 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
                     if (_loadFailed)
                       Text(s.legalDocumentLoadFailed)
                     else if (_markdown == null)
-                      const Center(child: CircularProgressIndicator())
+                      const Center(child: CupertinoActivityIndicator())
                     else
                       MarkdownBody(data: _markdown!),
                     if (error != null && error.isNotEmpty)
