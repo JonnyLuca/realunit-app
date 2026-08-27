@@ -13,12 +13,16 @@ import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 
 /// Binds a stashed or freshly delivered referral code once the session is unlocked.
 /// Shows the API campaign text for promo binds; navigates to referral overview for invites.
+///
+/// The stash is consumed only after a successful bind. A 4xx/5xx or transport
+/// failure puts the code back so the next dashboard landing can retry.
 Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
-  final resolved = code ?? await takePendingReferralCode();
+  final resolved = code ?? await peekPendingReferralCode();
   if (resolved == null || resolved.isEmpty) return;
 
   try {
     final result = await getIt<RealUnitReferralService>().bind(code: resolved);
+    await clearPendingReferralCode();
     final ctx = router.routerDelegate.navigatorKey.currentContext;
     if (ctx == null || !ctx.mounted) return;
 
@@ -44,9 +48,9 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
       unawaited(router.pushNamed(SettingsRoutes.referral));
     }
   } on ApiException {
-    // Deeplink bind failures must not crash boot; the user can retry via settings.
+    await stashPendingReferralCode(resolved);
   } catch (_) {
-    // Transport failures stay silent on the deeplink path.
+    await stashPendingReferralCode(resolved);
   }
 }
 
