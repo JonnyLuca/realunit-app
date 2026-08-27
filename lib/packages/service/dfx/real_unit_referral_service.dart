@@ -12,6 +12,7 @@ import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referra
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_payout_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_terms_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
 
 class RealUnitReferralService extends DFXAuthService {
   RealUnitReferralService(super.appStore, super.walletService);
@@ -134,9 +135,8 @@ class RealUnitReferralService extends DFXAuthService {
       );
     }
 
-    final list = jsonDecode(response.body) as List<dynamic>;
-    return list
-        .map((e) => ReferralInviteDto.fromJson(e as Map<String, dynamic>))
+    return referralJsonList(jsonDecode(response.body))
+        .map(ReferralInviteDto.fromJson)
         .toList();
   }
 
@@ -216,9 +216,8 @@ class RealUnitReferralService extends DFXAuthService {
       );
     }
 
-    final list = jsonDecode(response.body) as List<dynamic>;
-    return list
-        .map((e) => ReferralPayoutDto.fromJson(e as Map<String, dynamic>))
+    return referralJsonList(jsonDecode(response.body))
+        .map(ReferralPayoutDto.fromJson)
         .toList();
   }
 

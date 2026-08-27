@@ -326,6 +326,30 @@ void main() {
       expect(invites.single.isOpen, isTrue);
       expect(invites.single.guestName, 'Alice');
     });
+
+    test('unwraps an {invites: [...]} payload', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'invites': [
+              {
+                'id': 1,
+                'code': 'AB12',
+                'url': 'https://realunit.app/invite/AB12',
+                'guestName': 'Alice',
+                'status': 'Open',
+                'created': '2026-08-24T10:00:00Z',
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+
+      final invites = await build(client).getInvites();
+      expect(invites, hasLength(1));
+      expect(invites.single.guestName, 'Alice');
+    });
   });
 
   group('$RealUnitReferralService.getPayouts', () {
@@ -353,6 +377,29 @@ void main() {
       expect(payouts, hasLength(1));
       expect(payouts.single.chfValue, 246.5);
       expect(payouts.single.amount, 20);
+    });
+
+    test('unwraps a {payouts: [...]} payload', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'payouts': [
+              {
+                'id': 1,
+                'amount': 20,
+                'chfValue': 246.5,
+                'created': '2026-08-24T10:00:00Z',
+                'status': 'Complete',
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+
+      final payouts = await build(client).getPayouts();
+      expect(payouts, hasLength(1));
+      expect(payouts.single.chfValue, 246.5);
     });
   });
 

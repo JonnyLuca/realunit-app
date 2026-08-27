@@ -9,6 +9,7 @@ import 'package:realunit_wallet/packages/repository/transaction_repository.dart'
 import 'package:realunit_wallet/packages/service/dfx/dfx_auth_service.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/history/dto/account_history_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_payout_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/referral_json_list.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/transactions/dto/transactions_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:web3dart/credentials.dart';
@@ -107,12 +108,12 @@ class TransactionHistoryService extends DFXAuthService {
       if (response.statusCode != 200) return;
 
       final decoded = jsonDecode(response.body);
-      if (decoded is! List<dynamic>) return;
+      final rows = referralJsonList(decoded);
+      if (rows.isEmpty) return;
 
       final asset = appStore.apiConfig.asset;
       final walletAddress = appStore.primaryAddress;
-      for (final raw in decoded) {
-        if (raw is! Map<String, dynamic>) continue;
+      for (final raw in rows) {
         final payout = ReferralPayoutDto.fromJson(raw);
         if (!payout.isSettled) continue;
         final hash = payout.txHash;

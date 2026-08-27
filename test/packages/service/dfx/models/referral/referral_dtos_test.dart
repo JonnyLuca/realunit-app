@@ -128,6 +128,17 @@ void main() {
       expect(dto.campaignTextForLocale('de'), 'DE text');
     });
 
+    test('promo minBuyRealu defaults to 200 when the API omits it', () {
+      final dto = ReferralBindResultDto.fromJson({
+        'kind': 'Promo',
+        'campaignText': 'DE text',
+      });
+      expect(dto.minBuyRealu, 200);
+
+      final invite = ReferralBindResultDto.fromJson({'kind': 'Invite'});
+      expect(invite.minBuyRealu, isNull);
+    });
+
     test('EN falls back to DE when campaignTextEn is absent', () {
       final dto = ReferralBindResultDto.fromJson({
         'kind': 'Invite',

@@ -321,6 +321,43 @@ void main() {
       expect(captured.data, '246.5');
     });
 
+    test('writes wrapped {payouts: [...]} rows with frozen CHF', () async {
+      sessionCache.setAuthToken('jwt-1');
+      final client = MockClient((request) async {
+        if (request.url.path.endsWith('/history')) {
+          return http.Response(jsonEncode(_accountHistory([])), 200);
+        }
+        if (request.url.path.contains('/referral/payouts')) {
+          return http.Response(
+            jsonEncode({
+              'payouts': [
+                {
+                  'id': 9,
+                  'amount': 20,
+                  'chfValue': 246.5,
+                  'created': '2026-08-24T10:00:00Z',
+                  'kind': 'Invite',
+                  'status': 'Complete',
+                  'txHash': '0xwrap',
+                },
+              ],
+            }),
+            200,
+          );
+        }
+        return http.Response('[]', 200);
+      });
+
+      await build(client).apiBasedSync();
+
+      final captured = verify(
+        () => txRepo.insertTransaction(captureAny()),
+      ).captured.single as Transaction;
+      expect(captured.txId, '0xwrap');
+      expect(captured.type, TransactionTypes.referralPayout);
+      expect(captured.data, '246.5');
+    });
+
     test('does not write pending referral payouts into history', () async {
       sessionCache.setAuthToken('jwt-1');
       final client = MockClient((request) async {

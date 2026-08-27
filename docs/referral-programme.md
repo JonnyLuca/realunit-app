@@ -63,8 +63,9 @@ are capped at 80 characters in the app.
 
 ### `GET /v1/realunit/referral/invites`
 
-List of the current user's invites. Counts of `Open` and `Credited` come
-from the summary. Open invites can be copied and shared again; credited
+List of the current user's invites (bare array or `{ "invites": [...] }`).
+Counts of `Open` and `Credited` come from the summary. Open invites can be
+copied and shared again; credited
 names stay hidden — never registration, verification, or purchases of
 the invited person. If this list call fails, the app still shows the
 summary tiles (open/credited/total) and omits the copy/share rows. A
@@ -104,8 +105,9 @@ mounted yet: treat it as unavailable and keep a stashed code for retry.
 
 ### `GET /v1/realunit/referral/payouts`
 
-Each row carries `amount` (whole REALU), `created`, and `chfValue` frozen
-at credit. The app never recomputes that CHF amount from the live share
+Bare array or `{ "payouts": [...] }`. Each row carries `amount` (whole REALU),
+`created`, and `chfValue` frozen at credit. The app never recomputes that
+CHF amount from the live share
 price. Pending and failed payouts stay out of history until the transfer
 is confirmed.
 

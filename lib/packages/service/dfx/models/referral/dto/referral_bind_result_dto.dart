@@ -36,12 +36,15 @@ class ReferralBindResultDto {
   }
 
   factory ReferralBindResultDto.fromJson(Map<String, dynamic> json) {
+    final kind = inferReferralKind(json);
+    final minBuy = json['minBuyRealu'] as num?;
     return ReferralBindResultDto(
-      kind: inferReferralKind(json),
+      kind: kind,
       campaignText: json['campaignText'] as String?,
       campaignTextEn: json['campaignTextEn'] as String?,
       actionText: json['actionText'] as String?,
-      minBuyRealu: json['minBuyRealu'] as num?,
+      // Promo first-purchase floor. Spec default is 200 REALU when omitted.
+      minBuyRealu: minBuy ?? (kind.toLowerCase() == 'promo' ? 200 : null),
       validUntil: json['validUntil'] != null
           ? DateTime.parse(json['validUntil'] as String)
           : null,
