@@ -78,199 +78,199 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
       child: Scaffold(
         appBar: AppBar(title: Text(s.referralCreateInvite)),
         body: SafeArea(
-        child: BlocBuilder<ReferralCubit, ReferralState>(
-          builder: (context, state) {
-            if (state is ReferralLoading || state is ReferralInitial) {
-              return const Center(child: CupertinoActivityIndicator());
-            }
+          child: BlocBuilder<ReferralCubit, ReferralState>(
+            builder: (context, state) {
+              if (state is ReferralLoading || state is ReferralInitial) {
+                return const Center(child: CupertinoActivityIndicator());
+              }
 
-            if (state is ReferralNotEligible) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    s.referralNotEligible,
-                    textAlign: TextAlign.center,
+              if (state is ReferralNotEligible) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      s.referralNotEligible,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              );
-            }
+                );
+              }
 
-            if (state is ReferralFailure || state is ReferralNeedsTerms) {
-              final message = state is ReferralFailure
-                  ? state.message
-                  : (state as ReferralNeedsTerms).errorMessage;
-              final text = (message != null && message.isNotEmpty)
-                  ? message
-                  : (state is ReferralNeedsTerms ? s.referralTermsTitle : null);
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 16,
-                    children: [
-                      if (text != null)
-                        Text(text, textAlign: TextAlign.center),
+              if (state is ReferralFailure || state is ReferralNeedsTerms) {
+                final message = state is ReferralFailure
+                    ? state.message
+                    : (state as ReferralNeedsTerms).errorMessage;
+                final text = (message != null && message.isNotEmpty)
+                    ? message
+                    : (state is ReferralNeedsTerms ? s.referralTermsTitle : null);
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 16,
+                      children: [
+                        if (text != null)
+                          Text(text, textAlign: TextAlign.center),
+                        AppFilledButton(
+                          label: s.retry,
+                          onPressed: () {
+                            final cubit = context.read<ReferralCubit>();
+                            cubit.load().then((_) {
+                              if (!cubit.isClosed) cubit.openCreate();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              if (state is ReferralInviteCreated) {
+                final lang = Localizations.localeOf(context).languageCode;
+                final text = _shareText(
+                  guestName: state.invite.guestName,
+                  url: state.invite.url,
+                  copyText: state.invite.copyTextForLocale(lang),
+                );
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ScrollableActionsLayout(
+                    body: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 16,
+                      children: [
+                        Text(
+                          s.referralYourInviteFor(state.invite.guestName),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        SelectableText(
+                          state.invite.url,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: RealUnitColors.realUnitBlue,
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
                       AppFilledButton(
-                        label: s.retry,
-                        onPressed: () {
-                          final cubit = context.read<ReferralCubit>();
-                          cubit.load().then((_) {
-                            if (!cubit.isClosed) cubit.openCreate();
-                          });
+                        label: s.referralCopyInviteLink,
+                        variant: FilledButtonVariant.secondary,
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: state.invite.url),
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(s.copyClipboard)),
+                            );
+                          }
                         },
                       ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            if (state is ReferralInviteCreated) {
-              final lang = Localizations.localeOf(context).languageCode;
-              final text = _shareText(
-                guestName: state.invite.guestName,
-                url: state.invite.url,
-                copyText: state.invite.copyTextForLocale(lang),
-              );
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ScrollableActionsLayout(
-                  body: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 16,
-                    children: [
-                      Text(
-                        s.referralYourInviteFor(state.invite.guestName),
-                        style: Theme.of(context).textTheme.titleMedium,
+                      AppFilledButton(
+                        label: s.referralShareInviteLink,
+                        onPressed: () {
+                          final box = context.findRenderObject() as RenderBox?;
+                          Share.share(
+                            text,
+                            sharePositionOrigin: box == null
+                                ? const Rect.fromLTWH(0, 0, 1, 1)
+                                : box.localToGlobal(Offset.zero) & box.size,
+                          );
+                        },
                       ),
-                      SelectableText(
-                        state.invite.url,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: RealUnitColors.realUnitBlue,
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: AppFilledButton(
+                          label: s.done,
+                          variant: FilledButtonVariant.secondary,
+                          onPressed: () => Navigator.of(context).pop(true),
                         ),
                       ),
                     ],
                   ),
+                );
+              }
+
+              final creating = state is ReferralCreating;
+              final error = state is ReferralCreateReady
+                  ? state.errorMessage
+                  : null;
+              final canSubmit =
+                  state is ReferralCreateReady ||
+                  state is ReferralOverviewLoaded ||
+                  state is ReferralCreating;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ScrollableActionsLayout(
+                  body: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 16,
+                      children: [
+                        Text(
+                          s.referralCreateInviteDescription,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: RealUnitColors.neutral500,
+                          ),
+                        ),
+                        LabeledTextField(
+                          label: s.referralGuestName,
+                          hintText: s.name,
+                          controller: _nameCtrl,
+                          textCapitalization: TextCapitalization.words,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(
+                              maxReferralGuestNameLength,
+                            ),
+                          ],
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return '';
+                            return null;
+                          },
+                        ),
+                        if (error != null && error.isNotEmpty)
+                          Text(
+                            error,
+                            style: TextStyle(color: RealUnitColors.status.red600),
+                          ),
+                      ],
+                    ),
+                  ),
                   actions: [
-                    AppFilledButton(
-                      label: s.referralCopyInviteLink,
-                      variant: FilledButtonVariant.secondary,
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: state.invite.url),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(s.copyClipboard)),
-                          );
-                        }
-                      },
-                    ),
-                    AppFilledButton(
-                      label: s.referralShareInviteLink,
-                      onPressed: () {
-                        final box = context.findRenderObject() as RenderBox?;
-                        Share.share(
-                          text,
-                          sharePositionOrigin: box == null
-                              ? const Rect.fromLTWH(0, 0, 1, 1)
-                              : box.localToGlobal(Offset.zero) & box.size,
-                        );
-                      },
-                    ),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       child: AppFilledButton(
-                        label: s.done,
-                        variant: FilledButtonVariant.secondary,
-                        onPressed: () => Navigator.of(context).pop(true),
+                        label: s.referralCreateInvite,
+                        state: creating
+                            ? FilledButtonState.loading
+                            : FilledButtonState.idle,
+                        onPressed: !canSubmit || creating
+                            ? null
+                            : () {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                if (_formKey.currentState?.validate() ?? false) {
+                                  final cubit = context.read<ReferralCubit>();
+                                  if (cubit.state is ReferralOverviewLoaded) {
+                                    cubit.openCreate();
+                                  }
+                                  cubit.createInvite(
+                                    guestName: _nameCtrl.text.trim(),
+                                  );
+                                }
+                              },
                       ),
                     ),
                   ],
                 ),
               );
-            }
-
-            final creating = state is ReferralCreating;
-            final error = state is ReferralCreateReady
-                ? state.errorMessage
-                : null;
-            final canSubmit =
-                state is ReferralCreateReady ||
-                state is ReferralOverviewLoaded ||
-                state is ReferralCreating;
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ScrollableActionsLayout(
-                body: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 16,
-                    children: [
-                      Text(
-                        s.referralCreateInviteDescription,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: RealUnitColors.neutral500,
-                        ),
-                      ),
-                      LabeledTextField(
-                        label: s.referralGuestName,
-                        hintText: s.name,
-                        controller: _nameCtrl,
-                        textCapitalization: TextCapitalization.words,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(
-                            maxReferralGuestNameLength,
-                          ),
-                        ],
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return '';
-                          return null;
-                        },
-                      ),
-                      if (error != null && error.isNotEmpty)
-                        Text(
-                          error,
-                          style: TextStyle(color: RealUnitColors.status.red600),
-                        ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: AppFilledButton(
-                      label: s.referralCreateInvite,
-                      state: creating
-                          ? FilledButtonState.loading
-                          : FilledButtonState.idle,
-                      onPressed: !canSubmit || creating
-                          ? null
-                          : () {
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              if (_formKey.currentState?.validate() ?? false) {
-                                final cubit = context.read<ReferralCubit>();
-                                if (cubit.state is ReferralOverviewLoaded) {
-                                  cubit.openCreate();
-                                }
-                                cubit.createInvite(
-                                  guestName: _nameCtrl.text.trim(),
-                                );
-                              }
-                            },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+            },
+          ),
         ),
       ),
-    ),
     );
   }
 }

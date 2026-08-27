@@ -307,5 +307,21 @@ void main() {
       });
       expect(invite.isInvite, isTrue);
     });
+
+    test('blank kind is ignored so action text still infers promo', () {
+      final promo = ReferralCodeLookupDto.fromJson({
+        'kind': '  ',
+        'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      });
+      expect(promo.isPromo, isTrue);
+    });
+
+    test('inviterName wins over action text when kind is omitted', () {
+      final invite = ReferralCodeLookupDto.fromJson({
+        'inviterName': 'Björn',
+        'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      });
+      expect(invite.isInvite, isTrue);
+    });
   });
 }
