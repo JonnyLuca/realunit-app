@@ -6,6 +6,7 @@ import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referra
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
+import 'package:realunit_wallet/screens/referral/referral_limits.dart';
 
 class _MockService extends Mock implements RealUnitReferralService {}
 
@@ -279,6 +280,47 @@ void main() {
     seed: () => ReferralOverviewLoaded(summary: _eligible, invites: const []),
     act: (cubit) => cubit.refreshOverview(),
     expect: () => const [ReferralNotEligible()],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'createInvite truncates a guest name to the field cap',
+    build: () {
+      when(
+        () => service.createInvite(
+          guestName: 'A' * maxReferralGuestNameLength,
+        ),
+      ).thenAnswer(
+        (_) async => ReferralCreatedInviteDto(
+          code: 'AB12',
+          url: 'https://realunit.app/invite/AB12',
+          guestName: 'A' * maxReferralGuestNameLength,
+        ),
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralCreateReady(summary: _eligible),
+    act: (cubit) => cubit.createInvite(guestName: 'A' * 120),
+    expect: () => [
+      ReferralCreating(
+        summary: _eligible,
+        guestName: 'A' * maxReferralGuestNameLength,
+      ),
+      ReferralInviteCreated(
+        summary: _eligible,
+        invite: ReferralCreatedInviteDto(
+          code: 'AB12',
+          url: 'https://realunit.app/invite/AB12',
+          guestName: 'A' * maxReferralGuestNameLength,
+        ),
+      ),
+    ],
+    verify: (_) {
+      verify(
+        () => service.createInvite(
+          guestName: 'A' * maxReferralGuestNameLength,
+        ),
+      ).called(1);
+    },
   );
 
   blocTest<ReferralCubit, ReferralState>(

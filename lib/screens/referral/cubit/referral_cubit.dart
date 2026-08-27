@@ -5,6 +5,7 @@ import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referra
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
+import 'package:realunit_wallet/screens/referral/referral_limits.dart';
 
 part 'referral_state.dart';
 
@@ -58,8 +59,11 @@ class ReferralCubit extends Cubit<ReferralState> {
   }
 
   Future<void> createInvite({required String guestName}) async {
-    final name = guestName.trim();
+    var name = guestName.trim();
     if (name.isEmpty) return;
+    if (name.length > maxReferralGuestNameLength) {
+      name = name.substring(0, maxReferralGuestNameLength);
+    }
     final current = state;
     if (current is! ReferralOverviewLoaded && current is! ReferralCreateReady) {
       return;

@@ -286,6 +286,102 @@ void main() {
     expect(find.text('In die Zwischenablage kopiert'), findsOneWidget);
   });
 
+  testWidgets('share uses the API copyText 1:1', (tester) async {
+    String? shared;
+    const channel = MethodChannel('dev.fluttercommunity.plus/share');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      channel,
+      (call) async {
+        if (call.method == 'share') {
+          final args = call.arguments;
+          if (args is Map) {
+            shared = args['text'] as String?;
+          }
+        }
+        return '';
+      },
+    );
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      );
+    });
+
+    const summary = ReferralSummaryDto(
+      eligible: true,
+      termsAccepted: true,
+      openCount: 1,
+      creditedCount: 0,
+      realuSum: 0,
+      chfSum: 0,
+    );
+    final invites = [
+      ReferralInviteDto(
+        id: 1,
+        code: 'AAAA',
+        url: 'https://realunit.app/invite/AAAA',
+        guestName: 'Alice',
+        status: 'Open',
+        created: DateTime.utc(2026, 8, 1),
+        copyText: 'Hey Alice, Björn lädt dich ein: https://realunit.app/invite/AAAA',
+      ),
+    ];
+    when(() => cubit.state).thenReturn(
+      ReferralOverviewLoaded(summary: summary, invites: invites),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralOverviewLoaded(summary: summary, invites: invites),
+    );
+
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => MultiBlocProvider(
+            providers: [
+              BlocProvider<ReferralCubit>.value(value: cubit),
+              BlocProvider<SettingsBloc>.value(value: settings),
+            ],
+            child: const ReferralOverviewPage(),
+          ),
+          routes: [
+            GoRoute(
+              name: SettingsRoutes.referralCreate,
+              path: 'create',
+              builder: (_, _) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Einladungslink versenden'));
+    await tester.pump();
+
+    expect(
+      shared,
+      'Hey Alice, Björn lädt dich ein: https://realunit.app/invite/AAAA',
+    );
+  });
+
   testWidgets('hides received REALU and CHF when amounts are hidden', (tester) async {
     const hidden = SettingsState(language: Language.de, hideAmounts: true);
     when(() => settings.state).thenReturn(hidden);

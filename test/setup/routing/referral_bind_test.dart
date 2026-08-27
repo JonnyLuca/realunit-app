@@ -57,6 +57,22 @@ void main() {
     verify(() => service.bind(code: 'AB12CD')).called(1);
   });
 
+  test('keeps the stashed code when bind returns 408', () async {
+    await stashPendingReferralCode('AB12CD');
+    when(() => service.bind(code: 'AB12CD')).thenThrow(
+      const ApiException(
+        statusCode: 408,
+        code: 'TIMEOUT',
+        message: 'slow',
+      ),
+    );
+
+    await bindPendingReferralCode(router);
+
+    expect(await peekPendingReferralCode(), 'AB12CD');
+    verify(() => service.bind(code: 'AB12CD')).called(1);
+  });
+
   test('keeps the stashed code when bind times out', () async {
     await stashPendingReferralCode('AB12CD');
     when(() => service.bind(code: 'AB12CD')).thenThrow(

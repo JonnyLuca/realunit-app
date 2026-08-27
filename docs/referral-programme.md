@@ -52,11 +52,14 @@ Response:
   "code": "AB12CD",
   "url": "https://realunit.app/invite/AB12CD",
   "guestName": "Alice",
-  "copyText": "Hey Alice, …"
+  "copyText": "Hey Alice, …",
+  "copyTextEn": "Hey Alice, …"
 }
 ```
 
-The server generates code, URL, and share text.
+The server generates code, URL, and share text. The app renders
+`copyText` / `copyTextEn` 1:1; empty EN falls back to DE. Guest names
+are capped at 80 characters in the app.
 
 ### `GET /v1/realunit/referral/invites`
 

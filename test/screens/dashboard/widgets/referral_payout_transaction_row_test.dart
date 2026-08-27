@@ -77,5 +77,6 @@ void main() {
 
     expect(find.textContaining('246.50'), findsNothing);
     expect(find.textContaining('***.**'), findsWidgets);
+    expect(find.textContaining('REALU'), findsNothing);
   });
 }

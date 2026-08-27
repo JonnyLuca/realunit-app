@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
+import 'package:realunit_wallet/screens/referral/referral_limits.dart';
 import 'package:realunit_wallet/screens/referral/referral_share_text.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/styles/colors.dart';
@@ -110,7 +111,12 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                         Text(message, textAlign: TextAlign.center),
                       AppFilledButton(
                         label: s.retry,
-                        onPressed: () => context.read<ReferralCubit>().load(),
+                        onPressed: () {
+                          final cubit = context.read<ReferralCubit>();
+                          cubit.load().then((_) {
+                            if (!cubit.isClosed) cubit.openCreate();
+                          });
+                        },
                       ),
                     ],
                   ),
@@ -214,7 +220,9 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                         controller: _nameCtrl,
                         textCapitalization: TextCapitalization.words,
                         inputFormatters: [
-                          LengthLimitingTextInputFormatter(80),
+                          LengthLimitingTextInputFormatter(
+                            maxReferralGuestNameLength,
+                          ),
                         ],
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) return '';

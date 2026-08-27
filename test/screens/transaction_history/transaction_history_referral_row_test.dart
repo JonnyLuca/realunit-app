@@ -85,4 +85,70 @@ void main() {
       expect(find.text('Verkaufen'), findsNothing);
     },
   );
+
+  testWidgets('hides REALU and frozen CHF when amounts are hidden', (
+    tester,
+  ) async {
+    final receiptCubit = _MockReceiptCubit();
+    when(() => receiptCubit.state).thenReturn(
+      const TransactionHistoryReceiptInitial(),
+    );
+
+    final tx = Transaction(
+      height: 0,
+      txId: 'referral-payout-9',
+      chainId: realUnitAsset.chainId,
+      senderAddress: '',
+      receiverAddress: '0xabc',
+      amount: BigInt.from(20),
+      asset: realUnitAsset,
+      type: TransactionTypes.referralPayout,
+      note: '',
+      data: '246.5',
+      timestamp: DateTime.utc(2026, 8, 24, 10),
+    );
+
+    final settings = _MockSettingsBloc();
+    const settingsState = SettingsState(
+      language: Language.de,
+      hideAmounts: true,
+    );
+    when(() => settings.state).thenReturn(settingsState);
+    whenListen(
+      settings,
+      const Stream<SettingsState>.empty(),
+      initialState: settingsState,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: Scaffold(
+          body: MultiBlocProvider(
+            providers: [
+              BlocProvider<TransactionHistoryReceiptCubit>.value(
+                value: receiptCubit,
+              ),
+              BlocProvider<SettingsBloc>.value(value: settings),
+            ],
+            child: TransactionHistoryRowView(
+              transaction: tx,
+              isOutbound: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.textContaining('246.50'), findsNothing);
+    expect(find.textContaining('***.**'), findsWidgets);
+    expect(find.textContaining('REALU'), findsNothing);
+  });
 }
