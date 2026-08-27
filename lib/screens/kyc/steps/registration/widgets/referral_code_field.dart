@@ -8,6 +8,7 @@ import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_code_lookup_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
+import 'package:realunit_wallet/packages/service/dfx/referral_lookup_status.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/form/labeled_text_field.dart';
@@ -96,12 +97,12 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       if (result != null && result.isPromo) {
         await _maybeShowPromo(code, result);
       }
-    } on ApiException {
+    } on ApiException catch (error) {
       if (!mounted) return;
       if (normalizeReferralCode(widget.controller.text) != code) return;
       setState(() {
         _result = null;
-        _invalid = true;
+        _invalid = isReferralLookupInvalidStatus(error.statusCode);
         _loading = false;
       });
     } catch (_) {

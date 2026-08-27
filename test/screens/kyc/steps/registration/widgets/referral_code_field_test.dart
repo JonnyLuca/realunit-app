@@ -92,6 +92,47 @@ void main() {
     );
   });
 
+  testWidgets('a 500 lookup is not shown as an invalid code', (tester) async {
+    final ctrl = TextEditingController(text: 'AB12');
+    await pumpField(
+      tester,
+      controller: ctrl,
+      lookup: (_) async => throw const ApiException(
+        statusCode: 500,
+        code: 'SERVER_ERROR',
+        message: 'down',
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      find.text('Dieser Code ist ungültig oder abgelaufen.'),
+      findsNothing,
+    );
+    expect(ctrl.text, 'AB12');
+  });
+
+  testWidgets('a 429 lookup is not shown as an invalid code', (tester) async {
+    final ctrl = TextEditingController(text: 'AB12');
+    await pumpField(
+      tester,
+      controller: ctrl,
+      lookup: (_) async => throw const ApiException(
+        statusCode: 429,
+        code: 'RATE_LIMIT',
+        message: 'slow',
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      find.text('Dieser Code ist ungültig oder abgelaufen.'),
+      findsNothing,
+    );
+  });
+
   testWidgets('ignores a stale lookup after the field changes', (tester) async {
     final ctrl = TextEditingController(text: 'OLD1');
     var firstLookupStarted = false;

@@ -92,6 +92,9 @@ stacking. Promo credit is only the first successful purchase of at least
 ### `GET /v1/realunit/referral/code/:code` (public)
 
 Landing payload for `realunit.app/invite/…` and `/promo/…`.
+HTTP 400/404/409/410/422 mean the code is invalid or spent. 5xx, 401, 408
+and 429 are transport failures — the registration field must not show
+«invalid», and the landing shows «unavailable».
 
 ### `GET /v1/realunit/referral/payouts`
 
