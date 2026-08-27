@@ -104,6 +104,13 @@ class ReferralOverviewPage extends StatelessWidget {
                     ),
                     for (final invite in openInvites)
                       _OpenInviteTile(invite: invite),
+                    if (summary.openCount > 0 && openInvites.isEmpty)
+                      AppFilledButton(
+                        label: s.retry,
+                        variant: FilledButtonVariant.secondary,
+                        onPressed: () =>
+                            context.read<ReferralCubit>().reloadInvites(),
+                      ),
                     Text(
                       s.referralOpenInvitesExpire,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(

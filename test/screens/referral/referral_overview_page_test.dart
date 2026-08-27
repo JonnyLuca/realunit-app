@@ -452,4 +452,73 @@ void main() {
     expect(find.textContaining('512'), findsNothing);
     expect(find.textContaining('***.**'), findsOneWidget);
   });
+
+  testWidgets(
+    'offers retry when openCount is set but no open-invite rows loaded',
+    (tester) async {
+      const summary = ReferralSummaryDto(
+        eligible: true,
+        termsAccepted: true,
+        openCount: 2,
+        creditedCount: 0,
+        realuSum: 0,
+        chfSum: 0,
+      );
+      when(() => cubit.state).thenReturn(
+        const ReferralOverviewLoaded(summary: summary, invites: []),
+      );
+      whenListen(
+        cubit,
+        const Stream<ReferralState>.empty(),
+        initialState: const ReferralOverviewLoaded(
+          summary: summary,
+          invites: [],
+        ),
+      );
+      when(() => cubit.reloadInvites()).thenAnswer((_) async {});
+
+      final router = GoRouter(
+        initialLocation: '/',
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => MultiBlocProvider(
+              providers: [
+                BlocProvider<ReferralCubit>.value(value: cubit),
+                BlocProvider<SettingsBloc>.value(value: settings),
+              ],
+              child: const ReferralOverviewPage(),
+            ),
+            routes: [
+              GoRoute(
+                name: SettingsRoutes.referralCreate,
+                path: 'create',
+                builder: (_, _) => const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          theme: realUnitTheme,
+          locale: const Locale('de'),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          routerConfig: router,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Wiederholen'), findsOneWidget);
+      await tester.tap(find.text('Wiederholen'));
+      await tester.pump();
+      verify(() => cubit.reloadInvites()).called(1);
+    },
+  );
 }

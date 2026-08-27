@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_created_invite_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
@@ -239,6 +240,55 @@ void main() {
       const ReferralLoading(),
       ReferralOverviewLoaded(summary: _eligible, invites: const []),
     ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'reloadInvites replaces open-invite rows without hiding the summary',
+    build: () {
+      when(() => service.getInvites()).thenAnswer(
+        (_) async => [
+          ReferralInviteDto(
+            id: 1,
+            code: 'AAAA',
+            url: 'https://realunit.app/invite/AAAA',
+            guestName: 'Alice',
+            status: 'Open',
+            created: DateTime.utc(2026, 8, 1),
+          ),
+        ],
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralOverviewLoaded(summary: _eligible, invites: const []),
+    act: (cubit) => cubit.reloadInvites(),
+    expect: () => [
+      ReferralOverviewLoaded(
+        summary: _eligible,
+        invites: [
+          ReferralInviteDto(
+            id: 1,
+            code: 'AAAA',
+            url: 'https://realunit.app/invite/AAAA',
+            guestName: 'Alice',
+            status: 'Open',
+            created: DateTime.utc(2026, 8, 1),
+          ),
+        ],
+      ),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'reloadInvites keeps the current overview when the list is still down',
+    build: () {
+      when(() => service.getInvites()).thenThrow(
+        const ApiException(code: 'SERVER_ERROR', message: 'invites down'),
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralOverviewLoaded(summary: _eligible, invites: const []),
+    act: (cubit) => cubit.reloadInvites(),
+    expect: () => <ReferralState>[],
   );
 
   blocTest<ReferralCubit, ReferralState>(

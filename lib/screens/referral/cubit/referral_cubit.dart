@@ -106,6 +106,16 @@ class ReferralCubit extends Cubit<ReferralState> {
     }
   }
 
+  /// Refetches open-invite rows without dropping the summary tiles.
+  Future<void> reloadInvites() async {
+    final current = state;
+    if (current is! ReferralOverviewLoaded) return;
+    try {
+      final invites = await _service.getInvites();
+      emit(ReferralOverviewLoaded(summary: current.summary, invites: invites));
+    } catch (_) {}
+  }
+
   Future<void> _emitFromSummary(ReferralSummaryDto summary) async {
     if (!summary.eligible) {
       emit(const ReferralNotEligible());
