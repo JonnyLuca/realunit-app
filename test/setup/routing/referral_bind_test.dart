@@ -57,5 +57,6 @@ void main() {
 
     expect(await peekPendingReferralCode(), isNull);
     verify(() => service.bind(code: 'AB12CD')).called(1);
+    expect(router.state.uri.path, '/');
   });
 }

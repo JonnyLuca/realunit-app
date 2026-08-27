@@ -108,7 +108,8 @@ price.
   or the promo campaign dialog is shown.
 - History: referral payouts with amount, date, frozen CHF
 - Deeplinks: `realunit-wallet://invite|promo/{code}` and
-  `https://realunit.app/invite|promo/{code}`
+  `https://realunit.app/invite|promo/{code}`. Invite bind is silent;
+  promo bind shows the campaign dialog.
 
 ## Website
 

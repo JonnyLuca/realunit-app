@@ -9,10 +9,10 @@ import 'package:realunit_wallet/screens/pin/bloc/auth/pin_auth_cubit.dart';
 import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
-import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 
 /// Binds a stashed or freshly delivered referral code once the session is unlocked.
-/// Shows the API campaign text for promo binds; navigates to referral overview for invites.
+/// Shows the API campaign text for promo binds. Invite binds stay silent —
+/// the invitee is not sent to the referrer overview (they are not the host).
 ///
 /// The stash is consumed only after a successful bind. A 4xx/5xx or transport
 /// failure puts the code back so the next dashboard landing can retry.
@@ -44,8 +44,6 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
           ),
         );
       }
-    } else {
-      unawaited(router.pushNamed(SettingsRoutes.referral));
     }
   } on ApiException {
     await stashPendingReferralCode(resolved);

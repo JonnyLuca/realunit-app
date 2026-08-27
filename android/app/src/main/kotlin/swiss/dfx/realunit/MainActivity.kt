@@ -62,5 +62,3 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 }
-
-class MainActivity: FlutterFragmentActivity()
