@@ -645,6 +645,33 @@ void main() {
       );
     });
 
+    test('reads an iOS Smart App Banner app-argument', () {
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'realunit-wallet://open?app-argument=realunit-wallet://invite/AB12CD',
+          ),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'realunit-wallet://open?app-argument=${Uri.encodeComponent('realunit-wallet://promo/EVT1')}',
+          ),
+        ),
+        'EVT1',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'https://realunit.app/?app-argument=realunit-wallet://invite/AB12CD',
+          ),
+        ),
+        'AB12CD',
+      );
+    });
+
     test('rejects a whitespace-only decoded code', () {
       expect(
         extractReferralInviteCode(

@@ -98,7 +98,25 @@ String? _referralCodeFromRawQuery(String remainder) {
   );
 }
 
+String? _rawQueryValue(String raw, String key) {
+  final q = raw.indexOf('?');
+  if (q < 0) return null;
+  return Uri.splitQueryString(raw.substring(q + 1))[key];
+}
+
 String? extractReferralInviteCode(Uri uri) {
+  final direct = _extractReferralInviteCode(uri);
+  if (direct != null) return direct;
+  final argument =
+      uri.queryParameters['app-argument'] ??
+      _rawQueryValue(uri.toString(), 'app-argument');
+  if (argument == null || argument.isEmpty) return null;
+  final nestedUri = Uri.tryParse(argument);
+  if (nestedUri == null || nestedUri.toString() == uri.toString()) return null;
+  return _extractReferralInviteCode(nestedUri);
+}
+
+String? _extractReferralInviteCode(Uri uri) {
   if ((uri.scheme == 'https' || uri.scheme == 'http') &&
       _referralLinkHosts.contains(uri.host)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
