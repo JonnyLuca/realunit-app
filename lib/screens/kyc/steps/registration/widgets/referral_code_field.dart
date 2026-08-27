@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
@@ -162,6 +163,9 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
           hintText: s.referralCodeHint,
           controller: widget.controller,
           textCapitalization: TextCapitalization.characters,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(256),
+          ],
         ),
         if (_loading)
           const Align(

@@ -125,6 +125,69 @@ void main() {
     expect(find.text('In die Zwischenablage kopiert'), findsOneWidget);
   });
 
+  testWidgets('share uses the API copyText 1:1', (tester) async {
+    String? shared;
+    const channel = MethodChannel('dev.fluttercommunity.plus/share');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      channel,
+      (call) async {
+        if (call.method == 'share') {
+          final args = call.arguments;
+          if (args is Map) {
+            shared = args['text'] as String?;
+          }
+        }
+        return '';
+      },
+    );
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      );
+    });
+
+    const created = ReferralCreatedInviteDto(
+      code: 'AB12CD',
+      url: 'https://realunit.app/invite/AB12CD',
+      guestName: 'Alice',
+      copyText: 'Hey Alice, Björn lädt dich ein: https://realunit.app/invite/AB12CD',
+    );
+    when(() => cubit.state).thenReturn(
+      ReferralInviteCreated(summary: _summary, invite: created),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralInviteCreated(summary: _summary, invite: created),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: BlocProvider<ReferralCubit>.value(
+          value: cubit,
+          child: const ReferralCreateView(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Einladungslink versenden'));
+    await tester.pump();
+
+    expect(
+      shared,
+      'Hey Alice, Björn lädt dich ein: https://realunit.app/invite/AB12CD',
+    );
+  });
+
   testWidgets('failure offers retry that reloads the summary', (tester) async {
     when(() => cubit.state).thenReturn(const ReferralFailure(message: 'down'));
     whenListen(

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
+import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:realunit_wallet/packages/service/app_store.dart';
 import 'package:realunit_wallet/packages/service/dfx/dfx_country_service.dart';
 import 'package:realunit_wallet/packages/service/dfx/dfx_kyc_service.dart';
@@ -216,8 +217,8 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
             // Persist a manually entered invite/promo code for post-auth bind
             // (same stash path as a deeplink). Empty field leaves any prior
             // deeplink stash untouched.
-            final entered = referralCodeCtrl.text.trim();
-            if (entered.isNotEmpty) {
+            final entered = normalizeReferralCode(referralCodeCtrl.text);
+            if (entered != null) {
               unawaited(stashPendingReferralCode(entered));
             }
 

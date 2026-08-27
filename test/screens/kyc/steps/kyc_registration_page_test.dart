@@ -36,6 +36,7 @@ import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registr
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_personal_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_referral_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_tax_step.dart';
+import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/buttons/app_text_button.dart';
@@ -239,6 +240,30 @@ void main() {
 
       expect(find.byType(KycRegistrationReferralStep).hitTestable(), findsOne);
       expect(find.byType(AppTextButton), findsOneWidget);
+    });
+
+    testWidgets('prefills a stashed invite code on the referral step', (
+      tester,
+    ) async {
+      addTearDown(clearPendingReferralCode);
+      await stashPendingReferralCode('AB12CD');
+      const state = KycRegistrationStepState(
+        step: KycRegistrationStep.referral,
+        steps: [
+          KycRegistrationStep.referral,
+          KycRegistrationStep.personal,
+        ],
+      );
+      when(() => registrationStepCubit.state).thenReturn(state);
+
+      await tester.pumpApp(buildSubject(const KycRegistrationView()));
+      await tester.pump();
+      (tester.widget(find.byType(PageView)) as PageView).controller
+          ?.jumpToPage(state.index);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('AB12CD'), findsOneWidget);
     });
 
     testWidgets('renders $KycRegistrationAddressStep', (tester) async {

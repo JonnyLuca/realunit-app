@@ -132,6 +132,76 @@ void main() {
     },
   );
 
+  testWidgets('hides an open invite with a blank guest name', (tester) async {
+    const summary = ReferralSummaryDto(
+      eligible: true,
+      termsAccepted: true,
+      openCount: 1,
+      creditedCount: 0,
+      realuSum: 0,
+      chfSum: 0,
+    );
+    final invites = [
+      ReferralInviteDto(
+        id: 1,
+        code: 'AAAA',
+        url: 'https://realunit.app/invite/AAAA',
+        guestName: '   ',
+        status: 'Open',
+        created: DateTime.utc(2026, 8, 1),
+      ),
+    ];
+    when(() => cubit.state).thenReturn(
+      ReferralOverviewLoaded(summary: summary, invites: invites),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: ReferralOverviewLoaded(summary: summary, invites: invites),
+    );
+
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => MultiBlocProvider(
+            providers: [
+              BlocProvider<ReferralCubit>.value(value: cubit),
+              BlocProvider<SettingsBloc>.value(value: settings),
+            ],
+            child: const ReferralOverviewPage(),
+          ),
+          routes: [
+            GoRoute(
+              name: SettingsRoutes.referralCreate,
+              path: 'create',
+              builder: (_, _) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Einladungslink kopieren'), findsNothing);
+    expect(find.textContaining('Deine Einladung für'), findsNothing);
+  });
+
   testWidgets('copy writes the open invite URL to the clipboard', (tester) async {
     String? copied;
     final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;

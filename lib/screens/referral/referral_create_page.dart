@@ -213,6 +213,9 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                         hintText: s.name,
                         controller: _nameCtrl,
                         textCapitalization: TextCapitalization.words,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(80),
+                        ],
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) return '';
                           return null;

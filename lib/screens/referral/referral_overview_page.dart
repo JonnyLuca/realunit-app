@@ -51,8 +51,12 @@ class ReferralOverviewPage extends StatelessWidget {
             }
 
             final summary = state.summary;
-            final openInvites =
-                state.invites.where((invite) => invite.isOpen).toList();
+            final openInvites = state.invites
+                .where(
+                  (invite) =>
+                      invite.isOpen && invite.guestName.trim().isNotEmpty,
+                )
+                .toList();
             final chfFormat = NumberFormat.currency(
               locale: 'de_CH',
               symbol: 'CHF',

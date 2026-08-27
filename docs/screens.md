@@ -78,6 +78,10 @@ Column meaning:
 | Settings | `SettingsTaxReportPage` | `settingsTaxReport` | `/settings/taxReport` | `42`, `43`, `224`, `225`, `226` |
 | Settings | `SettingsSeedPage` | `settingsSeed` | `/settings/seed` | `18`, `19`, `218` |
 | Settings | `SettingsWalletAddressPage` | `settingsWalletAddress` | `/settings/walletAddress` | `16` |
+| Settings | `ReferralPage` | `settingsReferral` | `/settings/referral` | — |
+| Settings | `ReferralCreatePage` | `settingsReferralCreate` | `/settings/referral/create` | — |
+| Settings | `ReferralOverviewPage` | — | — | — |
+| Settings | `ReferralTermsPage` | — | — | — |
 | Settings | `SettingsUserDataPage` | `settingsUserData` | `/settings/userData` | `227`, `228`, `229`, `230`, `231`, `232`, `233`, `234`, `235` |
 | Settings | `SettingsEditNamePage` | `settingsEditName` | `/settings/userData/editName` | `236` |
 | Settings | `SettingsEditAddressPage` | `settingsEditAddress` | `/settings/userData/editAddress` | `238` |
@@ -92,6 +96,7 @@ Column meaning:
 | Support | `SupportChatPage` | `supportChat` | `/support/chat/:uid` | `257`, `258`, `259`, `260`, `261` |
 | KYC | `KycPageManager` | `kyc` | `/kyc` | — |
 | KYC | `KycRegistrationPage` | — | — | `161`, `162`, `166`, `168`, `169`, `170`, `171`, `172` |
+| KYC | `KycRegistrationReferralStep` | — | — | — |
 | KYC | `KycRegistrationPersonalStep` | — | — | `40`, `54`, `163`, `164`, `165` |
 | KYC | `KycRegistrationAddressStep` | — | — | `41`, `55`, `167` |
 | KYC | `KycRegistrationTaxStep` | — | — | `56`, `57`, `58`, `59`, `60`, `61`, `61b`, `61c`, `61d`, `61e`, `61f`, `61g`, `61h`, `61i`, `61j`, `61k` |
@@ -116,8 +121,10 @@ Column meaning:
 | KYC | `KycMergeProcessingPage` | — | — | `210` |
 | Shared widgets | `PhoneNumberField` | — | — | `268` |
 
-76 screens — 44 routed (`GoRoute`) + 32 non-routed. The table also carries
+81 screens — 46 routed (`GoRoute`) + 35 non-routed. The table also carries
 one shared form-widget baseline (`PhoneNumberField`), which is not a screen.
+Referral surfaces have no Golden baseline yet (`—`); the handbook documents
+the programme in `#spec-referral`.
 
 ## Notes
 
