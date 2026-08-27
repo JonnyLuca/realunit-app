@@ -11,17 +11,31 @@ import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referra
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_overview_page.dart';
+import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
+import 'package:realunit_wallet/styles/language.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 
 class _MockReferralCubit extends MockCubit<ReferralState>
     implements ReferralCubit {}
 
+class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState>
+    implements SettingsBloc {}
+
 void main() {
   late _MockReferralCubit cubit;
+  late _MockSettingsBloc settings;
 
   setUp(() {
     cubit = _MockReferralCubit();
+    settings = _MockSettingsBloc();
+    const settingsState = SettingsState(language: Language.de);
+    when(() => settings.state).thenReturn(settingsState);
+    whenListen(
+      settings,
+      const Stream<SettingsState>.empty(),
+      initialState: settingsState,
+    );
   });
 
   testWidgets(
@@ -68,8 +82,11 @@ void main() {
         routes: [
           GoRoute(
             path: '/',
-            builder: (_, _) => BlocProvider<ReferralCubit>.value(
-              value: cubit,
+            builder: (_, _) => MultiBlocProvider(
+              providers: [
+                BlocProvider<ReferralCubit>.value(value: cubit),
+                BlocProvider<SettingsBloc>.value(value: settings),
+              ],
               child: const ReferralOverviewPage(),
             ),
             routes: [
@@ -160,8 +177,11 @@ void main() {
       routes: [
         GoRoute(
           path: '/',
-          builder: (_, _) => BlocProvider<ReferralCubit>.value(
-            value: cubit,
+          builder: (_, _) => MultiBlocProvider(
+            providers: [
+              BlocProvider<ReferralCubit>.value(value: cubit),
+              BlocProvider<SettingsBloc>.value(value: settings),
+            ],
             child: const ReferralOverviewPage(),
           ),
           routes: [
@@ -194,5 +214,76 @@ void main() {
 
     expect(copied, 'https://realunit.app/invite/AAAA');
     expect(find.text('In die Zwischenablage kopiert'), findsOneWidget);
+  });
+
+  testWidgets('hides received REALU and CHF when amounts are hidden', (tester) async {
+    const hidden = SettingsState(language: Language.de, hideAmounts: true);
+    when(() => settings.state).thenReturn(hidden);
+    whenListen(
+      settings,
+      const Stream<SettingsState>.empty(),
+      initialState: hidden,
+    );
+
+    const summary = ReferralSummaryDto(
+      eligible: true,
+      termsAccepted: true,
+      openCount: 0,
+      creditedCount: 0,
+      realuSum: 40,
+      chfSum: 512.4,
+      sharePriceLabel: 'Aktienkurs',
+    );
+    when(() => cubit.state).thenReturn(
+      const ReferralOverviewLoaded(summary: summary, invites: []),
+    );
+    whenListen(
+      cubit,
+      const Stream<ReferralState>.empty(),
+      initialState: const ReferralOverviewLoaded(summary: summary, invites: []),
+    );
+
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => MultiBlocProvider(
+            providers: [
+              BlocProvider<ReferralCubit>.value(value: cubit),
+              BlocProvider<SettingsBloc>.value(value: settings),
+            ],
+            child: const ReferralOverviewPage(),
+          ),
+          routes: [
+            GoRoute(
+              name: SettingsRoutes.referralCreate,
+              path: 'create',
+              builder: (_, _) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('40 REALU'), findsNothing);
+    expect(find.text('*** REALU'), findsOneWidget);
+    expect(find.textContaining('512'), findsNothing);
+    expect(find.textContaining('***.**'), findsOneWidget);
   });
 }

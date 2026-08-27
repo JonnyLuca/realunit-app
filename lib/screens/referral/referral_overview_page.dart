@@ -7,6 +7,7 @@ import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/open_referral_create.dart';
+import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/scrollable_actions_layout.dart';
@@ -63,13 +64,21 @@ class ReferralOverviewPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 20,
                   children: [
-                    _TotalReceivedTile(
-                      realu: summary.realuSum,
-                      chfLabel: s.referralChfAtSharePrice(
-                        chfFormat.format(summary.chfSum),
-                        summary.sharePriceLabel ?? s.referralSharePrice,
-                      ),
-                      title: s.referralTotalReceived,
+                    BlocBuilder<SettingsBloc, SettingsState>(
+                      builder: (context, settings) {
+                        final chf = settings.hideAmounts
+                            ? '***.**'
+                            : chfFormat.format(summary.chfSum);
+                        return _TotalReceivedTile(
+                          realu: summary.realuSum,
+                          hideAmounts: settings.hideAmounts,
+                          chfLabel: s.referralChfAtSharePrice(
+                            chf,
+                            summary.sharePriceLabel ?? s.referralSharePrice,
+                          ),
+                          title: s.referralTotalReceived,
+                        );
+                      },
                     ),
                     Row(
                       spacing: 12,
@@ -124,11 +133,13 @@ class ReferralOverviewPage extends StatelessWidget {
 
 class _TotalReceivedTile extends StatelessWidget {
   final num realu;
+  final bool hideAmounts;
   final String chfLabel;
   final String title;
 
   const _TotalReceivedTile({
     required this.realu,
+    required this.hideAmounts,
     required this.chfLabel,
     required this.title,
   });
@@ -153,7 +164,7 @@ class _TotalReceivedTile extends StatelessWidget {
             ),
           ),
           Text(
-            '${realu.toStringAsFixed(0)} REALU',
+            hideAmounts ? '*** REALU' : '${realu.toStringAsFixed(0)} REALU',
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
