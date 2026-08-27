@@ -99,7 +99,8 @@ price.
 
 - Dashboard card and settings entry only when `summary.eligible`
 - Terms page; create-invite button after checkbox
-  «Ich habe die Teilnahmebedingungen gelesen und akzeptiert»
+  «Ich habe die Teilnahmebedingungen gelesen und akzeptiert».
+  Accepting terms opens the name-entry screen.
 - Overview: open / credited counts, total REALU, CHF, label «Aktienkurs»
 - Registration: dedicated optional step (skip allowed) with the same
   field for invite and promo. After lookup the invite recognition copy

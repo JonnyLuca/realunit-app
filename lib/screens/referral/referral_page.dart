@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_overview_page.dart';
 import 'package:realunit_wallet/screens/referral/referral_terms_page.dart';
 import 'package:realunit_wallet/setup/di.dart';
+import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 
 /// Entry under `/settings/referral` — loads summary and shows terms or overview.
@@ -16,7 +18,16 @@ class ReferralPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => ReferralCubit(getIt<RealUnitReferralService>())..load(),
-      child: const ReferralGateView(),
+      child: BlocListener<ReferralCubit, ReferralState>(
+        listenWhen: (previous, current) =>
+            (previous is ReferralNeedsTerms ||
+                previous is ReferralTermsAccepting) &&
+            current is ReferralOverviewLoaded,
+        listener: (context, _) {
+          context.pushNamed(SettingsRoutes.referralCreate);
+        },
+        child: const ReferralGateView(),
+      ),
     );
   }
 }

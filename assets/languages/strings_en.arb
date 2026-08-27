@@ -280,6 +280,7 @@
   "referralNotEligible": "The referral programme is available once you are a verified shareholder with the required holding.",
   "referralOpenInvitesExpire": "Open invitations expire after 3 months.",
   "referralOverviewHint": "20 REALU per referral once the first purchase completes successfully.",
+  "referralOverviewTitle": "Your referrals",
   "referralPayout": "Referral prize",
   "referralPayoutChf": "CHF ${chf} at credit",
   "referralPromoTitle": "Promotion",

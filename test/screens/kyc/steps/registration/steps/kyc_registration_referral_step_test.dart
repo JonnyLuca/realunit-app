@@ -50,7 +50,6 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Hast du einen Empfehlungscode?'), findsOneWidget);
     expect(find.text('Überspringen'), findsOneWidget);
 
     await tester.tap(find.text('Überspringen'));

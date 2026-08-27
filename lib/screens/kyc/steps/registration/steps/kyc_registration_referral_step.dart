@@ -39,6 +39,7 @@ class KycRegistrationReferralStep extends StatelessWidget {
             ReferralCodeField(
               controller: referralCodeCtrl,
               lookup: lookup,
+              showHeading: false,
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8),

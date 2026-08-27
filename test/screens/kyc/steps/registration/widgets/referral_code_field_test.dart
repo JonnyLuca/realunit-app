@@ -66,7 +66,7 @@ void main() {
     expect(find.text('Aktion'), findsOneWidget);
     expect(
       find.text('Mit dem Code EVT1 schenken wir dir 20 Token.'),
-      findsOneWidget,
+      findsNWidgets(2),
     );
   });
 

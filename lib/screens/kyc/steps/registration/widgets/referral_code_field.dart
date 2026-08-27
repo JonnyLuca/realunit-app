@@ -18,10 +18,14 @@ class ReferralCodeField extends StatefulWidget {
   /// Injected in tests. Production uses [RealUnitReferralService.lookupCode].
   final Future<ReferralCodeLookupDto> Function(String code)? lookup;
 
+  /// When false, the surrounding page already shows the heading (AppBar).
+  final bool showHeading;
+
   const ReferralCodeField({
     super.key,
     required this.controller,
     this.lookup,
+    this.showHeading = true,
   });
 
   @override
@@ -138,10 +142,11 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 8,
       children: [
-        Text(
-          s.referralCodeHeading,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        if (widget.showHeading)
+          Text(
+            s.referralCodeHeading,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         Text(
           s.referralCodeDescription,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -177,6 +182,27 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
                 color: RealUnitColors.darkBlue,
               ),
             ),
+          ),
+        if (_result != null && _result!.isPromo)
+          Builder(
+            builder: (context) {
+              final lang = Localizations.localeOf(context).languageCode;
+              final text = _result!.campaignTextForLocale(lang);
+              if (text == null || text.isEmpty) return const SizedBox.shrink();
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: RealUnitColors.brand700,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: RealUnitColors.darkBlue,
+                  ),
+                ),
+              );
+            },
           ),
       ],
     );

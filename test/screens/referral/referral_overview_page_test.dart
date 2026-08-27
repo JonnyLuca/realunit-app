@@ -101,6 +101,7 @@ void main() {
       expect(find.text('2'), findsOneWidget);
       expect(find.text('Offen'), findsOneWidget);
       expect(find.text('Gutgeschrieben'), findsOneWidget);
+      expect(find.text('Deine Empfehlungen'), findsOneWidget);
       expect(find.text('INSGESAMT ERHALTEN'), findsOneWidget);
       expect(find.textContaining('Aktienkurs'), findsOneWidget);
       expect(find.text('Offene Einladungen verfallen nach 3 Monaten.'), findsOneWidget);

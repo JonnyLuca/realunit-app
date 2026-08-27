@@ -16,7 +16,7 @@ class ReferralOverviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(s.referrals)),
+      appBar: AppBar(title: Text(s.referralOverviewTitle)),
       body: SafeArea(
         child: BlocBuilder<ReferralCubit, ReferralState>(
           builder: (context, state) {
