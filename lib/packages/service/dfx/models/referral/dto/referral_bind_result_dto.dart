@@ -18,8 +18,8 @@ class ReferralBindResultDto {
     this.redemptionCap,
   });
 
-  bool get isPromo => kind == 'Promo';
-  bool get isInvite => kind == 'Invite';
+  bool get isPromo => kind.toLowerCase() == 'promo';
+  bool get isInvite => kind.toLowerCase() == 'invite';
 
   /// Locale-aware campaign wording. EN falls back to DE when the EN field is absent.
   String? campaignTextForLocale(String languageCode) {

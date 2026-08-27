@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_invite_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_create_page.dart';
@@ -28,6 +29,15 @@ const _summary = ReferralSummaryDto(
   creditedCount: 1,
   realuSum: 20,
   chfSum: 246.5,
+);
+
+final _openInvite = ReferralInviteDto(
+  id: 1,
+  code: 'AAAA',
+  url: 'https://realunit.app/invite/AAAA',
+  guestName: 'Alice',
+  status: 'Open',
+  created: DateTime.utc(2026, 8, 1),
 );
 
 Future<void> _pumpScreen(
@@ -127,14 +137,14 @@ void main() {
     for (final cell in kFullResponsiveMatrix) {
       testWidgets(cell.id, (tester) async {
         when(() => cubit.state).thenReturn(
-          ReferralOverviewLoaded(summary: _summary, invites: const []),
+          ReferralOverviewLoaded(summary: _summary, invites: [_openInvite]),
         );
         whenListen(
           cubit,
           const Stream<ReferralState>.empty(),
           initialState: ReferralOverviewLoaded(
             summary: _summary,
-            invites: const [],
+            invites: [_openInvite],
           ),
         );
         await withTargetPlatform(cell.device.platform, () async {

@@ -92,6 +92,17 @@ void main() {
       expect(dto.isInvite, isTrue);
       expect(dto.campaignTextForLocale('en'), 'DE only');
     });
+
+    test('kind matching is case-insensitive', () {
+      expect(
+        ReferralBindResultDto.fromJson({'kind': 'promo'}).isPromo,
+        isTrue,
+      );
+      expect(
+        ReferralBindResultDto.fromJson({'kind': 'INVITE'}).isInvite,
+        isTrue,
+      );
+    });
   });
 
   group('$ReferralInviteDto.fromJson', () {
