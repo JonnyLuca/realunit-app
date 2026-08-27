@@ -66,7 +66,8 @@ are capped at 80 characters in the app.
 List of the current user's invites. Counts of `Open` and `Credited` come
 from the summary. Open invites can be copied and shared again; credited
 names stay hidden — never registration, verification, or purchases of
-the invited person.
+the invited person. If this list call fails, the app still shows the
+summary tiles (open/credited/total) and omits the copy/share rows.
 
 ### `POST /v1/realunit/referral/bind`
 

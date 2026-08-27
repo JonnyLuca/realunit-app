@@ -115,7 +115,12 @@ class ReferralCubit extends Cubit<ReferralState> {
       emit(ReferralNeedsTerms(summary: summary));
       return;
     }
-    final invites = await _service.getInvites();
+    // Counts come from summary. Open-invite copy/share is best-effort so a
+    // list outage cannot hide the programme after terms are accepted.
+    var invites = const <ReferralInviteDto>[];
+    try {
+      invites = await _service.getInvites();
+    } catch (_) {}
     emit(ReferralOverviewLoaded(summary: summary, invites: invites));
   }
 }

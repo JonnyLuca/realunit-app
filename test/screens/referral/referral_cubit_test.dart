@@ -208,7 +208,7 @@ void main() {
   );
 
   blocTest<ReferralCubit, ReferralState>(
-    'acceptTerms surfaces a post-accept invite-list failure without the checkbox',
+    'acceptTerms still shows overview when the invite list is down',
     build: () {
       when(() => service.acceptTerms()).thenAnswer((_) async {});
       when(() => service.getSummary()).thenAnswer((_) async => _eligible);
@@ -221,7 +221,23 @@ void main() {
     act: (cubit) => cubit.acceptTerms(),
     expect: () => [
       ReferralTermsAccepting(summary: _needsTerms),
-      const ReferralFailure(message: 'invites down'),
+      ReferralOverviewLoaded(summary: _eligible, invites: const []),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'load shows overview counts when the invite list is down',
+    build: () {
+      when(() => service.getSummary()).thenAnswer((_) async => _eligible);
+      when(() => service.getInvites()).thenThrow(
+        const ApiException(code: 'SERVER_ERROR', message: 'invites down'),
+      );
+      return ReferralCubit(service);
+    },
+    act: (cubit) => cubit.load(),
+    expect: () => [
+      const ReferralLoading(),
+      ReferralOverviewLoaded(summary: _eligible, invites: const []),
     ],
   );
 
