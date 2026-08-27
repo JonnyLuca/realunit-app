@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/packages/wallet/wallet.dart';
 import 'package:realunit_wallet/screens/home/bloc/home_bloc.dart';
 import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
@@ -27,6 +28,9 @@ void main() {
 
   setUpAll(() {
     GetIt.instance.registerSingleton<SettingsBloc>(MockSettingsBloc());
+    GetIt.instance.registerSingleton<RealUnitReferralService>(
+      MockRealUnitReferralService(),
+    );
   });
 
   tearDownAll(() async {

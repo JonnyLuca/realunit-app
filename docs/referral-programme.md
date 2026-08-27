@@ -60,9 +60,10 @@ The server generates code, URL, and share text.
 
 ### `GET /v1/realunit/referral/invites`
 
-List of the current user's invites. The UI only shows **counts** of `Open`
-and `Credited` from the summary — never registration, verification, or
-purchases of the invited person.
+List of the current user's invites. Counts of `Open` and `Credited` come
+from the summary. Open invites can be copied and shared again; credited
+names stay hidden — never registration, verification, or purchases of
+the invited person.
 
 ### `POST /v1/realunit/referral/bind`
 
