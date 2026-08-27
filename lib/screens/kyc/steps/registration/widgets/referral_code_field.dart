@@ -24,11 +24,17 @@ class ReferralCodeField extends StatefulWidget {
   /// When false, the surrounding page already shows the heading (AppBar).
   final bool showHeading;
 
+  /// Normalized code after lookup: set on success / in-flight text, `null`
+  /// when empty or the code is invalid/spent so KYC submit will not overwrite
+  /// a deeplink stash.
+  final ValueChanged<String?>? onResolved;
+
   const ReferralCodeField({
     super.key,
     required this.controller,
     this.lookup,
     this.showHeading = true,
+    this.onResolved,
   });
 
   @override
@@ -74,6 +80,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
   Future<void> _runLookup() async {
     final code = normalizeReferralCode(widget.controller.text);
     if (code == null) {
+      widget.onResolved?.call(null);
       if (mounted) {
         setState(() {
           _result = null;
@@ -84,6 +91,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
       return;
     }
 
+    widget.onResolved?.call(code);
     if (mounted) setState(() => _loading = true);
     try {
       final result = await _lookup(code);
@@ -94,17 +102,20 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
         _invalid = false;
         _loading = false;
       });
+      widget.onResolved?.call(code);
       if (result != null && result.isPromo) {
         await _maybeShowPromo(code, result);
       }
     } on ApiException catch (error) {
       if (!mounted) return;
       if (normalizeReferralCode(widget.controller.text) != code) return;
+      final invalid = isReferralLookupInvalid(error);
       setState(() {
         _result = null;
-        _invalid = isReferralLookupInvalid(error);
+        _invalid = invalid;
         _loading = false;
       });
+      widget.onResolved?.call(invalid ? null : code);
     } catch (_) {
       if (!mounted) return;
       if (normalizeReferralCode(widget.controller.text) != code) return;
@@ -113,6 +124,7 @@ class _ReferralCodeFieldState extends State<ReferralCodeField> {
         _invalid = false;
         _loading = false;
       });
+      widget.onResolved?.call(code);
     }
   }
 

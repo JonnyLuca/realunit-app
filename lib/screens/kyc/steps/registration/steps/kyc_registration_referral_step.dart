@@ -15,10 +15,13 @@ class KycRegistrationReferralStep extends StatelessWidget {
   /// Injected in tests. Production lookup goes through [ReferralCodeField].
   final Future<ReferralCodeLookupDto> Function(String code)? lookup;
 
+  final ValueChanged<String?>? onResolved;
+
   const KycRegistrationReferralStep({
     super.key,
     required this.referralCodeCtrl,
     this.lookup,
+    this.onResolved,
   });
 
   void _advance(BuildContext context, {required bool skip}) {
@@ -41,6 +44,7 @@ class KycRegistrationReferralStep extends StatelessWidget {
               controller: referralCodeCtrl,
               lookup: lookup,
               showHeading: false,
+              onResolved: onResolved,
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8),

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
-import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:realunit_wallet/packages/service/app_store.dart';
 import 'package:realunit_wallet/packages/service/dfx/dfx_country_service.dart';
 import 'package:realunit_wallet/packages/service/dfx/dfx_kyc_service.dart';
@@ -26,6 +25,7 @@ import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registrati
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_address_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_personal_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_referral_step.dart';
+import 'package:realunit_wallet/screens/kyc/steps/registration/stash_resolved_referral_code.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_tax_step.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
@@ -80,6 +80,7 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
   final nationalityCtrl = ValueNotifier<Country?>(null);
   final birthdayCtrl = ValueNotifier<String?>(null);
   final referralCodeCtrl = TextEditingController();
+  String? _resolvedReferralCode;
 
   final addressStreetCtrl = TextEditingController();
   final addressStreetNumberCtrl = TextEditingController();
@@ -214,13 +215,9 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
       body: BlocListener<KycRegistrationSubmitCubit, KycRegistrationSubmitState>(
         listener: (context, state) async {
           if (state is KycRegistrationSubmitSuccess) {
-            // Persist a manually entered invite/promo code for post-auth bind
-            // (same stash path as a deeplink). Empty field leaves any prior
-            // deeplink stash untouched.
-            final entered = normalizeReferralCode(referralCodeCtrl.text);
-            if (entered != null) {
-              unawaited(stashPendingReferralCode(entered));
-            }
+            // Persist a looked-up invite/promo code for post-auth bind.
+            // Skip / invalid lookup leaves any prior deeplink stash untouched.
+            unawaited(stashResolvedReferralCode(_resolvedReferralCode));
 
             // The submit cubit only emits Success after a successful EIP-712
             // sign through `_signEip712`, regardless of the resulting backend
@@ -329,6 +326,7 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
       case KycRegistrationStep.referral:
         return KycRegistrationReferralStep(
           referralCodeCtrl: referralCodeCtrl,
+          onResolved: (code) => _resolvedReferralCode = code,
         );
 
       case KycRegistrationStep.personal:

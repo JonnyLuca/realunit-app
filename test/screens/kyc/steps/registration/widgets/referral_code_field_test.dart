@@ -14,6 +14,7 @@ void main() {
     WidgetTester tester, {
     required TextEditingController controller,
     required Future<ReferralCodeLookupDto> Function(String code) lookup,
+    ValueChanged<String?>? onResolved,
   }) {
     return tester.pumpWidget(
       MaterialApp(
@@ -26,7 +27,11 @@ void main() {
         ],
         supportedLocales: S.delegate.supportedLocales,
         home: Scaffold(
-          body: ReferralCodeField(controller: controller, lookup: lookup),
+          body: ReferralCodeField(
+            controller: controller,
+            lookup: lookup,
+            onResolved: onResolved,
+          ),
         ),
       ),
     );
@@ -108,6 +113,32 @@ void main() {
       find.text('Dieser Code ist ungültig oder abgelaufen.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('onResolved is null for an invalid code and set for a valid one', (
+    tester,
+  ) async {
+    String? resolved = 'sentinel';
+    final ctrl = TextEditingController(text: 'NOPE');
+    await pumpField(
+      tester,
+      controller: ctrl,
+      onResolved: (code) => resolved = code,
+      lookup: (_) async => throw const ApiException(
+        statusCode: 404,
+        code: 'NOT_FOUND',
+        message: 'missing',
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(resolved, isNull);
+
+    resolved = 'sentinel';
+    ctrl.text = 'AB12';
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(resolved, 'AB12');
   });
 
   testWidgets(
