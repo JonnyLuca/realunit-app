@@ -584,6 +584,18 @@ void main() {
         ),
         'EVT1',
       );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('ios-app://6759720010/realunit-wallet/invite/AB12CD'),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('ios-app://6759720010/promo/EVT1'),
+        ),
+        'EVT1',
+      );
     });
 
     test('reads promo codes from custom-scheme and https App Links', () {

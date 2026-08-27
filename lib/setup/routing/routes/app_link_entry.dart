@@ -87,6 +87,7 @@ bool _isWebReferralLink(Uri uri) =>
 /// - `intent://realunit.app/invite/{code}#Intent;scheme=https;…` (Chrome)
 /// - `intent://invite/{code}#Intent;scheme=realunit-wallet;…`
 /// - `android-app://swiss.realunit.app/https/realunit.app/invite/{code}`
+/// - `ios-app://6759720010/realunit-wallet/invite/{code}`
 ///
 /// Returns the last path segment (trimmed, percent-decoded, max 256) or
 /// null when not a referral/promo link. Invite and promo share one code field.
@@ -150,6 +151,19 @@ String? _extractReferralInviteCode(Uri uri) {
         _referralLinkHosts.contains(segs[1]) &&
         _isReferralPathKind(segs[2])) {
       return normalizeReferralCode(segs[3]);
+    }
+    return null;
+  }
+
+  if (uri.scheme == 'ios-app') {
+    final segs = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    if (segs.length >= 3 &&
+        segs[0] == appLinkScheme &&
+        _isReferralPathKind(segs[1])) {
+      return normalizeReferralCode(segs[2]);
+    }
+    if (segs.length >= 2 && _isReferralPathKind(segs[0])) {
+      return normalizeReferralCode(segs[1]);
     }
     return null;
   }
@@ -275,7 +289,8 @@ String? appLinkSchemeRedirect(
   if (state.uri.scheme == 'https' ||
       state.uri.scheme == 'http' ||
       state.uri.scheme == 'intent' ||
-      state.uri.scheme == 'android-app') {
+      state.uri.scheme == 'android-app' ||
+      state.uri.scheme == 'ios-app') {
     final httpsCode = extractReferralInviteCode(state.uri);
     if (httpsCode != null) {
       final current = Uri.parse(currentLocation);
