@@ -16,17 +16,7 @@ class ReferralCubit extends Cubit<ReferralState> {
   Future<void> load() async {
     emit(const ReferralLoading());
     try {
-      final summary = await _service.getSummary();
-      if (!summary.eligible) {
-        emit(const ReferralNotEligible());
-        return;
-      }
-      if (!summary.termsAccepted) {
-        emit(ReferralNeedsTerms(summary: summary));
-        return;
-      }
-      final invites = await _service.getInvites();
-      emit(ReferralOverviewLoaded(summary: summary, invites: invites));
+      await _emitFromSummary(await _service.getSummary());
     } on ApiException catch (e) {
       emit(ReferralFailure(message: e.message));
     } catch (e) {
@@ -49,9 +39,7 @@ class ReferralCubit extends Cubit<ReferralState> {
     emit(ReferralTermsAccepting(summary: summary));
     try {
       await _service.acceptTerms();
-      final refreshed = await _service.getSummary();
-      final invites = await _service.getInvites();
-      emit(ReferralOverviewLoaded(summary: refreshed, invites: invites));
+      await _emitFromSummary(await _service.getSummary());
     } on ApiException catch (e) {
       emit(ReferralNeedsTerms(summary: summary, errorMessage: e.message));
     } catch (e) {
@@ -60,6 +48,8 @@ class ReferralCubit extends Cubit<ReferralState> {
   }
 
   Future<void> createInvite({required String guestName}) async {
+    final name = guestName.trim();
+    if (name.isEmpty) return;
     final current = state;
     if (current is! ReferralOverviewLoaded && current is! ReferralCreateReady) {
       return;
@@ -72,9 +62,9 @@ class ReferralCubit extends Cubit<ReferralState> {
     };
     if (summary == null) return;
 
-    emit(ReferralCreating(summary: summary, guestName: guestName));
+    emit(ReferralCreating(summary: summary, guestName: name));
     try {
-      final created = await _service.createInvite(guestName: guestName);
+      final created = await _service.createInvite(guestName: name);
       emit(ReferralInviteCreated(summary: summary, invite: created));
     } on ApiException catch (e) {
       emit(ReferralCreateReady(summary: summary, errorMessage: e.message));
@@ -94,9 +84,7 @@ class ReferralCubit extends Cubit<ReferralState> {
 
   Future<void> refreshOverview() async {
     try {
-      final summary = await _service.getSummary();
-      final invites = await _service.getInvites();
-      emit(ReferralOverviewLoaded(summary: summary, invites: invites));
+      await _emitFromSummary(await _service.getSummary());
     } on ApiException catch (e) {
       emit(ReferralFailure(message: e.message));
     } catch (e) {
@@ -104,4 +92,16 @@ class ReferralCubit extends Cubit<ReferralState> {
     }
   }
 
+  Future<void> _emitFromSummary(ReferralSummaryDto summary) async {
+    if (!summary.eligible) {
+      emit(const ReferralNotEligible());
+      return;
+    }
+    if (!summary.termsAccepted) {
+      emit(ReferralNeedsTerms(summary: summary));
+      return;
+    }
+    final invites = await _service.getInvites();
+    emit(ReferralOverviewLoaded(summary: summary, invites: invites));
+  }
 }

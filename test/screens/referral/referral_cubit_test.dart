@@ -190,6 +190,61 @@ void main() {
   );
 
   blocTest<ReferralCubit, ReferralState>(
+    'acceptTerms hides the programme when the refreshed gate is closed',
+    build: () {
+      when(() => service.acceptTerms()).thenAnswer((_) async {});
+      when(() => service.getSummary()).thenAnswer(
+        (_) async => const ReferralSummaryDto(
+          eligible: false,
+          termsAccepted: true,
+          openCount: 0,
+          creditedCount: 0,
+          realuSum: 0,
+          chfSum: 0,
+        ),
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralNeedsTerms(summary: _needsTerms),
+    act: (cubit) => cubit.acceptTerms(),
+    expect: () => [
+      ReferralTermsAccepting(summary: _needsTerms),
+      const ReferralNotEligible(),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'refreshOverview hides the programme when the API gate closes',
+    build: () {
+      when(() => service.getSummary()).thenAnswer(
+        (_) async => const ReferralSummaryDto(
+          eligible: false,
+          termsAccepted: true,
+          openCount: 0,
+          creditedCount: 0,
+          realuSum: 0,
+          chfSum: 0,
+        ),
+      );
+      return ReferralCubit(service);
+    },
+    seed: () => ReferralOverviewLoaded(summary: _eligible, invites: const []),
+    act: (cubit) => cubit.refreshOverview(),
+    expect: () => const [ReferralNotEligible()],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'createInvite ignores a blank guest name',
+    build: () => ReferralCubit(service),
+    seed: () => ReferralCreateReady(summary: _eligible),
+    act: (cubit) => cubit.createInvite(guestName: '   '),
+    expect: () => <ReferralState>[],
+    verify: (_) {
+      verifyNever(() => service.createInvite(guestName: any(named: 'guestName')));
+    },
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
     'load surfaces API errors',
     build: () {
       when(() => service.getSummary()).thenThrow(
