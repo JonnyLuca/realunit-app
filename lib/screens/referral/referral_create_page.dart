@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/screens/referral/cubit/referral_cubit.dart';
@@ -172,7 +171,7 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                       child: AppFilledButton(
                         label: s.done,
                         variant: FilledButtonVariant.secondary,
-                        onPressed: () => context.pop(true),
+                        onPressed: () => Navigator.of(context).pop(true),
                       ),
                     ),
                   ],

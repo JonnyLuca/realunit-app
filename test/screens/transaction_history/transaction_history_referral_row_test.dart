@@ -7,12 +7,17 @@ import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/models/transaction.dart';
 import 'package:realunit_wallet/packages/utils/default_assets.dart';
+import 'package:realunit_wallet/screens/settings/bloc/settings_bloc.dart';
 import 'package:realunit_wallet/screens/transaction_history/cubits/receipt/transaction_history_receipt_cubit.dart';
 import 'package:realunit_wallet/screens/transaction_history/widgets/transaction_history_row.dart';
+import 'package:realunit_wallet/styles/language.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 
 class _MockReceiptCubit extends MockCubit<TransactionHistoryReceiptState>
     implements TransactionHistoryReceiptCubit {}
+
+class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState>
+    implements SettingsBloc {}
 
 void main() {
   testWidgets(
@@ -37,6 +42,15 @@ void main() {
         timestamp: DateTime.utc(2026, 8, 24, 10),
       );
 
+      final settings = _MockSettingsBloc();
+      const settingsState = SettingsState(language: Language.de);
+      when(() => settings.state).thenReturn(settingsState);
+      whenListen(
+        settings,
+        const Stream<SettingsState>.empty(),
+        initialState: settingsState,
+      );
+
       await tester.pumpWidget(
         MaterialApp(
           theme: realUnitTheme,
@@ -48,8 +62,13 @@ void main() {
           ],
           supportedLocales: S.delegate.supportedLocales,
           home: Scaffold(
-            body: BlocProvider<TransactionHistoryReceiptCubit>.value(
-              value: receiptCubit,
+            body: MultiBlocProvider(
+              providers: [
+                BlocProvider<TransactionHistoryReceiptCubit>.value(
+                  value: receiptCubit,
+                ),
+                BlocProvider<SettingsBloc>.value(value: settings),
+              ],
               child: TransactionHistoryRowView(
                 transaction: tx,
                 isOutbound: false,
