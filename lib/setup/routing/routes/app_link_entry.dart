@@ -81,14 +81,34 @@ bool _isReferralPathKind(String? value) =>
 ///
 /// Returns the last path segment (trimmed, percent-decoded, max 256) or
 /// null when not a referral/promo link. Invite and promo share one code field.
+String? _referralCodeFromQuery(Uri uri) {
+  return normalizeReferralCode(
+    uri.queryParameters['code'] ??
+        uri.queryParameters['invite'] ??
+        uri.queryParameters['promo'],
+  );
+}
+
+String? _referralCodeFromRawQuery(String remainder) {
+  final q = remainder.indexOf('?');
+  if (q < 0) return null;
+  final params = Uri.splitQueryString(remainder.substring(q + 1));
+  return normalizeReferralCode(
+    params['code'] ?? params['invite'] ?? params['promo'],
+  );
+}
+
 String? extractReferralInviteCode(Uri uri) {
   if ((uri.scheme == 'https' || uri.scheme == 'http') &&
       _referralLinkHosts.contains(uri.host)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
-    if (segments.length >= 2 && _isReferralPathKind(segments.first)) {
+    if (segments.isEmpty || !_isReferralPathKind(segments.first)) {
+      return null;
+    }
+    if (segments.length >= 2) {
       return normalizeReferralCode(segments[1]);
     }
-    return null;
+    return _referralCodeFromQuery(uri);
   }
 
   if (uri.scheme != appLinkScheme) return null;
@@ -97,6 +117,7 @@ String? extractReferralInviteCode(Uri uri) {
   if (_isReferralPathKind(uri.host)) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
     if (segments.isNotEmpty) return normalizeReferralCode(segments.first);
+    return _referralCodeFromQuery(uri);
   }
 
   // Fall back to raw-string parsing for opaque `realunit-wallet:invite/{code}`
@@ -110,6 +131,9 @@ String? extractReferralInviteCode(Uri uri) {
   final segments = withoutQuery.split('/').where((s) => s.isNotEmpty).toList();
   if (segments.length >= 2 && _isReferralPathKind(segments.first)) {
     return normalizeReferralCode(segments[1]);
+  }
+  if (segments.length >= 1 && _isReferralPathKind(segments.first)) {
+    return _referralCodeFromRawQuery(remainder);
   }
   return null;
 }

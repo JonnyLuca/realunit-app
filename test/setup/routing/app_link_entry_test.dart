@@ -612,6 +612,39 @@ void main() {
       );
     });
 
+    test('reads a query code on a bare /invite or /promo path', () {
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://realunit.app/invite?code=AB12CD'),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://realunit.app/promo?promo=EVT1'),
+        ),
+        'EVT1',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('realunit-wallet://invite?invite=AB12CD'),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('realunit-wallet:invite?code=AB12CD'),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse('https://realunit.app/invite/PATH?code=QUERY'),
+        ),
+        'PATH',
+      );
+    });
+
     test('rejects a whitespace-only decoded code', () {
       expect(
         extractReferralInviteCode(
