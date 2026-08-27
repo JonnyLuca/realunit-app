@@ -251,5 +251,17 @@ void main() {
       expect(terms.textForLang('de'), '# TB');
       expect(terms.textForLang('en'), '# Terms');
     });
+
+    test('aborts a stalled terms fetch so the bundled TB can load', () async {
+      final client = MockClient((request) async {
+        await Future<void>.delayed(const Duration(seconds: 30));
+        return http.Response('{}', 200);
+      });
+
+      await expectLater(
+        build(client).getTerms(timeout: const Duration(milliseconds: 20)),
+        throwsA(isA<TimeoutException>()),
+      );
+    });
   });
 }

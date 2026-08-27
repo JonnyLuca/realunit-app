@@ -17,11 +17,26 @@ class RealUnitReferralService extends DFXAuthService {
 
   static const _basePath = '/v1/realunit/referral';
 
-  Future<ReferralTermsDto> getTerms() async {
+  /// Public lookup and the landing page abort after 15s; authenticated
+  /// referral calls use the same budget so terms/summary/bind cannot hang
+  /// the UI past the bundled TB fallback.
+  static const lookupTimeout = Duration(seconds: 15);
+
+  Future<T> _timed<T>(
+    Future<T> future, {
+    Duration timeout = lookupTimeout,
+  }) => future.timeout(timeout);
+
+  Future<ReferralTermsDto> getTerms({
+    Duration timeout = lookupTimeout,
+  }) async {
     final uri = buildUri(host, '$_basePath/terms');
-    final response = await authenticatedGet(
-      uri,
-      headers: {'Content-Type': 'application/json'},
+    final response = await _timed(
+      authenticatedGet(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      ),
+      timeout: timeout,
     );
 
     if (response.statusCode != 200) {
@@ -38,10 +53,12 @@ class RealUnitReferralService extends DFXAuthService {
 
   Future<void> acceptTerms() async {
     final uri = buildUri(host, '$_basePath/terms/accept');
-    final response = await authenticatedPost(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'accepted': true}),
+    final response = await _timed(
+      authenticatedPost(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'accepted': true}),
+      ),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -54,9 +71,11 @@ class RealUnitReferralService extends DFXAuthService {
 
   Future<ReferralSummaryDto> getSummary() async {
     final uri = buildUri(host, '$_basePath/summary');
-    final response = await authenticatedGet(
-      uri,
-      headers: {'Content-Type': 'application/json'},
+    final response = await _timed(
+      authenticatedGet(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -75,13 +94,15 @@ class RealUnitReferralService extends DFXAuthService {
     required String guestName,
   }) async {
     final uri = buildUri(host, '$_basePath/invites');
-    final response = await authenticatedPost(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'guestName': guestName,
-        'termsAccepted': true,
-      }),
+    final response = await _timed(
+      authenticatedPost(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'guestName': guestName,
+          'termsAccepted': true,
+        }),
+      ),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -98,9 +119,11 @@ class RealUnitReferralService extends DFXAuthService {
 
   Future<List<ReferralInviteDto>> getInvites() async {
     final uri = buildUri(host, '$_basePath/invites');
-    final response = await authenticatedGet(
-      uri,
-      headers: {'Content-Type': 'application/json'},
+    final response = await _timed(
+      authenticatedGet(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -116,21 +139,18 @@ class RealUnitReferralService extends DFXAuthService {
         .toList();
   }
 
-  /// Public code lookup used by registration preview. No Bearer token —
-  /// the same route the website hits. 15s matches the landing-page abort.
-  static const lookupTimeout = Duration(seconds: 15);
-
   Future<ReferralCodeLookupDto> lookupCode(
     String code, {
     Duration timeout = lookupTimeout,
   }) async {
     final uri = buildUri(host, '$_basePath/code/$code');
-    final response = await appStore.httpClient
-        .get(
-          uri,
-          headers: {'Content-Type': 'application/json'},
-        )
-        .timeout(timeout);
+    final response = await _timed(
+      appStore.httpClient.get(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      ),
+      timeout: timeout,
+    );
 
     if (response.statusCode != 200) {
       throw ApiException.fromBody(
@@ -149,11 +169,14 @@ class RealUnitReferralService extends DFXAuthService {
     Duration timeout = lookupTimeout,
   }) async {
     final uri = buildUri(host, '$_basePath/bind');
-    final response = await authenticatedPost(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'code': code}),
-    ).timeout(timeout);
+    final response = await _timed(
+      authenticatedPost(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'code': code}),
+      ),
+      timeout: timeout,
+    );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw ApiException.fromBody(
@@ -169,9 +192,11 @@ class RealUnitReferralService extends DFXAuthService {
 
   Future<List<ReferralPayoutDto>> getPayouts() async {
     final uri = buildUri(host, '$_basePath/payouts');
-    final response = await authenticatedGet(
-      uri,
-      headers: {'Content-Type': 'application/json'},
+    final response = await _timed(
+      authenticatedGet(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      ),
     );
 
     if (response.statusCode != 200) {
