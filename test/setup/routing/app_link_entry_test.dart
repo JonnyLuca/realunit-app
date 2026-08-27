@@ -559,6 +559,33 @@ void main() {
       );
     });
 
+    test('reads the code from intent://invite and android-app:// URIs', () {
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'intent://invite/AB12CD#Intent;scheme=realunit-wallet;package=swiss.realunit.app;end',
+          ),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'android-app://swiss.realunit.app/https/realunit.app/invite/AB12CD',
+          ),
+        ),
+        'AB12CD',
+      );
+      expect(
+        extractReferralInviteCode(
+          Uri.parse(
+            'android-app://swiss.realunit.app/https/realunit.app/promo/EVT1',
+          ),
+        ),
+        'EVT1',
+      );
+    });
+
     test('reads promo codes from custom-scheme and https App Links', () {
       expect(
         extractReferralInviteCode(
