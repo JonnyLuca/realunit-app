@@ -116,9 +116,18 @@ class TransactionHistoryService extends DFXAuthService {
         final payout = ReferralPayoutDto.fromJson(raw);
         if (!payout.isSettled) continue;
         final hash = payout.txHash;
-        final txId = (hash != null && hash.isNotEmpty)
+        var txId = (hash != null && hash.isNotEmpty)
             ? hash
             : 'referral-payout-${payout.id}';
+        var exists = await _transactionRepository.existsTransaction(txId);
+        if (!exists && hash != null && hash.isNotEmpty) {
+          final lower = hash.toLowerCase();
+          if (lower != txId &&
+              await _transactionRepository.existsTransaction(lower)) {
+            txId = lower;
+            exists = true;
+          }
+        }
         final transaction = Transaction(
           height: 0,
           txId: txId,
@@ -132,7 +141,7 @@ class TransactionHistoryService extends DFXAuthService {
           data: payout.chfValue.toString(),
           timestamp: payout.created,
         );
-        if (await _transactionRepository.existsTransaction(txId)) {
+        if (exists) {
           await _transactionRepository.updateTransaction(transaction);
         } else {
           await _transactionRepository.insertTransaction(transaction);

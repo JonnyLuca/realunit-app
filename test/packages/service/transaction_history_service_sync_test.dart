@@ -349,5 +349,42 @@ void main() {
 
       verifyNever(() => txRepo.insertTransaction(any()));
     });
+
+    test('updates an existing payout row when the hash casing differs', () async {
+      sessionCache.setAuthToken('jwt-1');
+      when(() => txRepo.existsTransaction('0xPayOut')).thenAnswer((_) async => false);
+      when(() => txRepo.existsTransaction('0xpayout')).thenAnswer((_) async => true);
+      final client = MockClient((request) async {
+        if (request.url.path.endsWith('/history')) {
+          return http.Response(jsonEncode(_accountHistory([])), 200);
+        }
+        if (request.url.path.contains('/referral/payouts')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 9,
+                'amount': 20,
+                'chfValue': 246.5,
+                'created': '2026-08-24T10:00:00Z',
+                'kind': 'Invite',
+                'status': 'Complete',
+                'txHash': '0xPayOut',
+              },
+            ]),
+            200,
+          );
+        }
+        return http.Response('[]', 200);
+      });
+
+      await build(client).apiBasedSync();
+
+      final captured = verify(
+        () => txRepo.updateTransaction(captureAny()),
+      ).captured.single as Transaction;
+      expect(captured.txId, '0xpayout');
+      expect(captured.type, TransactionTypes.referralPayout);
+      verifyNever(() => txRepo.insertTransaction(any()));
+    });
   });
 }

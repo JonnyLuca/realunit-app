@@ -350,6 +350,10 @@ void main() {
       ),
     );
     await tester.pump();
+    expect(
+      find.text('Teilnahmebedingungen Referral-Programm'),
+      findsOneWidget,
+    );
     await tester.tap(find.byType(AppFilledButton));
     await tester.pump();
     await tester.pump();

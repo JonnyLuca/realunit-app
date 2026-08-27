@@ -100,6 +100,9 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
               final message = state is ReferralFailure
                   ? state.message
                   : (state as ReferralNeedsTerms).errorMessage;
+              final text = (message != null && message.isNotEmpty)
+                  ? message
+                  : (state is ReferralNeedsTerms ? s.referralTermsTitle : null);
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -107,8 +110,8 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 16,
                     children: [
-                      if (message != null && message.isNotEmpty)
-                        Text(message, textAlign: TextAlign.center),
+                      if (text != null)
+                        Text(text, textAlign: TextAlign.center),
                       AppFilledButton(
                         label: s.retry,
                         onPressed: () {
