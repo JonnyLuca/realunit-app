@@ -41,6 +41,7 @@ Uri? referralTermsInAppUri(String? href) {
   return null;
 }
 
+@visibleForTesting
 bool referralTermsOpensInApp(String? href) => referralTermsInAppUri(href) != null;
 
 class ReferralTermsPage extends StatefulWidget {
