@@ -192,6 +192,10 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                           onPressed: retrying
                               ? null
                               : () {
+                                  if (state is ReferralNeedsTerms) {
+                                    Navigator.of(context).pop('needsTerms');
+                                    return;
+                                  }
                                   final cubit = context.read<ReferralCubit>();
                                   cubit.load().then((_) {
                                     if (!cubit.isClosed) cubit.openCreate();

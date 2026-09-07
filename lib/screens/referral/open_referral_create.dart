@@ -18,10 +18,15 @@ Future<void> openReferralCreateAndRefresh(BuildContext context) async {
   if (_openingReferralCreate) return;
   _openingReferralCreate = true;
   try {
-    final created = await context.pushNamed<bool>(SettingsRoutes.referralCreate);
+    final created = await context.pushNamed<Object>(
+      SettingsRoutes.referralCreate,
+    );
     _openingReferralCreate = false;
-    if (created == true && context.mounted) {
+    if (!context.mounted) return;
+    if (created == true) {
       unawaited(context.read<ReferralCubit>().refreshOverview());
+    } else if (created == 'needsTerms') {
+      unawaited(context.read<ReferralCubit>().load());
     }
   } finally {
     _openingReferralCreate = false;

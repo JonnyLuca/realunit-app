@@ -14,6 +14,10 @@ String? _pendingReferralCode;
 /// boot bind cannot read prefs after memory was claimed.
 bool _takingPendingReferralCode = false;
 
+/// Invalidates an in-flight prefs `setString` after take/clear/discard so a
+/// late write cannot resurrect a code that was already bound.
+int _stashGeneration = 0;
+
 /// Persist [code] for post-unlock / post-KYC bind.
 ///
 /// Sources: custom-scheme / https App Links, the registration field, and
@@ -23,8 +27,10 @@ bool _takingPendingReferralCode = false;
 Future<void> stashPendingReferralCode(String code) async {
   final capped = referralCodeFromInput(code);
   if (capped == null) return;
+  final gen = ++_stashGeneration;
   _pendingReferralCode = capped;
   final prefs = await SharedPreferences.getInstance();
+  if (gen != _stashGeneration || _pendingReferralCode != capped) return;
   await prefs.setString(pendingReferralCodeKey, capped);
 }
 
@@ -35,6 +41,7 @@ Future<String?> takePendingReferralCode() async {
   try {
     final inMemory = _pendingReferralCode;
     _pendingReferralCode = null;
+    _stashGeneration++;
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(pendingReferralCodeKey);
     await prefs.remove(pendingReferralCodeKey);
@@ -48,6 +55,7 @@ Future<String?> takePendingReferralCode() async {
 Future<void> clearPendingReferralCode() async {
   _pendingReferralCode = null;
   _takingPendingReferralCode = false;
+  _stashGeneration++;
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove(pendingReferralCodeKey);
 }
@@ -67,6 +75,7 @@ Future<void> discardPendingReferralCodeIfEqual(String code) async {
     final current = inMemory ?? stored;
     if (current != capped) return;
     _pendingReferralCode = null;
+    _stashGeneration++;
     await prefs.remove(pendingReferralCodeKey);
   } finally {
     _takingPendingReferralCode = false;
@@ -94,4 +103,5 @@ String? peekPendingReferralCodeSync() =>
 void debugSetPendingReferralCodeSync(String? code) {
   _pendingReferralCode = code;
   _takingPendingReferralCode = false;
+  _stashGeneration++;
 }

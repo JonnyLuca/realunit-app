@@ -866,7 +866,9 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('needs-terms offers retry that reloads the summary', (tester) async {
+  testWidgets('needs-terms pops so the parent cubit can show terms', (
+    tester,
+  ) async {
     when(() => cubit.state).thenReturn(
       const ReferralNeedsTerms(summary: _summary),
     );
@@ -875,9 +877,8 @@ void main() {
       const Stream<ReferralState>.empty(),
       initialState: const ReferralNeedsTerms(summary: _summary),
     );
-    when(() => cubit.load()).thenAnswer((_) async {});
-    when(() => cubit.openCreate()).thenReturn(null);
 
+    Object? popped;
     await tester.pumpWidget(
       MaterialApp(
         theme: realUnitTheme,
@@ -889,13 +890,24 @@ void main() {
           GlobalWidgetsLocalizations.delegate,
         ],
         supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
+        home: Builder(
+          builder: (context) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              popped = await Navigator.of(context).push<Object>(
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider<ReferralCubit>.value(
+                    value: cubit,
+                    child: const ReferralCreateView(),
+                  ),
+                ),
+              );
+            });
+            return const SizedBox();
+          },
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       find.text('Bitte zuerst die Teilnahmebedingungen akzeptieren.'),
       findsOneWidget,
@@ -905,10 +917,10 @@ void main() {
       isTrue,
     );
     await tester.tap(find.byType(AppFilledButton));
-    await tester.pump();
-    await tester.pump();
-    verify(() => cubit.load()).called(1);
-    verify(() => cubit.openCreate()).called(1);
+    await tester.pumpAndSettle();
+    expect(popped, 'needsTerms');
+    verifyNever(() => cubit.load());
+    verifyNever(() => cubit.openCreate());
   });
 
   testWidgets(
