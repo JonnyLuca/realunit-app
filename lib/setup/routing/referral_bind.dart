@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
@@ -338,7 +339,11 @@ Future<void> _showInvalidBindDialog(GoRouter router, Object error) {
 }
 
 bool _shouldRetryBind(Object error) {
-  if (error is! ApiException) return true;
+  if (error is FormatException || error is TypeError) return false;
+  if (error is TimeoutException) return true;
+  if (error is http.ClientException) return true;
+  if (error.runtimeType.toString() == 'SocketException') return true;
+  if (error is! ApiException) return false;
   if (isReferralRouteMissing(error.message)) return true;
   final status = error.statusCode;
   if (status == null) return true;
