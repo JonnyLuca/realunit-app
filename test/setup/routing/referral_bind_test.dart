@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
@@ -16,7 +17,6 @@ import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockService extends Mock implements RealUnitReferralService {}
 
@@ -143,6 +143,28 @@ void main() {
         message: 'already bound',
       ),
     );
+
+    await bindPendingReferralCode(router);
+
+    expect(await peekPendingReferralCode(), isNull);
+    verify(() => service.bind(code: 'AB12CD')).called(1);
+  });
+
+  test('drops the stash when bind throws FormatException', () async {
+    await stashPendingReferralCode('AB12CD');
+    when(() => service.bind(code: 'AB12CD')).thenThrow(
+      const FormatException('not json'),
+    );
+
+    await bindPendingReferralCode(router);
+
+    expect(await peekPendingReferralCode(), isNull);
+    verify(() => service.bind(code: 'AB12CD')).called(1);
+  });
+
+  test('drops the stash when bind throws TypeError', () async {
+    await stashPendingReferralCode('AB12CD');
+    when(() => service.bind(code: 'AB12CD')).thenThrow(TypeError());
 
     await bindPendingReferralCode(router);
 
