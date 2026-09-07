@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fake_async/fake_async.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:realunit_wallet/packages/io/install_referrer_port.dart';
 import 'package:realunit_wallet/setup/routing/capture_install_referrer.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakePort implements InstallReferrerPort {
   _FakePort(this.value, {this.throwing = false});

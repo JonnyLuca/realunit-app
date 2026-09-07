@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/stash_resolved_referral_code.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   setUp(() async {
