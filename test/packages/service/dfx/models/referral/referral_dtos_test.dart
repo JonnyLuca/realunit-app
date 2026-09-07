@@ -752,7 +752,7 @@ void main() {
       expect(dto.txHash, '123');
     });
 
-    test('pending and failed payouts are not settled; missing status is', () {
+    test('pending, failed, and missing-status payouts are not settled', () {
       expect(
         ReferralPayoutDto.fromJson({
           'id': 1,
@@ -770,7 +770,17 @@ void main() {
           'chfValue': 1,
           'created': '2026-08-24T10:00:00Z',
         }).isSettled,
-        isTrue,
+        isFalse,
+      );
+      expect(
+        ReferralPayoutDto.fromJson({
+          'id': 5,
+          'amount': 20,
+          'chfValue': 1,
+          'created': '2026-08-24T10:00:00Z',
+          'status': '   ',
+        }).isSettled,
+        isFalse,
       );
       expect(
         ReferralPayoutDto.fromJson({

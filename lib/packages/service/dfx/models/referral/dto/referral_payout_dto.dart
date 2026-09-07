@@ -23,10 +23,11 @@ class ReferralPayoutDto {
   });
 
   /// History only shows a prize after the on-chain transfer is confirmed
-  /// (Offerte Punkt 4). Pending/failed rows stay off the ledger.
+  /// (Offerte Punkt 4). Pending/failed/missing-status rows stay off the
+  /// ledger — a missing status is not treated as settled.
   bool get isSettled {
     final s = status.toLowerCase();
-    if (s.isEmpty) return true;
+    if (s.isEmpty) return false;
     return s == 'complete' ||
         s == 'completed' ||
         s == 'credited' ||
@@ -52,7 +53,7 @@ class ReferralPayoutDto {
       chfValue: referralJsonNum(json['chfValue']) ?? 0,
       created: created,
       kind: referralJsonString(json['kind']) ?? '',
-      status: referralJsonString(json['status']) ?? 'Settled',
+      status: referralJsonString(json['status']) ?? '',
       txHash: referralJsonString(json['txHash']),
     );
   }
