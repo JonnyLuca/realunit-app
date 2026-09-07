@@ -18,15 +18,20 @@ class ReferralCubit extends Cubit<ReferralState> {
 
   ReferralCubit(this._service) : super(const ReferralInitial());
 
+  void _emitIfOpen(ReferralState next) {
+    if (isClosed) return;
+    emit(next);
+  }
+
   Future<void> load() async {
     final current = state;
     if (current is ReferralLoading) return;
     if (current is ReferralFailure && current.retrying) return;
     if (current is ReferralNeedsTerms && current.retrying) return;
     if (current is ReferralFailure) {
-      emit(ReferralFailure(message: current.message, retrying: true));
+      _emitIfOpen(ReferralFailure(message: current.message, retrying: true));
     } else if (current is ReferralNeedsTerms) {
-      emit(
+      _emitIfOpen(
         ReferralNeedsTerms(
           summary: current.summary,
           errorMessage: current.errorMessage,
@@ -34,14 +39,14 @@ class ReferralCubit extends Cubit<ReferralState> {
         ),
       );
     } else {
-      emit(const ReferralLoading());
+      _emitIfOpen(const ReferralLoading());
     }
     try {
       await _emitFromSummary(await _service.getSummary());
     } on ApiException catch (e) {
-      emit(ReferralFailure(message: referralErrorMessage(e)));
+      _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
     } catch (e) {
-      emit(ReferralFailure(message: referralErrorMessage(e)));
+      _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
     }
   }
 
@@ -52,7 +57,7 @@ class ReferralCubit extends Cubit<ReferralState> {
     if (current is! ReferralNeedsTerms) return;
     final summary = current.summary;
 
-    emit(
+    _emitIfOpen(
       ReferralTermsAccepting(
         summary: summary,
         errorMessage: current.errorMessage,
@@ -61,7 +66,7 @@ class ReferralCubit extends Cubit<ReferralState> {
     try {
       await _service.acceptTerms(version: version);
     } on ApiException catch (e) {
-      emit(
+      _emitIfOpen(
         ReferralNeedsTerms(
           summary: summary,
           errorMessage: referralErrorMessage(e),
@@ -69,7 +74,7 @@ class ReferralCubit extends Cubit<ReferralState> {
       );
       return;
     } catch (e) {
-      emit(
+      _emitIfOpen(
         ReferralNeedsTerms(
           summary: summary,
           errorMessage: referralErrorMessage(e),
@@ -82,9 +87,9 @@ class ReferralCubit extends Cubit<ReferralState> {
     try {
       await _emitFromSummary(await _service.getSummary());
     } on ApiException catch (e) {
-      emit(ReferralFailure(message: referralErrorMessage(e)));
+      _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
     } catch (e) {
-      emit(ReferralFailure(message: referralErrorMessage(e)));
+      _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
     }
   }
 
@@ -102,7 +107,7 @@ class ReferralCubit extends Cubit<ReferralState> {
     };
     if (summary == null) return;
 
-    emit(
+    _emitIfOpen(
       ReferralCreating(
         summary: summary,
         guestName: name,
@@ -111,24 +116,24 @@ class ReferralCubit extends Cubit<ReferralState> {
     );
     try {
       final created = await _service.createInvite(guestName: name);
-      emit(ReferralInviteCreated(summary: summary, invite: created));
+      _emitIfOpen(ReferralInviteCreated(summary: summary, invite: created));
     } on ApiException catch (e) {
       if (e.code == 'NOT_ELIGIBLE') {
-        emit(const ReferralNotEligible());
+        _emitIfOpen(const ReferralNotEligible());
         return;
       }
       if (e.code == 'NEEDS_TERMS') {
-        emit(ReferralNeedsTerms(summary: summary));
+        _emitIfOpen(ReferralNeedsTerms(summary: summary));
         return;
       }
-      emit(
+      _emitIfOpen(
         ReferralCreateReady(
           summary: summary,
           errorMessage: referralErrorMessage(e),
         ),
       );
     } catch (e) {
-      emit(
+      _emitIfOpen(
         ReferralCreateReady(
           summary: summary,
           errorMessage: referralErrorMessage(e),
@@ -140,9 +145,9 @@ class ReferralCubit extends Cubit<ReferralState> {
   void openCreate() {
     final current = state;
     if (current is ReferralOverviewLoaded) {
-      emit(ReferralCreateReady(summary: current.summary));
+      _emitIfOpen(ReferralCreateReady(summary: current.summary));
     } else if (current is ReferralInviteCreated) {
-      emit(ReferralCreateReady(summary: current.summary));
+      _emitIfOpen(ReferralCreateReady(summary: current.summary));
     }
   }
 
@@ -154,10 +159,10 @@ class ReferralCubit extends Cubit<ReferralState> {
       await _emitFromSummary(await _service.getSummary());
     } on ApiException catch (e) {
       if (previous is ReferralOverviewLoaded) return;
-      emit(ReferralFailure(message: referralErrorMessage(e)));
+      _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
     } catch (e) {
       if (previous is ReferralOverviewLoaded) return;
-      emit(ReferralFailure(message: referralErrorMessage(e)));
+      _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
     } finally {
       _refreshing = false;
     }
@@ -170,7 +175,7 @@ class ReferralCubit extends Cubit<ReferralState> {
     if (current.invitesLoading) return;
     if (_refreshing) return;
     final generation = ++_invitesGeneration;
-    emit(
+    _emitIfOpen(
       ReferralOverviewLoaded(
         summary: current.summary,
         invites: current.invites,
@@ -183,12 +188,12 @@ class ReferralCubit extends Cubit<ReferralState> {
       if (generation != _invitesGeneration) return;
       final latest = state;
       if (latest is! ReferralOverviewLoaded) return;
-      emit(ReferralOverviewLoaded(summary: latest.summary, invites: invites));
+      _emitIfOpen(ReferralOverviewLoaded(summary: latest.summary, invites: invites));
     } on ApiException catch (e) {
       if (generation != _invitesGeneration) return;
       final latest = state;
       if (latest is! ReferralOverviewLoaded) return;
-      emit(
+      _emitIfOpen(
         ReferralOverviewLoaded(
           summary: latest.summary,
           invites: latest.invites,
@@ -199,7 +204,7 @@ class ReferralCubit extends Cubit<ReferralState> {
       if (generation != _invitesGeneration) return;
       final latest = state;
       if (latest is! ReferralOverviewLoaded) return;
-      emit(
+      _emitIfOpen(
         ReferralOverviewLoaded(
           summary: latest.summary,
           invites: latest.invites,
@@ -212,11 +217,11 @@ class ReferralCubit extends Cubit<ReferralState> {
   Future<void> _emitFromSummary(ReferralSummaryDto summary) async {
     _invitesGeneration++;
     if (!summary.eligible) {
-      emit(const ReferralNotEligible());
+      _emitIfOpen(const ReferralNotEligible());
       return;
     }
     if (!summary.termsAccepted) {
-      emit(ReferralNeedsTerms(summary: summary));
+      _emitIfOpen(ReferralNeedsTerms(summary: summary));
       return;
     }
     // Counts come from summary. Open-invite copy/share is best-effort so a
@@ -230,7 +235,7 @@ class ReferralCubit extends Cubit<ReferralState> {
     } catch (e) {
       invitesError = referralErrorMessage(e);
     }
-    emit(
+    _emitIfOpen(
       ReferralOverviewLoaded(
         summary: summary,
         invites: invites,
