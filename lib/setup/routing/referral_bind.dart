@@ -40,10 +40,20 @@ void debugResetBindInFlight() {
 /// dialog is shown on the next frame instead of dropped.
 /// After a finished bind, a leftover stash is
 /// taken next so a later deeplink is not stuck behind a spent POST.
+bool _isKycLocation(GoRouter router) {
+  try {
+    final path = router.routerDelegate.currentConfiguration.uri.path;
+    return path == '/kyc' || path.startsWith('/kyc/');
+  } catch (_) {
+    return false;
+  }
+}
+
 Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
   if (code != null) {
     await stashPendingReferralCode(code);
   }
+  if (_isKycLocation(router)) return;
   if (_bindInFlight) return;
   _bindInFlight = true;
   try {

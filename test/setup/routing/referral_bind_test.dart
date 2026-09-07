@@ -252,6 +252,29 @@ void main() {
     expect(await peekPendingReferralCode(), isNull);
   });
 
+  test('defers bind while on /kyc and keeps the stash', () async {
+    router = GoRouter(
+      navigatorKey: GlobalKey<NavigatorState>(),
+      initialLocation: '/kyc',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => const Scaffold(body: SizedBox()),
+        ),
+        GoRoute(
+          path: '/kyc',
+          builder: (_, _) => const Scaffold(body: SizedBox()),
+        ),
+      ],
+    );
+    await stashPendingReferralCode('AB12CD');
+
+    await bindPendingReferralCode(router);
+
+    verifyNever(() => service.bind(code: any(named: 'code')));
+    expect(await peekPendingReferralCode(), 'AB12CD');
+  });
+
   test('does not rebind the same code restashed during an in-flight POST', () async {
     await stashPendingReferralCode('AB12CD');
     final started = Completer<void>();
