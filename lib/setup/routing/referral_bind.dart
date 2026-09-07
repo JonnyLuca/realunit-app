@@ -76,13 +76,23 @@ class _BindReferralOnKycExitState extends State<BindReferralOnKycExit> {
 /// dialog is shown on the next frame instead of dropped.
 /// After a finished bind, a leftover stash is
 /// taken next so a later deeplink is not stuck behind a spent POST.
+bool _pathIsKyc(String location) {
+  final path = Uri.tryParse(location)?.path ?? location;
+  return path == '/kyc' || path.startsWith('/kyc/');
+}
+
 bool _isKycLocation(GoRouter router) {
   try {
-    final location = effectiveLocation(
-      router.routerDelegate.currentConfiguration,
-    );
-    final path = Uri.parse(location).path;
-    return path == '/kyc' || path.startsWith('/kyc/');
+    final config = router.routerDelegate.currentConfiguration;
+    if (_pathIsKyc(effectiveLocation(config))) return true;
+    for (final match in config.matches) {
+      if (_pathIsKyc(match.matchedLocation)) return true;
+      if (match is ImperativeRouteMatch &&
+          _pathIsKyc(match.matches.uri.toString())) {
+        return true;
+      }
+    }
+    return false;
   } catch (_) {
     return false;
   }

@@ -416,6 +416,41 @@ void main() {
     );
 
     testWidgets(
+      'restore /kyc with /pay on top does not bind a pending referral code',
+      (tester) async {
+        final service = _MockReferralService();
+        when(() => service.bind(code: any(named: 'code'))).thenAnswer(
+          (_) async => const ReferralBindResultDto(kind: 'Invite'),
+        );
+        GetIt.instance.registerSingleton<RealUnitReferralService>(service);
+        await stashPendingReferralCode('AB12CD');
+
+        final router = buildRouter();
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+
+        stashPendingPaymentDeeplink('lightning:LNURL1DP68GURN8GHJ7VF3XGENJVE5UMD');
+        applyBootNavAction(
+          resolveAfterRelock('/kyc'),
+          router,
+          onLoadWallet: () {},
+          onClearResume: () {},
+        );
+        await tester.pump();
+        await tester.pump();
+
+        verifyNever(() => service.bind(code: any(named: 'code')));
+        expect(await peekPendingReferralCode(), 'AB12CD');
+        expect(
+          router.routerDelegate.currentConfiguration.matches
+              .map((m) => m.matchedLocation)
+              .toList(),
+          ['/dashboard', '/kyc', '/pay'],
+        );
+      },
+    );
+
+    testWidgets(
       'BootNavStay replays a stashed pendingPaymentDeeplink, pushing /pay on '
       'top of the current location',
       (tester) async {

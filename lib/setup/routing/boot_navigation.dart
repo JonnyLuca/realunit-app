@@ -250,10 +250,15 @@ void applyBootNavAction(
       }
       // Bind after this frame so the restored location is current. Do not
       // wait for the pushed route to pop — staying on /settings would
-      // otherwise never bind. KYC is still skipped by `_isKycLocation`.
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        unawaited(bindPendingReferralCode(router));
-      });
+      // otherwise never bind. Restored KYC (even with /pay on top) stays
+      // unbound; `_isKycLocation` walks the whole match list.
+      final restoreIsKyc =
+          restorePath == '/kyc' || restorePath.startsWith('/kyc/');
+      if (!restoreIsKyc) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          unawaited(bindPendingReferralCode(router));
+        });
+      }
       return;
     case BootNavStay():
       // Already on a valid non-gate route — discard any stale resume capture.
