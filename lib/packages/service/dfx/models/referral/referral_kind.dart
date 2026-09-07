@@ -10,7 +10,7 @@ String inferReferralKind(
 }) {
   final raw = referralJsonString(json['kind']);
   if (raw != null) return raw;
-  final inviter = referralJsonString(json['inviterName']);
+  final inviter = referralPersonName(json['inviterName']);
   if (inviter != null) return 'invite';
   if (firstNonEmpty([
         referralJsonString(json['campaignText']),

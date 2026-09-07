@@ -319,6 +319,23 @@ void main() {
       expect(numeric.inviterName, isNull);
     });
 
+    test('wallet/numeric inviterName + campaign text without kind is promo', () {
+      final wallet = ReferralBindResultDto.fromJson({
+        'inviterName': '0x553C7f9C780316FC1D34b8e14ac2465Ab22a090B',
+        'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      });
+      expect(wallet.isPromo, isTrue);
+      expect(wallet.inviterName, isNull);
+      expect(wallet.displayInviterName, isNull);
+
+      final numeric = ReferralBindResultDto.fromJson({
+        'inviterName': '12345',
+        'actionTextEn': 'With code EVT1 we give you 20 tokens.',
+      });
+      expect(numeric.isPromo, isTrue);
+      expect(numeric.inviterName, isNull);
+    });
+
     test('campaignTextLang keeps the UI language when there is no copy', () {
       final dto = ReferralBindResultDto.fromJson({
         'kind': 'Invite',
@@ -1022,6 +1039,22 @@ void main() {
         'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
       });
       expect(invite.isInvite, isTrue);
+    });
+
+    test('wallet/numeric inviterName + campaign text without kind is promo', () {
+      final wallet = ReferralCodeLookupDto.fromJson({
+        'inviterName': '0x553C7f9C780316FC1D34b8e14ac2465Ab22a090B',
+        'actionText': 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      });
+      expect(wallet.isPromo, isTrue);
+      expect(wallet.inviterName, isNull);
+
+      final numeric = ReferralCodeLookupDto.fromJson({
+        'inviterName': '12345',
+        'actionTextEn': 'With code EVT1 we give you 20 tokens.',
+      });
+      expect(numeric.isPromo, isTrue);
+      expect(numeric.inviterName, isNull);
     });
 
     test('campaignTextLang keeps the UI language when there is no copy', () {

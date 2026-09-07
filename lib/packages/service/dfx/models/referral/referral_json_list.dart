@@ -210,11 +210,15 @@ String? _canonicalRealUnitInviteUrl(String raw) {
 
   final uri = Uri.tryParse(value);
   if (uri != null && uri.hasScheme) {
+    final scheme = uri.scheme.toLowerCase();
+    if (scheme != 'http' && scheme != 'https') {
+      return null;
+    }
     if (!_referralInviteHosts.contains(uri.host.toLowerCase())) {
-      return raw.startsWith('//') ? value : raw;
+      return null;
     }
     var next = uri;
-    if (uri.scheme == 'http') {
+    if (scheme == 'http') {
       next = next.replace(scheme: 'https');
     }
     if (next.host.toLowerCase() == 'www.realunit.app') {

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/screens/referral/share_referral_invite.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
-import 'package:share_plus/share_plus.dart';
 
 /// Shares the personalised invite text. A second tap while the sheet is
 /// open is ignored. A platform share failure keeps the label in the error

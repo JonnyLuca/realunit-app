@@ -257,8 +257,25 @@ void main() {
     );
     expect(
       referralInviteUrl(url: '//cdn.example/invite/AB12', code: 'AB12'),
-      'https://cdn.example/invite/AB12',
+      'https://realunit.app/invite/AB12',
     );
+    expect(
+      referralInviteUrl(url: 'https://cdn.example/invite/AB12', code: 'AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(
+      referralInviteUrl(url: 'javascript:alert(1)', code: 'AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(
+      referralInviteUrl(url: 'javascript://realunit.app/%0aalert(1)', code: 'AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(
+      referralInviteUrl(url: 'data:text/html,phishing', code: 'AB12'),
+      'https://realunit.app/invite/AB12',
+    );
+    expect(referralInviteUrl(url: 'javascript:alert(1)'), isNull);
     expect(referralInviteUrl(), isNull);
   });
 
