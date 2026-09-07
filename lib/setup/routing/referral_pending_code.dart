@@ -44,6 +44,12 @@ Future<String?> takePendingReferralCode() async {
     _stashGeneration++;
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(pendingReferralCodeKey);
+    final newer = referralCodeFromInput(_pendingReferralCode);
+    if (newer != null) {
+      _pendingReferralCode = null;
+      await prefs.remove(pendingReferralCodeKey);
+      return newer;
+    }
     await prefs.remove(pendingReferralCodeKey);
     return referralCodeFromInput(inMemory ?? stored);
   } finally {

@@ -98,7 +98,11 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
     while (true) {
       // Take before POST so a parallel boot bind cannot send the same code twice.
       final resolved = await takePendingReferralCode();
-      if (resolved == null || resolved.isEmpty) return;
+      if (resolved == null || resolved.isEmpty) {
+        final leftover = await peekPendingReferralCode();
+        if (leftover == null || leftover.isEmpty) return;
+        continue;
+      }
       final retryLater = await _bindTakenCode(router, resolved);
       if (retryLater) return;
       await discardPendingReferralCodeIfEqual(resolved);
