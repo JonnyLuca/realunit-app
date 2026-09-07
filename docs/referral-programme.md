@@ -150,8 +150,7 @@ open so copy/share stay until Credited. An unknown non-terminal status
 is treated as open so a new API spelling cannot hide copy/share;
 credited/paid and deleted/expired/rejected are not open. Pending
 Open/Bound/Review rows are **Deleted** after 90 days.
-credited
-names stay hidden — never registration, verification, or purchases of
+Invitee names stay hidden — never registration, verification, or purchases of
 the invited person. If this list call fails, the app still shows the
 summary tiles (open/credited/total) and omits the copy/share rows on
 first load; a later reload keeps previous rows. Retry is shown for a
@@ -399,7 +398,7 @@ row.
   referrer, an Outlook Safe Links `url=`, a Proofpoint URL Defense
   v2/v3 encoded landing URL, or a path-nested landing URL (Yahoo `RU=https://…`). A hung
   Play Install Referrer read is timed out after 4s so app setup cannot
-  stall; the consumed flag is left unset. While lookup is in flight the field shows «Code wird»
+  stall; the consumed flag is left unset. While lookup is in flight the field shows «Code wird
   geprüft…» and hides the previous result. A later lookup of the same
   code (Done, paste, Retry) discards an earlier in-flight result so a
   slower 4xx cannot overwrite a later 200. Next/Skip lock the field
