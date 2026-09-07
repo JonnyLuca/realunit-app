@@ -335,7 +335,20 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
               KycRegistrationStep.referral;
           return KycRegistrationReferralStep(
             referralCodeCtrl: referralCodeCtrl,
-            onResolved: (code) => _resolvedReferralCode = code,
+            onResolved: (code) {
+              _resolvedReferralCode = code;
+              if (code != null) {
+                unawaited(() async {
+                  try {
+                    await stashResolvedReferralCode(code);
+                  } catch (e) {
+                    developer.log(
+                      'Failed to stash resolved referral code: $e',
+                    );
+                  }
+                }());
+              }
+            },
             pendingCode: isReferralActive ? peekPendingReferralCode : null,
             autoPasteOnEmpty: true,
           );
