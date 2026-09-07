@@ -63,4 +63,17 @@ void main() {
     expect(await peekPendingReferralCode(), isNull);
     expect(peekPendingReferralCodeSync(), isNull);
   });
+
+  test('discardPendingReferralCodeIfEqual drops only a matching stash', () async {
+    await stashPendingReferralCode('AB12CD');
+    await discardPendingReferralCodeIfEqual('AB12CD');
+    expect(await peekPendingReferralCode(), isNull);
+  });
+
+  test('discardPendingReferralCodeIfEqual leaves a newer distinct stash', () async {
+    await stashPendingReferralCode('AB12CD');
+    await stashPendingReferralCode('NEWER1');
+    await discardPendingReferralCodeIfEqual('AB12CD');
+    expect(await peekPendingReferralCode(), 'NEWER1');
+  });
 }

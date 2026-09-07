@@ -6,6 +6,8 @@ import 'package:realunit_wallet/setup/routing/routes/app_routes.dart';
 import 'package:realunit_wallet/setup/routing/routes/onboarding_routes.dart';
 import 'package:realunit_wallet/setup/routing/routes/pin_routes.dart';
 
+export 'package:realunit_wallet/setup/routing/effective_location.dart';
+
 /// The outcome of the boot/lock navigation decision (see
 /// [resolveBootNavigation]) driven by `main.dart`'s `_navigate`. The decision
 /// itself is `getIt`-free so the whole gate ladder can be unit-tested
@@ -43,21 +45,6 @@ final class BootNavRestore extends BootNavAction {
 /// them exactly where they are, never yank them to the dashboard.
 final class BootNavStay extends BootNavAction {
   const BootNavStay();
-}
-
-/// The location the user actually sees, including imperatively pushed routes.
-///
-/// `RouteMatchList.uri` only reflects declarative (`go`) matches — after a
-/// `push` (how the KYC flow is entered from Buy/Sell) it still reports the
-/// base route underneath. Everything that judges or captures "where the user
-/// is" (the boot machine's `currentLocation`, the background capture, the
-/// scheme-open redirect) must read this helper instead, or a pushed flow is
-/// invisible to it.
-String effectiveLocation(RouteMatchList configuration) {
-  final matches = configuration.matches;
-  final last = matches.isEmpty ? null : matches.last;
-  if (last is ImperativeRouteMatch) return last.matches.uri.toString();
-  return configuration.uri.toString();
 }
 
 /// Locations that are boot/lock gates: `_navigate` re-derives them from state
@@ -249,17 +236,20 @@ void applyBootNavAction(
       // push on top of the restored location (same post-unlock terminal
       // consumption as the dashboard branch).
       onClearResume();
-      if (Uri.parse(location).path == '/dashboard') {
+      final restorePath = Uri.parse(location).path;
+      final Future<void> restored;
+      if (restorePath == '/dashboard') {
         router.go(location);
+        restored = Future<void>.value();
       } else {
         router.goNamed(AppRoutes.dashboard);
-        unawaited(router.push(location));
+        restored = router.push(location);
       }
       final payload = takePendingPaymentDeeplink();
       if (payload != null) {
         unawaited(router.pushNamed(AppRoutes.pay, extra: payload));
       }
-      unawaited(bindPendingReferralCode(router));
+      unawaited(restored.then((_) => bindPendingReferralCode(router)));
       return;
     case BootNavStay():
       // Already on a valid non-gate route — discard any stale resume capture.

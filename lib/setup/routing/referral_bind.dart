@@ -10,6 +10,7 @@ import 'package:realunit_wallet/packages/service/dfx/referral_lookup_status.dart
 import 'package:realunit_wallet/screens/pin/bloc/auth/pin_auth_cubit.dart';
 import 'package:realunit_wallet/screens/referral/referral_error_message.dart';
 import 'package:realunit_wallet/setup/di.dart';
+import 'package:realunit_wallet/setup/routing/effective_location.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
@@ -42,7 +43,10 @@ void debugResetBindInFlight() {
 /// taken next so a later deeplink is not stuck behind a spent POST.
 bool _isKycLocation(GoRouter router) {
   try {
-    final path = router.routerDelegate.currentConfiguration.uri.path;
+    final location = effectiveLocation(
+      router.routerDelegate.currentConfiguration,
+    );
+    final path = Uri.parse(location).path;
     return path == '/kyc' || path.startsWith('/kyc/');
   } catch (_) {
     return false;
@@ -63,10 +67,7 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
       if (resolved == null || resolved.isEmpty) return;
       final retryLater = await _bindTakenCode(router, resolved);
       if (retryLater) return;
-      final leftover = await peekPendingReferralCode();
-      if (leftover == resolved) {
-        await clearPendingReferralCode();
-      }
+      await discardPendingReferralCodeIfEqual(resolved);
     }
   } finally {
     _bindInFlight = false;

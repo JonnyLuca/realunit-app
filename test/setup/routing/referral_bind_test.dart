@@ -275,6 +275,33 @@ void main() {
     expect(await peekPendingReferralCode(), 'AB12CD');
   });
 
+  testWidgets('defers bind when /kyc is pushed over /dashboard', (tester) async {
+    router = GoRouter(
+      navigatorKey: GlobalKey<NavigatorState>(),
+      initialLocation: '/dashboard',
+      routes: [
+        GoRoute(
+          path: '/dashboard',
+          builder: (_, _) => const Scaffold(body: SizedBox()),
+        ),
+        GoRoute(
+          path: '/kyc',
+          builder: (_, _) => const Scaffold(body: SizedBox()),
+        ),
+      ],
+    );
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+    router.push('/kyc');
+    await tester.pumpAndSettle();
+    await stashPendingReferralCode('AB12CD');
+
+    await bindPendingReferralCode(router);
+
+    verifyNever(() => service.bind(code: any(named: 'code')));
+    expect(await peekPendingReferralCode(), 'AB12CD');
+  });
+
   test('does not rebind the same code restashed during an in-flight POST', () async {
     await stashPendingReferralCode('AB12CD');
     final started = Completer<void>();

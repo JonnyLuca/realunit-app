@@ -52,6 +52,27 @@ Future<void> clearPendingReferralCode() async {
   await prefs.remove(pendingReferralCodeKey);
 }
 
+/// Drop the stash only if it still equals [code]. A newer distinct code
+/// that landed after a successful bind is left for the next take.
+Future<void> discardPendingReferralCodeIfEqual(String code) async {
+  final capped = referralCodeFromInput(code);
+  if (capped == null) return;
+  if (_takingPendingReferralCode) return;
+  _takingPendingReferralCode = true;
+  try {
+    final inMemory = referralCodeFromInput(_pendingReferralCode);
+    if (inMemory != null && inMemory != capped) return;
+    final prefs = await SharedPreferences.getInstance();
+    final stored = referralCodeFromInput(prefs.getString(pendingReferralCodeKey));
+    final current = inMemory ?? stored;
+    if (current != capped) return;
+    _pendingReferralCode = null;
+    await prefs.remove(pendingReferralCodeKey);
+  } finally {
+    _takingPendingReferralCode = false;
+  }
+}
+
 /// Read-only peek (memory first, then SharedPreferences). Does not clear.
 /// Percent-decodes values written before stash-time normalize.
 Future<String?> peekPendingReferralCode() async {
