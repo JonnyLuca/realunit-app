@@ -252,6 +252,25 @@ void main() {
     expect(await peekPendingReferralCode(), isNull);
   });
 
+  test('does not rebind the same code restashed during an in-flight POST', () async {
+    await stashPendingReferralCode('AB12CD');
+    final started = Completer<void>();
+    final release = Completer<ReferralBindResultDto>();
+    when(() => service.bind(code: 'AB12CD')).thenAnswer((_) async {
+      started.complete();
+      return release.future;
+    });
+
+    final first = bindPendingReferralCode(router);
+    await started.future;
+    await bindPendingReferralCode(router, code: 'AB12CD');
+    release.complete(const ReferralBindResultDto(kind: 'Invite'));
+    await first;
+
+    verify(() => service.bind(code: 'AB12CD')).called(1);
+    expect(await peekPendingReferralCode(), isNull);
+  });
+
   test('a retryable bind does not overwrite a newer stashed code', () async {
     await stashPendingReferralCode('AB12CD');
     final started = Completer<void>();

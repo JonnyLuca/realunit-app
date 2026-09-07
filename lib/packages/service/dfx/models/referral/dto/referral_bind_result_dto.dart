@@ -79,8 +79,7 @@ class ReferralBindResultDto {
       campaignTextEn: referralJsonString(json['campaignTextEn']),
       actionText: referralJsonString(json['actionText']),
       actionTextEn: referralJsonString(json['actionTextEn']),
-      // Promo first-purchase floor. Spec default is 200 REALU when omitted.
-      minBuyRealu: minBuy ?? (kind.toLowerCase() == 'promo' ? 200 : null),
+      minBuyRealu: minBuy,
       validUntil: referralJsonDate(json['validUntil']),
       redemptionCap: referralJsonNum(json['redemptionCap']),
     );

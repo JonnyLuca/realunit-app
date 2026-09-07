@@ -77,7 +77,7 @@ class ReferralCodeLookupDto {
       actionTextEn: referralJsonString(json['actionTextEn']),
       campaignText: referralJsonString(json['campaignText']),
       campaignTextEn: referralJsonString(json['campaignTextEn']),
-      minBuyRealu: minBuy ?? (kind.toLowerCase() == 'promo' ? 200 : null),
+      minBuyRealu: minBuy,
       validUntil: referralJsonDate(json['validUntil']),
       redemptionCap: referralJsonNum(json['redemptionCap']),
     );

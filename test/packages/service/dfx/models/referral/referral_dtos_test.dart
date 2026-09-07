@@ -199,12 +199,12 @@ void main() {
       expect(dto.redemptionCap, 80);
     });
 
-    test('promo minBuyRealu defaults to 200 when the API omits it', () {
+    test('omitted minBuyRealu stays null for promo and invite', () {
       final dto = ReferralBindResultDto.fromJson({
         'kind': 'Promo',
         'campaignText': 'DE text',
       });
-      expect(dto.minBuyRealu, 200);
+      expect(dto.minBuyRealu, isNull);
 
       final invite = ReferralBindResultDto.fromJson({'kind': 'Invite'});
       expect(invite.minBuyRealu, isNull);
@@ -990,14 +990,14 @@ void main() {
       expect(promo.campaignTextLang('en'), 'de');
     });
 
-    test('EN prefers actionTextEn and promo minBuyRealu defaults to 200', () {
+    test('EN prefers actionTextEn and omitted minBuyRealu stays null', () {
       final promo = ReferralCodeLookupDto.fromJson({
         'kind': 'promo',
         'actionText': 'DE action',
         'actionTextEn': 'EN action',
       });
       expect(promo.campaignTextForLocale('en'), 'EN action');
-      expect(promo.minBuyRealu, 200);
+      expect(promo.minBuyRealu, isNull);
       expect(
         ReferralCodeLookupDto.fromJson({'kind': 'invite'}).minBuyRealu,
         isNull,

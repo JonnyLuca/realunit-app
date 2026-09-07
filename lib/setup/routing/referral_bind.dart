@@ -53,6 +53,10 @@ Future<void> bindPendingReferralCode(GoRouter router, {String? code}) async {
       if (resolved == null || resolved.isEmpty) return;
       final retryLater = await _bindTakenCode(router, resolved);
       if (retryLater) return;
+      final leftover = await peekPendingReferralCode();
+      if (leftover == resolved) {
+        await clearPendingReferralCode();
+      }
     }
   } finally {
     _bindInFlight = false;
