@@ -28,7 +28,7 @@ void main() {
     debugSetPendingReferralCodeSync(null);
   });
 
-  test('stashes the invite code from a Play referrer once', () async {
+  test('stashes the invite code from a Play referrer once, then consumes', () async {
     final prefs = await SharedPreferences.getInstance();
     final port = _FakePort('invite=AB12CD');
 

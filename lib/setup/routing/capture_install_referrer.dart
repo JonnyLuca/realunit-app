@@ -34,9 +34,9 @@ Future<void> captureInstallReferrer({
   // next cold start must retry or a late referrer is lost forever.
   if (raw == null) return;
 
-  await prefs.setBool(installReferrerConsumedKey, true);
   final code = parseInviteCodeFromReferrer(raw);
   if (code != null) {
     await stashPendingReferralCode(code);
   }
+  await prefs.setBool(installReferrerConsumedKey, true);
 }
