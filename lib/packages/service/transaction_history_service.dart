@@ -106,75 +106,76 @@ class TransactionHistoryService extends DFXAuthService {
   }
 
   Future<void> _syncReferralPayouts() async {
+    final response;
     try {
       final uri = buildUri(host, '/v1/realunit/referral/payouts');
-      final response = await authenticatedGet(
+      response = await authenticatedGet(
         uri,
         headers: {'Content-Type': 'application/json'},
       ).timeout(RealUnitReferralService.lookupTimeout);
-      if (response.statusCode != 200) return;
-
-      final decoded = jsonDecode(response.body);
-      final rows = referralJsonList(decoded);
-      if (rows.isEmpty) return;
-
-      final asset = appStore.apiConfig.asset;
-      final walletAddress = appStore.primaryAddress;
-      final seenIds = <int>{};
-      final seenHashes = <String>{};
-      for (final raw in rows) {
-        final ReferralPayoutDto payout;
-        try {
-          payout = ReferralPayoutDto.fromJson(raw);
-        } catch (_) {
-          continue;
-        }
-        if (!payout.isSettled) continue;
-        final hash = payout.txHash;
-        final hashKey = hash != null && hash.isNotEmpty ? hash.toLowerCase() : null;
-        if (payout.id == 0 && hashKey == null) continue;
-        if (payout.id != 0 && !seenIds.add(payout.id)) continue;
-        if (hashKey != null && !seenHashes.add(hashKey)) continue;
-        var txId = hashKey ?? 'referral-payout-${payout.id}';
-        final storedTxId = await _transactionRepository.findTxIdIgnoreCase(txId);
-        var exists = storedTxId != null;
-        if (storedTxId != null) txId = storedTxId;
-        if (!exists && hash != null && hash.isNotEmpty) {
-          final byHash = await _transactionRepository.findTxIdIgnoreCase(hash);
-          if (byHash != null) {
-            txId = byHash;
-            exists = true;
-          }
-        }
-        final synthetic = payout.id != 0 ? 'referral-payout-${payout.id}' : null;
-        if (hashKey != null && synthetic != null && txId != synthetic) {
-          final leftover = await _transactionRepository.findTxIdIgnoreCase(synthetic);
-          if (leftover != null) {
-            await _transactionRepository.deleteTransaction(leftover);
-          }
-        }
-        await _transactionRepository.deleteDfxTransactionDetailsIgnoreCase(txId);
-        final transaction = Transaction(
-          height: 0,
-          txId: txId,
-          chainId: asset.chainId,
-          senderAddress: kReferralPayoutSenderAddress,
-          receiverAddress: walletAddress,
-          amount: BigInt.from(payout.amount.truncate()),
-          asset: asset,
-          type: TransactionTypes.referralPayout,
-          note: '',
-          data: formatFrozenChfAmount(payout.chfValue.toString()),
-          timestamp: payout.created,
-        );
-        if (exists) {
-          await _transactionRepository.updateTransaction(transaction);
-        } else {
-          await _transactionRepository.insertTransaction(transaction);
-        }
-      }
     } catch (_) {
       return;
+    }
+    if (response.statusCode != 200) return;
+
+    final decoded = jsonDecode(response.body);
+    final rows = referralJsonList(decoded);
+    if (rows.isEmpty) return;
+
+    final asset = appStore.apiConfig.asset;
+    final walletAddress = appStore.primaryAddress;
+    final seenIds = <int>{};
+    final seenHashes = <String>{};
+    for (final raw in rows) {
+      final ReferralPayoutDto payout;
+      try {
+        payout = ReferralPayoutDto.fromJson(raw);
+      } catch (_) {
+        continue;
+      }
+      if (!payout.isSettled) continue;
+      final hash = payout.txHash;
+      final hashKey = hash != null && hash.isNotEmpty ? hash.toLowerCase() : null;
+      if (payout.id == 0 && hashKey == null) continue;
+      if (payout.id != 0 && !seenIds.add(payout.id)) continue;
+      if (hashKey != null && !seenHashes.add(hashKey)) continue;
+      var txId = hashKey ?? 'referral-payout-${payout.id}';
+      final storedTxId = await _transactionRepository.findTxIdIgnoreCase(txId);
+      var exists = storedTxId != null;
+      if (storedTxId != null) txId = storedTxId;
+      if (!exists && hash != null && hash.isNotEmpty) {
+        final byHash = await _transactionRepository.findTxIdIgnoreCase(hash);
+        if (byHash != null) {
+          txId = byHash;
+          exists = true;
+        }
+      }
+      final synthetic = payout.id != 0 ? 'referral-payout-${payout.id}' : null;
+      if (hashKey != null && synthetic != null && txId != synthetic) {
+        final leftover = await _transactionRepository.findTxIdIgnoreCase(synthetic);
+        if (leftover != null) {
+          await _transactionRepository.deleteTransaction(leftover);
+        }
+      }
+      await _transactionRepository.deleteDfxTransactionDetailsIgnoreCase(txId);
+      final transaction = Transaction(
+        height: 0,
+        txId: txId,
+        chainId: asset.chainId,
+        senderAddress: kReferralPayoutSenderAddress,
+        receiverAddress: walletAddress,
+        amount: BigInt.from(payout.amount.truncate()),
+        asset: asset,
+        type: TransactionTypes.referralPayout,
+        note: '',
+        data: formatFrozenChfAmount(payout.chfValue.toString()),
+        timestamp: payout.created,
+      );
+      if (exists) {
+        await _transactionRepository.updateTransaction(transaction);
+      } else {
+        await _transactionRepository.insertTransaction(transaction);
+      }
     }
   }
 
