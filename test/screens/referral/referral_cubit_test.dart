@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_created_invite_dto.dart';
@@ -90,6 +90,27 @@ void main() {
     expect: () => [
       const ReferralLoading(),
       const ReferralOverviewLoaded(summary: _eligible, invites: []),
+    ],
+  );
+
+  blocTest<ReferralCubit, ReferralState>(
+    'load does not emit after the cubit is closed mid-flight',
+    build: () {
+      loadRelease = Completer<ReferralSummaryDto>();
+      when(() => service.getSummary()).thenAnswer((_) => loadRelease.future);
+      return ReferralCubit(service);
+    },
+    act: (cubit) async {
+      final pending = cubit.load();
+      await cubit.close();
+      loadRelease.complete(_eligible);
+      await pending;
+    },
+    // Only the synchronous Loading survives: the post-await emit is guarded by
+    // `isClosed`, so no ReferralOverviewLoaded is emitted after close (and
+    // no emit-after-close StateError is thrown).
+    expect: () => const [
+      ReferralLoading(),
     ],
   );
 
