@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mocktail/mocktail.dart';
@@ -346,19 +347,26 @@ void main() {
       expect(called, isFalse);
     });
 
-    test('aborts a stalled public lookup', () async {
-      final client = MockClient((request) async {
-        await Future<void>.delayed(const Duration(seconds: 30));
-        return http.Response('{}', 200);
-      });
+    test('aborts a stalled public lookup', () {
+      fakeAsync((async) {
+        final client = MockClient((request) async {
+          await Future<void>.delayed(const Duration(seconds: 30));
+          return http.Response('{}', 200);
+        });
 
-      await expectLater(
-        build(client).lookupCode(
-          'AB12',
-          timeout: const Duration(milliseconds: 20),
-        ),
-        throwsA(isA<TimeoutException>()),
-      );
+        Object? caught;
+        build(client)
+            .lookupCode(
+              'AB12',
+              timeout: const Duration(milliseconds: 20),
+            )
+            .then<void>((_) {}, onError: (Object e, StackTrace _) {
+          caught = e;
+        });
+
+        async.elapse(const Duration(milliseconds: 20));
+        expect(caught, isA<TimeoutException>());
+      });
     });
 
     test('throws ApiException on a non-200 response', () async {
@@ -468,19 +476,26 @@ void main() {
       expect(body, {'code': 'AB12CD'});
     });
 
-    test('aborts a stalled bind', () async {
-      final client = MockClient((request) async {
-        await Future<void>.delayed(const Duration(seconds: 30));
-        return http.Response('{}', 200);
-      });
+    test('aborts a stalled bind', () {
+      fakeAsync((async) {
+        final client = MockClient((request) async {
+          await Future<void>.delayed(const Duration(seconds: 30));
+          return http.Response('{}', 200);
+        });
 
-      await expectLater(
-        build(client).bind(
-          code: 'XY',
-          timeout: const Duration(milliseconds: 20),
-        ),
-        throwsA(isA<TimeoutException>()),
-      );
+        Object? caught;
+        build(client)
+            .bind(
+              code: 'XY',
+              timeout: const Duration(milliseconds: 20),
+            )
+            .then<void>((_) {}, onError: (Object e, StackTrace _) {
+          caught = e;
+        });
+
+        async.elapse(const Duration(milliseconds: 20));
+        expect(caught, isA<TimeoutException>());
+      });
     });
 
     test('throws ApiException on a non-200/201 response', () async {
@@ -695,16 +710,23 @@ void main() {
       expect(terms.textForLang('en'), '# Terms');
     });
 
-    test('aborts a stalled terms fetch so the bundled TB can load', () async {
-      final client = MockClient((request) async {
-        await Future<void>.delayed(const Duration(seconds: 30));
-        return http.Response('{}', 200);
-      });
+    test('aborts a stalled terms fetch so the bundled TB can load', () {
+      fakeAsync((async) {
+        final client = MockClient((request) async {
+          await Future<void>.delayed(const Duration(seconds: 30));
+          return http.Response('{}', 200);
+        });
 
-      await expectLater(
-        build(client).getTerms(timeout: const Duration(milliseconds: 20)),
-        throwsA(isA<TimeoutException>()),
-      );
+        Object? caught;
+        build(client)
+            .getTerms(timeout: const Duration(milliseconds: 20))
+            .then<void>((_) {}, onError: (Object e, StackTrace _) {
+          caught = e;
+        });
+
+        async.elapse(const Duration(milliseconds: 20));
+        expect(caught, isA<TimeoutException>());
+      });
     });
 
     test('throws ApiException on a non-200 response', () async {
