@@ -32,6 +32,16 @@ Future<void> stashPendingReferralCode(String code) async {
   final prefs = await SharedPreferences.getInstance();
   if (gen != _stashGeneration || _pendingReferralCode != capped) return;
   await prefs.setString(pendingReferralCodeKey, capped);
+  if (gen != _stashGeneration || _pendingReferralCode != capped) {
+    final written = prefs.getString(pendingReferralCodeKey);
+    if (written == capped) {
+      await prefs.remove(pendingReferralCodeKey);
+    }
+    final live = referralCodeFromInput(_pendingReferralCode);
+    if (live != null) {
+      await prefs.setString(pendingReferralCodeKey, live);
+    }
+  }
 }
 
 /// Returns and clears the pending code (memory + SharedPreferences).
@@ -77,8 +87,10 @@ Future<void> discardPendingReferralCodeIfEqual(String code) async {
     final inMemory = referralCodeFromInput(_pendingReferralCode);
     if (inMemory != null && inMemory != capped) return;
     final prefs = await SharedPreferences.getInstance();
+    final latest = referralCodeFromInput(_pendingReferralCode);
+    if (latest != null && latest != capped) return;
     final stored = referralCodeFromInput(prefs.getString(pendingReferralCodeKey));
-    final current = inMemory ?? stored;
+    final current = latest ?? stored;
     if (current != capped) return;
     _pendingReferralCode = null;
     _stashGeneration++;
