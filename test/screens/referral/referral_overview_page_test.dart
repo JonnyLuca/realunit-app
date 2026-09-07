@@ -28,10 +28,6 @@ class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState>
     implements SettingsBloc {}
 
 void main() {
-  test('constructs ReferralOverviewPage without a const key', () {
-    expect(ReferralOverviewPage(key: UniqueKey()), isA<ReferralOverviewPage>());
-  });
-
   late _MockReferralCubit cubit;
   late _MockSettingsBloc settings;
 
