@@ -2,10 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
+import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/setup/routing/boot_navigation.dart';
+import 'package:realunit_wallet/setup/routing/referral_bind.dart';
+import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:realunit_wallet/setup/routing/routes/app_routes.dart';
 import 'package:realunit_wallet/setup/routing/routes/pin_routes.dart';
+import 'package:realunit_wallet/setup/routing/routes/settings_routes.dart';
 
 // Drives the real `_navigate` wiring — `resolveBootNavigation` + the go_router
 // side effect `applyBootNavAction` — against a real [GoRouter]. This is the seam
@@ -15,7 +23,19 @@ import 'package:realunit_wallet/setup/routing/routes/pin_routes.dart';
 // on) that route. Pumping the full `WalletApp` is impractical (it depends on the
 // whole DI graph + the global router building real, service-backed pages), so we
 // exercise the smallest faithful seam instead.
+class _MockReferralService extends Mock implements RealUnitReferralService {}
+
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    debugSetPendingReferralCodeSync(null);
+    debugResetBindInFlight();
+  });
+
+  tearDown(() async {
+    await GetIt.instance.reset();
+  });
+
   // Only the routes this seam touches. `/buyPaymentDetails` mirrors the real
   // builder's non-nullable `extra` cast, so building it from a bare path throws
   // — exactly the crash the restore allowlist must prevent.
@@ -31,6 +51,11 @@ void main() {
         name: AppRoutes.dashboard,
         path: '/dashboard',
         builder: (_, _) => const Text('dashboard'),
+      ),
+      GoRoute(
+        name: SettingsRoutes.settings,
+        path: '/settings',
+        builder: (_, _) => const Text('settings'),
       ),
       GoRoute(
         name: AppRoutes.kyc,
@@ -96,6 +121,38 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('dashboard'), findsOneWidget);
       expect(locationOf(router), '/dashboard');
+    },
+  );
+
+  testWidgets(
+    'restore to /settings binds a pending code without popping the route',
+    (tester) async {
+      final service = _MockReferralService();
+      when(() => service.bind(code: 'AB12CD')).thenAnswer(
+        (_) async => const ReferralBindResultDto(kind: 'Invite'),
+      );
+      GetIt.instance.registerSingleton<RealUnitReferralService>(service);
+      await stashPendingReferralCode('AB12CD');
+
+      final router = buildRouter();
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      applyBootNavAction(
+        resolveAfterRelock('/settings'),
+        router,
+        onLoadWallet: () {},
+        onClearResume: () {},
+      );
+      // Bind is scheduled on the next frame, not when /settings pops.
+      await tester.pump();
+      await tester.pump();
+
+      verify(() => service.bind(code: 'AB12CD')).called(1);
+      expect(find.text('settings'), findsOneWidget);
+      expect(effectiveLocation(router.routerDelegate.currentConfiguration), '/settings');
+      expect(router.canPop(), isTrue);
+      expect(await peekPendingReferralCode(), isNull);
     },
   );
 
