@@ -52,6 +52,7 @@ import 'package:realunit_wallet/screens/web_view/web_view_page.dart';
 import 'package:realunit_wallet/screens/welcome/welcome_page.dart';
 import 'package:realunit_wallet/setup/di.dart';
 import 'package:realunit_wallet/setup/routing/boot_navigation.dart';
+import 'package:realunit_wallet/setup/routing/referral_bind.dart';
 import 'package:realunit_wallet/setup/routing/routes/app_link_entry.dart';
 import 'package:realunit_wallet/setup/routing/routes/app_routes.dart';
 import 'package:realunit_wallet/setup/routing/routes/legal_routes.dart';
@@ -233,7 +234,9 @@ final GoRouter routerConfig = GoRouter(
     GoRoute(
       name: AppRoutes.kyc,
       path: '/kyc',
-      builder: (_, state) => KycPageManager(kycContext: state.extra as String?),
+      builder: (_, state) => BindReferralOnKycExit(
+        child: KycPageManager(kycContext: state.extra as String?),
+      ),
     ),
 
     GoRoute(

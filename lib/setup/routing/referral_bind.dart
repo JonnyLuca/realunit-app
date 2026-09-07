@@ -22,6 +22,40 @@ void debugResetBindInFlight() {
   _bindInFlight = false;
 }
 
+/// Binds a KYC-deferred stash after the `/kyc` route leaves the stack.
+class BindReferralOnKycExit extends StatefulWidget {
+  final Widget child;
+
+  const BindReferralOnKycExit({super.key, required this.child});
+
+  @override
+  State<BindReferralOnKycExit> createState() => _BindReferralOnKycExitState();
+}
+
+class _BindReferralOnKycExitState extends State<BindReferralOnKycExit> {
+  GoRouter? _router;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _router = GoRouter.of(context);
+  }
+
+  @override
+  void dispose() {
+    final router = _router;
+    if (router != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(bindPendingReferralCode(router));
+      });
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 /// Binds a stashed or freshly delivered referral code once the session is unlocked.
 /// Shows the API campaign text for promo binds. Invite binds show the same
 /// recognition copy as registration (`referralInviteRecognized`) when the

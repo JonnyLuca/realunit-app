@@ -275,6 +275,38 @@ void main() {
     expect(await peekPendingReferralCode(), 'AB12CD');
   });
 
+  testWidgets('binds a KYC-deferred stash after /kyc is popped', (tester) async {
+    when(() => service.bind(code: 'AB12CD')).thenAnswer(
+      (_) async => const ReferralBindResultDto(kind: 'Invite'),
+    );
+    router = GoRouter(
+      navigatorKey: GlobalKey<NavigatorState>(),
+      initialLocation: '/dashboard',
+      routes: [
+        GoRoute(
+          path: '/dashboard',
+          builder: (_, _) => const Scaffold(body: SizedBox()),
+        ),
+        GoRoute(
+          path: '/kyc',
+          builder: (_, _) => const BindReferralOnKycExit(
+            child: Scaffold(body: SizedBox()),
+          ),
+        ),
+      ],
+    );
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+    router.push('/kyc');
+    await tester.pumpAndSettle();
+    await stashPendingReferralCode('AB12CD');
+    router.pop();
+    await tester.pumpAndSettle();
+
+    verify(() => service.bind(code: 'AB12CD')).called(1);
+    expect(await peekPendingReferralCode(), isNull);
+  });
+
   testWidgets('defers bind when /kyc is pushed over /dashboard', (tester) async {
     router = GoRouter(
       navigatorKey: GlobalKey<NavigatorState>(),
