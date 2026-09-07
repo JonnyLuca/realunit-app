@@ -104,11 +104,11 @@ DateTime? referralJsonDate(dynamic value) {
 /// load and show retry instead of hiding the card.
 bool referralJsonBool(dynamic value, {bool orElse = false}) {
   if (value is bool) return value;
-  if (value is num) return value != 0;
+  if (value is num) return value == 1;
   if (value is String) {
     final text = value.trim().toLowerCase();
-    if (text == 'true' || text == '1' || text == 'yes') return true;
-    if (text == 'false' || text == '0' || text == 'no' || text.isEmpty) {
+    if (text == 'true' || text == '1') return true;
+    if (text == 'false' || text == '0' || text.isEmpty) {
       return false;
     }
   }

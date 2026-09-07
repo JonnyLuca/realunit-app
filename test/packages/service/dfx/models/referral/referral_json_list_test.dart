@@ -124,13 +124,18 @@ void main() {
     },
   );
 
-  test('referralJsonBool is fail-closed except true/1/yes', () {
+  test('referralJsonBool is fail-closed except true/1/"true"', () {
     expect(referralJsonBool(true), isTrue);
     expect(referralJsonBool(false), isFalse);
     expect(referralJsonBool(1), isTrue);
+    expect(referralJsonBool(1.0), isTrue);
     expect(referralJsonBool(0), isFalse);
+    expect(referralJsonBool(2), isFalse);
+    expect(referralJsonBool(-1), isFalse);
+    expect(referralJsonBool(0.5), isFalse);
     expect(referralJsonBool('true'), isTrue);
-    expect(referralJsonBool('  YES  '), isTrue);
+    expect(referralJsonBool('  TRUE  '), isTrue);
+    expect(referralJsonBool('yes'), isFalse);
     expect(referralJsonBool('1'), isTrue);
     expect(referralJsonBool('false'), isFalse);
     expect(referralJsonBool('0'), isFalse);
