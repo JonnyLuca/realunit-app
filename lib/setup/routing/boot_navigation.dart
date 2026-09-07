@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:realunit_wallet/setup/routing/referral_bind.dart';
 import 'package:realunit_wallet/setup/routing/routes/app_routes.dart';
@@ -237,19 +238,22 @@ void applyBootNavAction(
       // consumption as the dashboard branch).
       onClearResume();
       final restorePath = Uri.parse(location).path;
-      final Future<void> restored;
       if (restorePath == '/dashboard') {
         router.go(location);
-        restored = Future<void>.value();
       } else {
         router.goNamed(AppRoutes.dashboard);
-        restored = router.push(location);
+        unawaited(router.push(location));
       }
       final payload = takePendingPaymentDeeplink();
       if (payload != null) {
         unawaited(router.pushNamed(AppRoutes.pay, extra: payload));
       }
-      unawaited(restored.then((_) => bindPendingReferralCode(router)));
+      // Bind after this frame so the restored location is current. Do not
+      // wait for the pushed route to pop — staying on /settings would
+      // otherwise never bind. KYC is still skipped by `_isKycLocation`.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        unawaited(bindPendingReferralCode(router));
+      });
       return;
     case BootNavStay():
       // Already on a valid non-gate route — discard any stale resume capture.
