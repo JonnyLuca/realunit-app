@@ -183,16 +183,14 @@ class ReferralPayoutTransactionRow extends StatelessWidget {
                         children: [
                           Text(
                             s.referralPayout,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.w600,
                               height: 20 / 16,
                             ),
                           ),
                           Text(
                             date,
-                            style: const TextStyle(
-                              fontSize: 12,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               height: 16 / 12,
                               color: RealUnitColors.neutral500,
                             ),
@@ -209,8 +207,7 @@ class ReferralPayoutTransactionRow extends StatelessWidget {
                       fractionalDigits: 0,
                       trimZeros: false,
                       trailingSymbol: transaction.asset.symbol,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         height: 20 / 16,
                       ),

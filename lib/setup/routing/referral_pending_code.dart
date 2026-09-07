@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 
 /// SharedPreferences key for a referral/promo invite code delivered via
 /// deeplink before the user is authenticated.
