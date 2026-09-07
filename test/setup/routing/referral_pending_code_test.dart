@@ -87,7 +87,8 @@ void main() {
     ]);
     expect(await peekPendingReferralCode(), isNull);
     final taken = results[0] as String?;
-    expect(taken == null || taken == 'AB12CD', isTrue);
+    expect(taken, anyOf(isNull, 'AB12CD'));
+    expect(await takePendingReferralCode(), isNull);
   });
 
   test('concurrent take and discard do not throw', () async {
