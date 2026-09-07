@@ -178,10 +178,9 @@ jobs:
           # Mix of the original 01-61 range and the 62-269 batch (every Golden
           # baseline) so a regression in either half surfaces here.
           for name in 01-welcome 11-dashboard 26-terms 35-dashboard-with-balance 46-buy-kyc-required 52-sell-unknown-error 53-buy-payment-details 61-kyc-registration-tax-tin-error 62-welcome-page-android 219-settings-security-page-default 268-phone-number-field-default 269-dashboard-insider-unlocked 270-handbook-persona-dca 275-handbook-persona-exit-1j 276-referral-overview 282-referral-payout-row 283-referral-terms-readonly 287-kyc-registration-referral-recognized 288-transaction-history-referral-payout 289-dashboard-referral-entry-and-payout 290-kyc-registration-referral-promo; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' -u "${HANDBOOK_USER:-x}:${HANDBOOK_PASS:-x}" "http://127.0.0.1:8080/screenshots/${name}.png")
-            # 200 (auth happens to match) or 401 (auth fails but file exists)
-            # both prove the file is on disk. 404 means it was not assembled.
-            if [ "$code" = "404" ]; then
+            # Auth is checked before the file exists: a missing PNG also
+            # returns 401, so HTTP status cannot prove assembly. Look on disk.
+            if ! docker exec handbook test -f "/usr/share/nginx/html/screenshots/${name}.png"; then
               echo "screenshot ${name}.png missing from /usr/share/nginx/html/screenshots/" >&2
               docker logs handbook
               exit 1
