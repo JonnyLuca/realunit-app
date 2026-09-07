@@ -1,9 +1,8 @@
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
@@ -21,8 +20,6 @@ class _MockReceiptCubit extends MockCubit<TransactionHistoryReceiptState>
 class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState> implements SettingsBloc {}
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   Transaction payout() => Transaction(
     height: 0,
     txId: 'referral-payout-9',

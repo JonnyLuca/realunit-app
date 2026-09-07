@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:realunit_wallet/screens/pin/bloc/auth/pin_auth_cubit.dart';
 import 'package:realunit_wallet/setup/routing/boot_navigation.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:realunit_wallet/setup/routing/routes/app_link_entry.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockPinAuthCubit extends Mock implements PinAuthCubit {}
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   late _MockPinAuthCubit pinAuthCubit;
 
   setUp(() async {

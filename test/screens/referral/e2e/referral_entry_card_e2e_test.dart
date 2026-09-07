@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_summary_dto.dart';
@@ -17,8 +16,6 @@ import 'support/test_view.dart';
 class _MockService extends Mock implements RealUnitReferralService {}
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   late _MockService service;
 
   setUp(() {
