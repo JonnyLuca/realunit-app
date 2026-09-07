@@ -80,7 +80,7 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
   final nationalityCtrl = ValueNotifier<Country?>(null);
   final birthdayCtrl = ValueNotifier<String?>(null);
   final referralCodeCtrl = TextEditingController();
-  String? _resolvedReferralCode;
+  final _typedReferral = TypedReferralStash();
 
   final addressStreetCtrl = TextEditingController();
   final addressStreetNumberCtrl = TextEditingController();
@@ -211,7 +211,8 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
             // Skip / invalid lookup leaves any prior deeplink stash untouched.
             // Stash I/O must not block checkKyc after a successful submit.
             try {
-              await stashResolvedReferralCode(_resolvedReferralCode);
+              await _typedReferral.awaitIdle();
+              await stashResolvedReferralCode(_typedReferral.resolved);
             } catch (e) {
               developer.log('Failed to stash resolved referral code: $e');
             }
@@ -336,18 +337,7 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
           return KycRegistrationReferralStep(
             referralCodeCtrl: referralCodeCtrl,
             onResolved: (code) {
-              _resolvedReferralCode = code;
-              if (code != null) {
-                unawaited(() async {
-                  try {
-                    await stashResolvedReferralCode(code);
-                  } catch (e) {
-                    developer.log(
-                      'Failed to stash resolved referral code: $e',
-                    );
-                  }
-                }());
-              }
+              unawaited(_typedReferral.onResolved(code));
             },
             pendingCode: isReferralActive ? peekPendingReferralCode : null,
             autoPasteOnEmpty: true,
@@ -397,6 +387,14 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
   }
 
   Future<void> _onSubmitTax(KycTaxResidenceSubmit tax) async {
+    // Persist the typed code before POST so a crash after the backend
+    // accepts still binds. Skip/invalid already discarded via onResolved(null).
+    try {
+      await _typedReferral.awaitIdle();
+      await stashResolvedReferralCode(_typedReferral.resolved);
+    } catch (e) {
+      developer.log('Failed to stash resolved referral code: $e');
+    }
     // `swissTaxResidence` + `countryAndTINs` are derived inside the tax step so
     // multi-residence and the locked address-country entry stay consistent with
     // the backend contract (tax residences must include addressCountry).

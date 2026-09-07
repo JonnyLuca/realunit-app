@@ -11,6 +11,7 @@ import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_code_lookup_dto.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registration_step/kyc_registration_step_cubit.dart';
+import 'package:realunit_wallet/screens/kyc/steps/registration/stash_resolved_referral_code.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_referral_step.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:realunit_wallet/styles/themes.dart';
@@ -123,6 +124,7 @@ void main() {
   );
 
   testWidgets('Next does not stash a spent 4xx code', (tester) async {
+    final typed = TypedReferralStash();
     String? resolved = 'sentinel';
     final ctrl = TextEditingController();
     await tester.pumpWidget(
@@ -141,7 +143,10 @@ void main() {
             value: stepCubit,
             child: KycRegistrationReferralStep(
               referralCodeCtrl: ctrl,
-              onResolved: (code) => resolved = code,
+              onResolved: (code) {
+                resolved = code;
+                unawaited(typed.onResolved(code));
+              },
               lookup: (_) async => throw const ApiException(
                 statusCode: 404,
                 code: 'NOT_FOUND',
@@ -157,7 +162,9 @@ void main() {
     ctrl.text = 'NOPE';
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
+    await typed.awaitIdle();
     expect(resolved, isNull);
+    expect(await peekPendingReferralCode(), isNull);
     verify(() => stepCubit.next()).called(1);
   });
 
@@ -210,6 +217,7 @@ void main() {
     'Skip during Next lookup discards the code and advances once',
     (tester) async {
       final gate = Completer<ReferralCodeLookupDto>();
+      final typed = TypedReferralStash();
       String? resolved = 'sentinel';
       final ctrl = TextEditingController(text: 'AB12');
       await tester.pumpWidget(
@@ -229,7 +237,10 @@ void main() {
               child: KycRegistrationReferralStep(
                 referralCodeCtrl: ctrl,
                 lookup: (_) => gate.future,
-                onResolved: (code) => resolved = code,
+                onResolved: (code) {
+                  resolved = code;
+                  unawaited(typed.onResolved(code));
+                },
               ),
             ),
           ),
@@ -237,7 +248,9 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
+      await typed.awaitIdle();
       expect(resolved, 'AB12');
+      expect(await peekPendingReferralCode(), 'AB12');
 
       await tester.tap(find.byType(AppFilledButton));
       await tester.pump();
@@ -248,15 +261,19 @@ void main() {
 
       await tester.tap(find.byType(AppTextButton));
       await tester.pump();
+      await typed.awaitIdle();
       expect(ctrl.text, isEmpty);
       expect(resolved, isNull);
+      expect(await peekPendingReferralCode(), isNull);
       verify(() => stepCubit.next()).called(1);
 
       gate.complete(
         const ReferralCodeLookupDto(kind: 'invite', inviterName: 'Björn'),
       );
       await tester.pump();
+      await typed.awaitIdle();
       expect(resolved, isNull);
+      expect(await peekPendingReferralCode(), isNull);
     },
   );
 

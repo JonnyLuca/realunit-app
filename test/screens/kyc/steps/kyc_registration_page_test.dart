@@ -32,6 +32,7 @@ import 'package:realunit_wallet/screens/kyc/cubits/kyc/kyc_cubit.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registration_step/kyc_registration_step_cubit.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registration_submit/kyc_registration_submit_cubit.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/kyc_registration_page.dart';
+import 'package:realunit_wallet/screens/kyc/steps/registration/stash_resolved_referral_code.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_address_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_personal_step.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_referral_step.dart';
@@ -222,6 +223,38 @@ void main() {
       );
     });
 
+    testWidgets(
+      'Skip after a typed code discards the prefs stash',
+      (tester) async {
+        debugSetPendingReferralCodeSync(null);
+        addTearDown(clearPendingReferralCode);
+        const state = KycRegistrationStepState(
+          step: KycRegistrationStep.referral,
+          steps: [
+            KycRegistrationStep.referral,
+            KycRegistrationStep.personal,
+          ],
+        );
+        when(() => registrationStepCubit.state).thenReturn(state);
+
+        await tester.pumpApp(buildSubject(const KycRegistrationView()));
+        await tester.pump();
+        (tester.widget(find.byType(PageView)) as PageView).controller
+            ?.jumpToPage(state.index);
+        await tester.pump();
+
+        await tester.enterText(find.byType(TextField), 'AB12CD');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(await peekPendingReferralCode(), 'AB12CD');
+
+        await tester.tap(find.byType(AppTextButton));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(await peekPendingReferralCode(), isNull);
+      },
+    );
+
     testWidgets('renders $KycRegistrationReferralStep with skip', (tester) async {
       final state = const KycRegistrationStepState(
         step: KycRegistrationStep.referral,
@@ -391,6 +424,28 @@ void main() {
   });
 
   group('$BlocListener', () {
+    testWidgets(
+      'checkKyc still runs when referral stash I/O throws',
+      (tester) async {
+        debugStashResolvedReferralCode = (_) async {
+          throw Exception('prefs down');
+        };
+        addTearDown(() => debugStashResolvedReferralCode = null);
+        whenListen(
+          registrationSubmitCubit,
+          Stream.fromIterable([
+            const KycRegistrationSubmitSuccess(RegistrationStatus.completed),
+          ]),
+          initialState: KycRegistrationSubmitInitial(),
+        );
+
+        await tester.pumpApp(buildSubject(const KycRegistrationView()));
+        await tester.pump();
+
+        verify(() => kycCubit.checkKyc()).called(1);
+      },
+    );
+
     testWidgets('triggers checkKyc if submitting successes', (tester) async {
       whenListen(
         registrationSubmitCubit,
