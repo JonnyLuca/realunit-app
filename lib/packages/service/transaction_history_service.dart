@@ -126,11 +126,15 @@ class TransactionHistoryService extends DFXAuthService {
     final walletAddress = appStore.primaryAddress;
     final seenIds = <int>{};
     final seenHashes = <String>{};
+    Object? parseError;
+    StackTrace? parseStack;
     for (final raw in rows) {
       final ReferralPayoutDto payout;
       try {
         payout = ReferralPayoutDto.fromJson(raw);
-      } catch (_) {
+      } catch (e, st) {
+        parseError ??= e;
+        parseStack ??= st;
         continue;
       }
       if (!payout.isSettled) continue;
@@ -169,6 +173,9 @@ class TransactionHistoryService extends DFXAuthService {
       } else {
         await _transactionRepository.insertTransaction(transaction);
       }
+    }
+    if (parseError != null) {
+      Error.throwWithStackTrace(parseError, parseStack ?? StackTrace.current);
     }
   }
 

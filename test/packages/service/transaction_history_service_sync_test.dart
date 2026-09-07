@@ -512,6 +512,49 @@ void main() {
       expect(captured.data, '246.50');
     });
 
+    test('propagates a referral-payout parse error after writing valid rows', () async {
+      sessionCache.setAuthToken('jwt-1');
+      final client = MockClient((request) async {
+        if (request.url.path.endsWith('/history')) {
+          return http.Response(jsonEncode(_accountHistory([])), 200);
+        }
+        if (request.url.path.contains('/referral/payouts')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 9,
+                'amount': 20,
+                'chfValue': 246.5,
+                'created': '2026-08-24T10:00:00Z',
+                'kind': 'Invite',
+                'status': 'Complete',
+                'txHash': '0xgood',
+              },
+              {
+                'id': 10,
+                'amount': 20,
+                'chfValue': 1,
+                'kind': 'Invite',
+                'status': 'Complete',
+              },
+            ]),
+            200,
+          );
+        }
+        return http.Response('[]', 200);
+      });
+
+      await expectLater(
+        build(client).apiBasedSync(),
+        throwsA(isA<FormatException>()),
+      );
+      final captured =
+          verify(() => txRepo.insertTransaction(captureAny())).captured.single
+              as Transaction;
+      expect(captured.txId, '0xgood');
+      expect(captured.type, TransactionTypes.referralPayout);
+    });
+
     test('does not write pending referral payouts into history', () async {
       sessionCache.setAuthToken('jwt-1');
       final client = MockClient((request) async {
