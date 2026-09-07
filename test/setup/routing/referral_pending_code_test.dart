@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 
 void main() {
   setUp(() async {
@@ -75,5 +77,37 @@ void main() {
     await stashPendingReferralCode('NEWER1');
     await discardPendingReferralCodeIfEqual('AB12CD');
     expect(await peekPendingReferralCode(), 'NEWER1');
+  });
+
+  test('concurrent take and discard of the same code leave an empty stash', () async {
+    await stashPendingReferralCode('AB12CD');
+    final results = await Future.wait<Object?>([
+      takePendingReferralCode(),
+      discardPendingReferralCodeIfEqual('AB12CD'),
+    ]);
+    expect(await peekPendingReferralCode(), isNull);
+    final taken = results[0] as String?;
+    expect(taken == null || taken == 'AB12CD', isTrue);
+  });
+
+  test('concurrent take and discard do not throw', () async {
+    await stashPendingReferralCode('AB12CD');
+    await Future.wait<void>([
+      takePendingReferralCode().then<void>((_) {}),
+      discardPendingReferralCodeIfEqual('AB12CD'),
+      takePendingReferralCode().then<void>((_) {}),
+      discardPendingReferralCodeIfEqual('AB12CD'),
+    ]);
+    expect(await peekPendingReferralCode(), isNull);
+  });
+
+  test('a second take while the first is in flight returns null', () async {
+    await stashPendingReferralCode('AB12CD');
+    final first = takePendingReferralCode();
+    final second = takePendingReferralCode();
+    final results = await Future.wait([first, second]);
+    expect(results.where((code) => code == 'AB12CD').length, 1);
+    expect(results.where((code) => code == null).length, 1);
+    expect(await peekPendingReferralCode(), isNull);
   });
 }
