@@ -294,7 +294,9 @@ class _ReferralTermsPageState extends State<ReferralTermsPage> {
                 liveRegion: true,
                 child: Text(
                   localizedReferralError(context, error),
-                  style: TextStyle(color: RealUnitColors.status.red600),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: RealUnitColors.status.red600,
+                  ),
                 ),
               ),
             if (!widget.readOnly && _markdown != null && !_loadFailed)

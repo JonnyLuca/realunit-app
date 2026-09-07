@@ -540,7 +540,9 @@ class ReferralCodeFieldState extends State<ReferralCodeField> {
                 context,
                 _invalidMessage ?? referralInvalidMessage,
               ),
-              style: TextStyle(color: RealUnitColors.status.red600),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: RealUnitColors.status.red600,
+              ),
             ),
           ),
         if (_unavailable) ...[

@@ -315,11 +315,15 @@ Future<void> _showInvalidBindDialog(GoRouter router, Object error) {
       builder: (dialogContext) => AlertDialog(
         title: Text(
           localizedReferralErrorTitle(dialogContext, token),
-          style: TextStyle(color: RealUnitColors.status.red600),
+          style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
+            color: RealUnitColors.status.red600,
+          ),
         ),
         content: Text(
           localizedReferralError(dialogContext, token),
-          style: TextStyle(color: RealUnitColors.status.red600),
+          style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
+            color: RealUnitColors.status.red600,
+          ),
         ),
         actions: [
           TextButton(

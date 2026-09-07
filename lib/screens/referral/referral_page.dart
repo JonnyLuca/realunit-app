@@ -113,7 +113,9 @@ class ReferralGateView extends StatelessWidget {
                       child: Text(
                         localizedReferralError(context, state.message),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: RealUnitColors.status.red600),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: RealUnitColors.status.red600,
+                        ),
                       ),
                     ),
                     AppFilledButton(

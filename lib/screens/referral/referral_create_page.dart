@@ -177,9 +177,10 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                               text,
                               textAlign: TextAlign.center,
                               style: message != null && message.isNotEmpty
-                                  ? TextStyle(
-                                      color: RealUnitColors.status.red600,
-                                    )
+                                  ? Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: RealUnitColors.status.red600,
+                                      )
                                   : null,
                             ),
                           ),
@@ -355,9 +356,10 @@ class _ReferralCreateViewState extends State<ReferralCreateView> {
                               liveRegion: true,
                               child: Text(
                                 localizedReferralError(context, error),
-                                style: TextStyle(
-                                  color: RealUnitColors.status.red600,
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: RealUnitColors.status.red600,
+                                    ),
                               ),
                             ),
                         ],
