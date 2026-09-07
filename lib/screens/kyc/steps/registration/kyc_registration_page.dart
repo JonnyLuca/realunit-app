@@ -209,7 +209,13 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
           if (state is KycRegistrationSubmitSuccess) {
             // Persist a looked-up invite/promo code for post-auth bind.
             // Skip / invalid lookup leaves any prior deeplink stash untouched.
-            await stashResolvedReferralCode(_resolvedReferralCode);
+            // Stash I/O must not block checkKyc after a successful submit.
+            try {
+              await stashResolvedReferralCode(_resolvedReferralCode);
+            } catch (e) {
+              developer.log('Failed to stash resolved referral code: $e');
+            }
+            if (!context.mounted) return;
 
             // The submit cubit only emits Success after a successful EIP-712
             // sign through `_signEip712`, regardless of the resulting backend
