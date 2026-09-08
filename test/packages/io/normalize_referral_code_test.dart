@@ -12,10 +12,18 @@ void main() {
     expect(normalizeReferralCode('AB12CD!?'), 'AB12CD');
     expect(normalizeReferralCode('AB/12/'), 'AB/12');
     expect(normalizeReferralCode('invite/AB12CD'), 'AB12CD');
-    expect(normalizeReferralCode('prefixinvite/ab12cd'), 'AB12CD');
+    expect(normalizeReferralCode('prefixinvite/ab12cd'), isNot('AB12CD'));
+    expect(
+      normalizeReferralCode('MYINVITE/ABC123'),
+      isNot(normalizeReferralCode('ABC123')),
+    );
+    expect(
+      normalizeReferralCode(normalizeReferralCode('%2541')),
+      normalizeReferralCode('%2541'),
+    );
     expect(normalizeReferralCode('invite/AB%2F12'), 'AB/12');
     expect(normalizeReferralCode('%2Finvite%2FAB12CD'), 'AB12CD');
-    expect(referralCodeFromInput('prefixinvite/AB12CD'), 'AB12CD');
+    expect(referralCodeFromInput('prefixinvite/AB12CD'), isNot('AB12CD'));
     expect(normalizeReferralCode('!'), isNull);
     expect(normalizeReferralCode('!!!'), isNull);
     expect(normalizeReferralCode('https://example.com/campaign'), isNull);

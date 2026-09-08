@@ -887,9 +887,27 @@ void main() {
       Set<String> hostsIn(String path) => RegExp(
         r'android:host="([^"]+)"',
       ).allMatches(File(path).readAsStringSync()).map((m) => m.group(1)!).toSet();
+      final releaseXml = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
       final release = hostsIn('android/app/src/main/AndroidManifest.xml');
       expect(release, containsAll(['realunit.app', 'www.realunit.app']));
       expect(release.contains('dev.realunit.app'), isFalse);
+      expect(releaseXml.contains('android:autoVerify="true"'), isTrue);
+      expect(
+        RegExp(r'<data android:scheme="realunit-wallet"\s*/>').hasMatch(releaseXml),
+        isFalse,
+      );
+      expect(
+        releaseXml.contains('android:scheme="realunit-wallet" android:host="open"'),
+        isTrue,
+      );
+      expect(
+        releaseXml.contains('android:scheme="realunit-wallet" android:host="invite"'),
+        isTrue,
+      );
+      expect(
+        releaseXml.contains('android:scheme="realunit-wallet" android:host="promo"'),
+        isTrue,
+      );
       for (final flavor in ['debug', 'profile']) {
         final hosts = hostsIn('android/app/src/$flavor/AndroidManifest.xml');
         expect(hosts, contains('dev.realunit.app'));

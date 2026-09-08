@@ -22,13 +22,19 @@ String? parseInviteCodeFromReferrer(String? raw) => _parseInviteCodeFromReferrer
 String? _parseInviteCodeFromReferrer(String? raw, int depth) {
   if (raw == null || raw.isEmpty || depth > 2) return null;
 
-  var decoded = stripInvisibleReferralChars(_decodeReferrer(raw));
-  final first = _codeFromDecodedReferrer(decoded, depth);
-  if (first != null) return first;
-
-  final twice = stripInvisibleReferralChars(_decodeReferrer(decoded));
-  if (twice == decoded) return null;
-  return _codeFromDecodedReferrer(twice, depth);
+  var current = stripInvisibleReferralChars(foldReferralPastedText(raw));
+  for (var round = 0; round < 3; round++) {
+    final found = _codeFromReferrerText(current, depth, splitQuery: true);
+    if (found != null) return found;
+    // Fully encoded payloads (`invite%253DAB12CD`) have no raw `=`. Decode
+    // the whole string only then — never when `%26` inside a value would
+    // become a new top-level `invite=` parameter.
+    if (current.contains('=')) return null;
+    final decoded = stripInvisibleReferralChars(_decodeReferrer(current));
+    if (decoded == current) return null;
+    current = decoded;
+  }
+  return null;
 }
 
 String _decodeReferrer(String raw) {
@@ -39,14 +45,30 @@ String _decodeReferrer(String raw) {
   }
 }
 
-String? _codeFromDecodedReferrer(String decoded, int depth) {
+bool _isBareReferralAssignment(String value) {
+  return RegExp(
+    r'^(invite|promo|code)=',
+    caseSensitive: false,
+  ).hasMatch(value.trim());
+}
+
+String? _codeFromReferrerText(
+  String decoded,
+  int depth, {
+  required bool splitQuery,
+}) {
   decoded = foldReferralPastedText(decoded);
   Map<String, String> params = const {};
-  try {
-    params = Uri.splitQueryString(decoded);
-  } catch (_) {
-    // Folded fullwidth / CJK referrers can still contain `%` that is not
-    // a valid percent-escape. Fall through to payload unwrap.
+  if (splitQuery) {
+    try {
+      // Split on the raw string first. Uri.splitQueryString then decodes
+      // each key/value so `%26` stays inside a value instead of becoming
+      // a new top-level `invite=`.
+      params = Uri.splitQueryString(decoded);
+    } catch (_) {
+      // Folded fullwidth / CJK referrers can still contain `%` that is not
+      // a valid percent-escape. Fall through to payload unwrap.
+    }
   }
   const codeKeys = ['invite', 'promo', 'code'];
   for (final key in codeKeys) {
@@ -67,10 +89,41 @@ String? _codeFromDecodedReferrer(String decoded, int depth) {
   // email link= key (same unwrap as the KYC paste / landing). A campaign
   // name in utm_content must not hide a later key that carries the code.
   const nestedKeys = ['utm_content', 'referrer', 'u', 'q', 'url', 'link'];
+  // Play sometimes delivers the whole query percent-encoded as one
+  // parameter (`utm_source=google-play%26invite%253DEVT1`). `%253D` is
+  // a double-encoded `=`. A single-encoded `%26invite%3D` inside a
+  // value is parameter injection and must not become a top-level key.
+  if (splitQuery &&
+      params.length == 1 &&
+      !decoded.contains('&') &&
+      !codeKeys.contains(params.keys.first.toLowerCase()) &&
+      !nestedKeys.contains(params.keys.first.toLowerCase()) &&
+      RegExp(
+        r'%26(?:invite|promo|code)%253D',
+        caseSensitive: false,
+      ).hasMatch(decoded)) {
+    var decodedWhole = decoded;
+    for (var i = 0; i < 2; i++) {
+      final next = stripInvisibleReferralChars(_decodeReferrer(decodedWhole));
+      if (next == decodedWhole) break;
+      decodedWhole = next;
+    }
+    if (decodedWhole != decoded) {
+      final fromEncodedQuery = _codeFromReferrerText(
+        decodedWhole,
+        depth,
+        splitQuery: true,
+      );
+      if (fromEncodedQuery != null) return fromEncodedQuery;
+    }
+  }
   for (final key in nestedKeys) {
     final nested = params[key];
     if (nested == null || nested.isEmpty || nested == decoded) continue;
-    final fromNested = _parseInviteCodeFromReferrer(nested, depth + 1);
+    final splitNested = _isBareReferralAssignment(nested);
+    final fromNested = splitNested
+        ? _parseInviteCodeFromReferrer(nested, depth + 1)
+        : _codeFromReferrerText(nested, depth + 1, splitQuery: false);
     if (fromNested != null) return fromNested;
   }
   return null;

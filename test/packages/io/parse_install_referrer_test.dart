@@ -137,6 +137,13 @@ void main() {
       expect(parseInviteCodeFromReferrer('promo=AB%2F12'), 'AB/12');
     });
 
+    test('does not promote percent-encoded & in a value to invite=', () {
+      expect(
+        parseInviteCodeFromReferrer('utm_content=campaign%26invite%3DEVIL'),
+        isNull,
+      );
+    });
+
     test('extracts the code when the referrer value is an invite URL', () {
       expect(
         parseInviteCodeFromReferrer('https://realunit.app?invite=AB12CD'),

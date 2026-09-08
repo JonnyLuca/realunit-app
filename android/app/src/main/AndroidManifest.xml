@@ -52,7 +52,9 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="realunit-wallet"/>
+                <data android:scheme="realunit-wallet" android:host="open"/>
+                <data android:scheme="realunit-wallet" android:host="invite" android:pathPrefix="/"/>
+                <data android:scheme="realunit-wallet" android:host="promo" android:pathPrefix="/"/>
             </intent-filter>
             <!-- HTTPS App Links for invite and promo codes (verified against
                  Digital Asset Links). autoVerify checks every host in this

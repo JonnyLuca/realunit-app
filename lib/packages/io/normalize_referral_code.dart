@@ -48,10 +48,24 @@ const int kReferralCodeMaxLength = 32;
 /// (including `%20`) become null.
 String _unwrapNestedReferralCode(String value) {
   final nested = RegExp(
-    r'(?:invite|promo)/([^/?#]+)',
+    r'(?:^|/)(?:invite|promo)/([^/?#]+)',
     caseSensitive: false,
   ).firstMatch(value);
   return nested != null ? nested.group(1)! : value;
+}
+
+String _decodeReferralComponentIdempotent(String value) {
+  var current = value;
+  for (var i = 0; i < 3; i++) {
+    try {
+      final next = Uri.decodeComponent(current);
+      if (next == current) return current;
+      current = next;
+    } catch (_) {
+      return current;
+    }
+  }
+  return current;
 }
 
 String? normalizeReferralCode(String? raw) {
@@ -65,11 +79,7 @@ String? normalizeReferralCode(String? raw) {
   // before percent-decode so `invite/AB%2F12` stays AB/12, then unwrap
   // again after decode so `%2Finvite%2FAB12CD` still yields AB12CD.
   value = _unwrapNestedReferralCode(value);
-  try {
-    value = Uri.decodeComponent(value);
-  } catch (_) {
-    // Keep the trimmed raw value when it is not valid percent-encoding.
-  }
+  value = _decodeReferralComponentIdempotent(value);
   value = _unescapeFullwidthUrlChars(value);
   value = stripInvisibleReferralChars(value).replaceAll(RegExp(r'\s+'), '');
   value = _unwrapNestedReferralCode(value);
