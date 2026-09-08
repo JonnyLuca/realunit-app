@@ -14,6 +14,11 @@ void main() {
     expect(formatFrozenChfAmount('1.005'), '1.01');
     expect(formatFrozenChfAmount('1.004'), '1.00');
     expect(formatFrozenChfAmount('1.015'), '1.02');
+    // Negative amounts: the sign survives rounding, but a value that rounds to
+    // zero must not be rendered as "-0.00".
+    expect(formatFrozenChfAmount('-1.005'), '-1.01');
+    expect(formatFrozenChfAmount('-246,5'), '-246.50');
+    expect(formatFrozenChfAmount('-0.004'), '0.00');
   });
 
   test('referralPayoutSemanticsLabel joins title, date, CHF and amount', () {
