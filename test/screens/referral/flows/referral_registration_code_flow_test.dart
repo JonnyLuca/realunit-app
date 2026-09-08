@@ -101,7 +101,7 @@ void main() {
     );
   });
 
-  testWidgets('skip dismisses an open promo dialog', (tester) async {
+  testWidgets('the promo dialog closes without confirming, then skip clears the code', (tester) async {
     final ctrl = TextEditingController(text: 'EVT1');
     await pumpStep(
       tester,
@@ -116,6 +116,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Aktion'), findsOneWidget);
 
+    // The promo text is informational, not a consent gate: tapping the barrier
+    // leaves it without pressing the action. Skip itself sits behind the modal
+    // and is deliberately not reachable while the dialog is up.
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.text('Aktion'), findsNothing);
+
     await tester.tap(find.byType(AppTextButton));
     await tester.pump();
     expect(
@@ -124,7 +131,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Aktion'), findsNothing);
     expect(ctrl.text, isEmpty);
     verify(() => stepCubit.next()).called(1);
   });

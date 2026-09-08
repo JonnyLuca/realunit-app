@@ -438,7 +438,10 @@ class ReferralCodeFieldState extends State<ReferralCodeField> {
     try {
       await showDialog<void>(
         context: context,
-        barrierDismissible: false,
+        // The promo text is informational, not a consent gate: leaving via the
+        // barrier or the system back button must be possible without pressing
+        // the action. `close` stays as the explicit affordance.
+        barrierDismissible: true,
         builder: (dialogContext) => AlertDialog(
           title: Text(s.referralPromoTitle),
           content: SingleChildScrollView(
