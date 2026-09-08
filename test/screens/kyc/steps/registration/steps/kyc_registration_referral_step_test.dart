@@ -123,8 +123,7 @@ void main() {
     },
   );
 
-  testWidgets('Next does not stash a spent 4xx code', (tester) async {
-    final typed = TypedReferralStash();
+  testWidgets('Next reports onResolved(null) for a spent 4xx code', (tester) async {
     String? resolved = 'sentinel';
     final ctrl = TextEditingController();
     await tester.pumpWidget(
@@ -143,10 +142,7 @@ void main() {
             value: stepCubit,
             child: KycRegistrationReferralStep(
               referralCodeCtrl: ctrl,
-              onResolved: (code) {
-                resolved = code;
-                unawaited(typed.onResolved(code));
-              },
+              onResolved: (code) => resolved = code,
               lookup: (_) async => throw const ApiException(
                 statusCode: 404,
                 code: 'NOT_FOUND',
@@ -162,9 +158,7 @@ void main() {
     ctrl.text = 'NOPE';
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
-    await typed.awaitIdle();
     expect(resolved, isNull);
-    expect(await peekPendingReferralCode(), isNull);
     verify(() => stepCubit.next()).called(1);
   });
 

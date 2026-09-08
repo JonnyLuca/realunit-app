@@ -40,6 +40,7 @@ class KycRegistrationSubmitCubit extends Cubit<KycRegistrationSubmitState> {
     required bool swissTaxResidence,
     List<CountryAndTin>? countryAndTINs,
   }) async {
+    if (isClosed || state is KycRegistrationSubmitLoading) return;
     try {
       emit(KycRegistrationSubmitLoading());
 

@@ -45,23 +45,18 @@ void main() {
     expect(await peekPendingReferralCode(), 'EVT1');
   });
 
-  test('awaitIdle finishes the stash before submit can run', () async {
-    final gate = Completer<void>();
-    var stashed = false;
-    debugStashResolvedReferralCode = (code) async {
-      await gate.future;
-      stashed = true;
-    };
+  test('persistIfStillCurrent does not overwrite a newer deeplink', () async {
     final stash = TypedReferralStash();
-    unawaited(stash.onResolved('AB12CD'));
-    var submitReady = false;
-    final pending = stash.awaitIdle().then((_) => submitReady = true);
-    await Future<void>.value();
-    expect(submitReady, isFalse);
-    expect(stashed, isFalse);
-    gate.complete();
-    await pending;
-    expect(stashed, isTrue);
-    expect(submitReady, isTrue);
+    await stash.onResolved('AB12CD');
+    await stashPendingReferralCode('NEWER1');
+    await stash.persistIfStillCurrent();
+    expect(await peekPendingReferralCode(), 'NEWER1');
+  });
+
+  test('persistIfStillCurrent writes the typed code when stash is empty', () async {
+    final stash = TypedReferralStash();
+    stash.resolved = 'AB12CD';
+    await stash.persistIfStillCurrent();
+    expect(await peekPendingReferralCode(), 'AB12CD');
   });
 }

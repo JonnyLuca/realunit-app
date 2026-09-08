@@ -81,6 +81,7 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
   final birthdayCtrl = ValueNotifier<String?>(null);
   final referralCodeCtrl = TextEditingController();
   final _typedReferral = TypedReferralStash();
+  bool _submitInFlight = false;
 
   final addressStreetCtrl = TextEditingController();
   final addressStreetNumberCtrl = TextEditingController();
@@ -210,12 +211,7 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
             // Persist a looked-up invite/promo code for post-auth bind.
             // Skip / invalid lookup leaves any prior deeplink stash untouched.
             // Stash I/O must not block checkKyc after a successful submit.
-            try {
-              await _typedReferral.awaitIdle();
-              await stashResolvedReferralCode(_typedReferral.resolved);
-            } catch (e) {
-              developer.log('Failed to stash resolved referral code: $e');
-            }
+            await _typedReferral.persistIfStillCurrent();
             if (!context.mounted) return;
 
             // The submit cubit only emits Success after a successful EIP-712
@@ -387,32 +383,36 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
   }
 
   Future<void> _onSubmitTax(KycTaxResidenceSubmit tax) async {
-    // Persist the typed code before POST so a crash after the backend
-    // accepts still binds. Skip/invalid already discarded via onResolved(null).
+    if (_submitInFlight) return;
+    _submitInFlight = true;
+    final cubit = context.read<KycRegistrationSubmitCubit>();
     try {
-      await _typedReferral.awaitIdle();
-      await stashResolvedReferralCode(_typedReferral.resolved);
-    } catch (e) {
-      developer.log('Failed to stash resolved referral code: $e');
+      // Persist the typed code before POST so a crash after the backend
+      // accepts still binds. Skip/invalid already discarded via onResolved(null).
+      // Do not overwrite a newer distinct deeplink that landed during submit.
+      await _typedReferral.persistIfStillCurrent();
+      if (!mounted) return;
+      // `swissTaxResidence` + `countryAndTINs` are derived inside the tax step so
+      // multi-residence and the locked address-country entry stay consistent with
+      // the backend contract (tax residences must include addressCountry).
+      await cubit.submit(
+        type: typeCtrl.value,
+        firstName: firstnameCtrl.text.trim(),
+        lastName: lastnameCtrl.text.trim(),
+        phoneNumber: phoneCtrl.value?.trim() ?? '',
+        birthday: birthdayCtrl.value ?? '',
+        nationality: nationalityCtrl.value!,
+        addressStreet: addressStreetCtrl.text.trim(),
+        addressStreetNumber: addressStreetNumberCtrl.text.trim(),
+        addressPostalCode: postalCodeCtrl.text.trim(),
+        addressCity: cityCtrl.text.trim(),
+        addressCountry: countryCtrl.value!,
+        swissTaxResidence: tax.swissTaxResidence,
+        countryAndTINs: tax.countryAndTINs,
+      );
+    } finally {
+      _submitInFlight = false;
     }
-    // `swissTaxResidence` + `countryAndTINs` are derived inside the tax step so
-    // multi-residence and the locked address-country entry stay consistent with
-    // the backend contract (tax residences must include addressCountry).
-    await context.read<KycRegistrationSubmitCubit>().submit(
-      type: typeCtrl.value,
-      firstName: firstnameCtrl.text.trim(),
-      lastName: lastnameCtrl.text.trim(),
-      phoneNumber: phoneCtrl.value?.trim() ?? '',
-      birthday: birthdayCtrl.value ?? '',
-      nationality: nationalityCtrl.value!,
-      addressStreet: addressStreetCtrl.text.trim(),
-      addressStreetNumber: addressStreetNumberCtrl.text.trim(),
-      addressPostalCode: postalCodeCtrl.text.trim(),
-      addressCity: cityCtrl.text.trim(),
-      addressCountry: countryCtrl.value!,
-      swissTaxResidence: tax.swissTaxResidence,
-      countryAndTINs: tax.countryAndTINs,
-    );
   }
 
   @override

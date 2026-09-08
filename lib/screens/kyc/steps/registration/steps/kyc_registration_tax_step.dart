@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,6 +92,7 @@ class KycRegistrationTaxStep extends StatefulWidget {
 class _KycRegistrationTaxStepState extends State<KycRegistrationTaxStep> {
   final _formKey = GlobalKey<FormState>();
   late List<_TaxRow> _rows;
+  bool _submitting = false;
 
   @override
   void initState() {
@@ -209,6 +212,22 @@ class _KycRegistrationTaxStepState extends State<KycRegistrationTaxStep> {
     );
   }
 
+  void _onCompletePressed() {
+    if (_submitting) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    _submitting = true;
+    setState(() {});
+    unawaited(() async {
+      try {
+        await widget.onSubmit(_buildResult());
+      } finally {
+        _submitting = false;
+        if (mounted) setState(() {});
+      }
+    }());
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
@@ -238,12 +257,10 @@ class _KycRegistrationTaxStepState extends State<KycRegistrationTaxStep> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: AppFilledButton(
-                    onPressed: () async {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      if (_formKey.currentState?.validate() ?? false) {
-                        await widget.onSubmit(_buildResult());
-                      }
-                    },
+                    onPressed: _submitting ? null : _onCompletePressed,
+                    state: _submitting
+                        ? FilledButtonState.loading
+                        : FilledButtonState.idle,
                     label: s.complete,
                   ),
                 ),

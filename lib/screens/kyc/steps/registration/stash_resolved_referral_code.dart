@@ -3,11 +3,12 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 
-/// Persist a looked-up invite/promo code after KYC submit.
+/// Persist a looked-up invite/promo code for post-auth bind.
 ///
-/// Null means skip or invalid lookup: leave any deeplink stash in place so
-/// automatic takeover still binds. Only a resolved (empty-cleared or valid)
-/// code is written.
+/// Called before KYC submit (crash after backend accept) and again on
+/// success. Null means skip or invalid lookup: leave any deeplink stash in
+/// place so automatic takeover still binds. Only a resolved code is written.
+/// A newer distinct stash is not overwritten.
 Future<void> stashResolvedReferralCode(String? resolved) async {
   final override = debugStashResolvedReferralCode;
   if (override != null) {
@@ -36,6 +37,25 @@ class TypedReferralStash {
   }
 
   Future<void> awaitIdle() => _inflight;
+
+  /// Wait for in-flight field I/O, then write [resolved] only if the stash
+  /// is empty or still this code. A newer deeplink is left in place.
+  Future<void> persistIfStillCurrent() async {
+    await awaitIdle();
+    final code = resolved;
+    if (code == null) return;
+    try {
+      final latest = await peekPendingReferralCode();
+      if (latest != null && latest != code) return;
+      // Deeplink stash writes memory before its prefs await. Re-check so a
+      // code that landed during peek is not last-write-wins overwritten.
+      final live = peekPendingReferralCodeSync();
+      if (live != null && live != code) return;
+      await stashResolvedReferralCode(code);
+    } catch (e) {
+      developer.log('Failed to persist typed referral code: $e');
+    }
+  }
 
   Future<void> _apply(String? code, String? previous) async {
     try {
