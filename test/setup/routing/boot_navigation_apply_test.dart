@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_bind_result_dto.dart';
 import 'package:realunit_wallet/packages/service/dfx/real_unit_referral_service.dart';
 import 'package:realunit_wallet/setup/routing/boot_navigation.dart';
@@ -139,7 +141,21 @@ void main() {
       await stashPendingReferralCode('AB12CD');
 
       final router = buildRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      // The bind result opens a dialog that reads S.of(context); without the
+      // localization delegates that build throws a null-check error.
+      await tester.pumpWidget(
+        MaterialApp.router(
+          locale: const Locale('de'),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          routerConfig: router,
+        ),
+      );
       await tester.pumpAndSettle();
 
       applyBootNavAction(
