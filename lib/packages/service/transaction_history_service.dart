@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:http/http.dart' as http;
 import 'package:web3dart/credentials.dart';
 import 'package:realunit_wallet/models/dfx_transaction.dart';
 import 'package:realunit_wallet/models/transaction.dart';
@@ -106,7 +107,7 @@ class TransactionHistoryService extends DFXAuthService {
   }
 
   Future<void> _syncReferralPayouts() async {
-    final response;
+    final http.Response response;
     try {
       final uri = buildUri(host, '/v1/realunit/referral/payouts');
       response = await authenticatedGet(
