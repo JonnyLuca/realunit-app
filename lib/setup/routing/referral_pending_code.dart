@@ -114,10 +114,17 @@ Future<String?> peekPendingReferralCode() async {
   return referralCodeFromInput(prefs.getString(pendingReferralCodeKey));
 }
 
+/// True when the in-memory stash is empty or already [code].
+/// Deeplink writes hit memory before prefs, so this sees a newer code
+/// that [peekPendingReferralCode] may still miss.
+bool pendingReferralCodeIsCurrent(String code) {
+  final live = referralCodeFromInput(_pendingReferralCode);
+  return live == null || live == code;
+}
+
 /// Synchronous in-memory peek. Deeplink stash writes memory before prefs.
 /// Does not read SharedPreferences.
-String? peekPendingReferralCodeSync() =>
-    referralCodeFromInput(_pendingReferralCode);
+String? peekPendingReferralCodeSync() => referralCodeFromInput(_pendingReferralCode);
 
 /// Test-only: seed the in-memory stash without touching SharedPreferences.
 @visibleForTesting

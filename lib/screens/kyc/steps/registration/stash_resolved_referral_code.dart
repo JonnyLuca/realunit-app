@@ -55,10 +55,7 @@ class TypedReferralStash {
       if (latest != null && latest != code) return;
       final pause = debugTypedReferralAfterPeek;
       if (pause != null) await pause();
-      // Deeplink stash writes memory before its prefs await. Re-check so a
-      // code that landed during peek is not last-write-wins overwritten.
-      final live = peekPendingReferralCodeSync();
-      if (live != null && live != code) return;
+      if (!pendingReferralCodeIsCurrent(code)) return;
       await stashResolvedReferralCode(code);
     } catch (e) {
       developer.log('Failed to persist typed referral code: $e');

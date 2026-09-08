@@ -15,6 +15,8 @@ void main() {
     await stashPendingReferralCode('  AB12CD  ');
     expect(await peekPendingReferralCode(), 'AB12CD');
     expect(peekPendingReferralCodeSync(), 'AB12CD');
+    expect(pendingReferralCodeIsCurrent('AB12CD'), isTrue);
+    expect(pendingReferralCodeIsCurrent('NEWER1'), isFalse);
 
     expect(await takePendingReferralCode(), 'AB12CD');
     expect(await peekPendingReferralCode(), isNull);
