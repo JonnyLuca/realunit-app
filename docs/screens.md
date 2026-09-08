@@ -122,8 +122,9 @@ Column meaning:
 | Shared widgets | `PhoneNumberField` | — | — | `268` |
 | Shared widgets | `ReferralPayoutTransactionRow` | — | — | `282` |
 
-81 screens — 46 routed (`GoRoute`) + 35 non-routed. The table also carries
-one shared form-widget baseline (`PhoneNumberField`), which is not a screen.
+81 screens — 47 routed (`GoRoute`) + 34 non-routed. The table also carries
+two shared-widget baselines (`PhoneNumberField`, `ReferralPayoutTransactionRow`),
+which are not screens.
 Referral surfaces have Golden baselines (`276`–`290`); the handbook
 documents the programme in `#spec-referral`.
 

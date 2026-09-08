@@ -47,8 +47,9 @@ class ReferralPayoutDto {
   }
 }
 
-/// Reads status from a payout row before amount/created are required, so a
-/// pending/failed row with missing fields cannot poison history sync.
+/// True when [status] is a settled payout spelling. Empty/missing is not
+/// settled, so a pending row cannot poison history sync before amount/created
+/// are required.
 bool referralPayoutStatusIsSettled(String status) {
   final s = status.toLowerCase();
   if (s.isEmpty) return false;

@@ -30,7 +30,7 @@ class TransactionRepository {
   /// UNIQUE cannot accept both rows.
   Future<int> insertTransaction(Transaction transaction) async {
     final key = transaction.txId.toLowerCase();
-    Completer<void>? mine;
+    late final Completer<void> mine;
     while (true) {
       final pending = _insertTxLocks[key];
       if (pending == null) {
@@ -59,7 +59,7 @@ class TransactionRepository {
         transaction.timestamp,
       );
     } finally {
-      mine!.complete();
+      mine.complete();
       if (identical(_insertTxLocks[key], mine.future)) {
         _insertTxLocks.remove(key);
       }

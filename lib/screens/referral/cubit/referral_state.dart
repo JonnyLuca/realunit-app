@@ -137,7 +137,14 @@ class ReferralInviteCreated extends ReferralState {
   const ReferralInviteCreated({required this.summary, required this.invite});
 
   @override
-  List<Object?> get props => [invite.code, invite.url, invite.guestName];
+  List<Object?> get props => [
+    invite.code,
+    invite.url,
+    invite.guestName,
+    invite.copyText,
+    invite.copyTextEn,
+    invite.inviterName,
+  ];
 }
 
 class ReferralFailure extends ReferralState {

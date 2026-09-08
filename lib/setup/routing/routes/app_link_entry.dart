@@ -73,22 +73,6 @@ bool _isWebReferralLink(Uri uri) =>
     (uri.scheme == 'https' || uri.scheme == 'http' || uri.scheme == 'intent') &&
     _referralLinkHosts.contains(uri.host);
 
-/// Extracts a referral/promo invite code from a custom-scheme or https App Link.
-///
-/// Matches:
-/// - `realunit-wallet://invite/{code}` and `realunit-wallet://promo/{code}`
-/// - `realunit-wallet:invite/{code}` and `realunit-wallet:promo/{code}`
-/// - `https://realunit.app/invite/{code}` and `/promo/{code}`
-///   (Android App Links / iOS Universal Links)
-/// - `intent://realunit.app/invite/{code}#Intent;scheme=https;…` (Chrome)
-/// - `intent://invite/{code}#Intent;scheme=realunit-wallet;…`
-/// - `android-app://swiss.realunit.app/https/realunit.app/invite/{code}`
-/// - `ios-app://6759720010/realunit-wallet/invite/{code}`
-/// - a share message or nested invite URL in `app-argument`
-///
-/// Returns the last path segment (trimmed, percent-decoded, capped at
-/// [kReferralCodeMaxLength]) or null when not a referral/promo link.
-/// Invite and promo share one code field.
 String? _referralCodeFromQuery(Uri uri) {
   return referralCodeFromQueryParameters(uri.queryParameters);
 }
@@ -112,6 +96,22 @@ String? _rawQueryValue(String raw, String key) {
   return Uri.splitQueryString(raw.substring(q + 1))[key];
 }
 
+/// Extracts a referral/promo invite code from a custom-scheme or https App Link.
+///
+/// Matches:
+/// - `realunit-wallet://invite/{code}` and `realunit-wallet://promo/{code}`
+/// - `realunit-wallet:invite/{code}` and `realunit-wallet:promo/{code}`
+/// - `https://realunit.app/invite/{code}` and `/promo/{code}`
+///   (Android App Links / iOS Universal Links)
+/// - `intent://realunit.app/invite/{code}#Intent;scheme=https;…` (Chrome)
+/// - `intent://invite/{code}#Intent;scheme=realunit-wallet;…`
+/// - `android-app://swiss.realunit.app/https/realunit.app/invite/{code}`
+/// - `ios-app://6759720010/realunit-wallet/invite/{code}`
+/// - a share message or nested invite URL in `app-argument`
+///
+/// Returns the last path segment (trimmed, percent-decoded, capped at
+/// [kReferralCodeMaxLength]) or null when not a referral/promo link.
+/// Invite and promo share one code field.
 String? extractReferralInviteCode(Uri uri) {
   final direct = _extractReferralInviteCode(uri);
   if (direct != null) return direct;

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
@@ -22,6 +23,7 @@ class ReferralCodeField extends StatefulWidget {
   final TextEditingController controller;
 
   /// Injected in tests. Production uses [RealUnitReferralService.lookupCode].
+  @visibleForTesting
   final Future<ReferralCodeLookupDto> Function(String code)? lookup;
 
   /// When false, the surrounding page already shows the heading (AppBar).
@@ -33,6 +35,7 @@ class ReferralCodeField extends StatefulWidget {
   final ValueChanged<String?>? onResolved;
 
   /// Injected in tests. Production reads [Clipboard.getData].
+  @visibleForTesting
   final Future<String?> Function()? readClipboard;
 
   /// KYC sets this so a copied landing code can be pasted immediately.
@@ -503,7 +506,8 @@ class ReferralCodeFieldState extends State<ReferralCodeField> {
               RegExp(r'\s+'),
               replacementString: '',
             ),
-            // Room for a pasted invite URL; the extracted code is still 32.
+            // Room for a pasted invite URL; the extracted code is still
+            // [kReferralCodeMaxLength].
             LengthLimitingTextInputFormatter(1024),
           ],
           suffixIcon: widget.enabled

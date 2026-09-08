@@ -89,7 +89,8 @@ a fallback when the call fails.
 
 ### `POST /v1/realunit/referral/terms/accept`
 
-Body: `{ "accepted": true }`.
+Body: `{ "accepted": true, "version": "2026-08-14" }`. `version` is the
+terms version the user accepted (bundled fallback `2026-08-14`).
 
 ### `POST /v1/realunit/referral/invites`
 
@@ -217,7 +218,7 @@ and failed payouts stay out of history until the transfer
 is confirmed. The server persists the broadcast `txHash` while the
 row is still Pending and confirms that receipt on retry, so a
 restart does not send a second 20 REALU. Non-settled rows are dropped if a payload includes them. Missing
-status is treated as Settled (this list is Settled-only). Duplicate payout rows (same id or tx hash) are shown once, including
+status is treated as not settled (this list is Settled-only). Duplicate payout rows (same id or tx hash) are shown once, including
 when history sync writes a payload that repeats an id or hash casing.
 A settled row with neither id nor tx hash is dropped so it cannot
 collide as `referral-payout-0`.

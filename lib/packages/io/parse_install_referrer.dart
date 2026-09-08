@@ -15,8 +15,8 @@ import 'package:realunit_wallet/packages/io/normalize_referral_code.dart';
 /// is unwrapped too — each key is tried until one yields a code, so a
 /// campaign name in `utm_content` does not hide `u=` / `link=`. A whole
 /// referrer that only mentions `realunit.app` (no code) still tries those keys.
-/// Returns null when no code is present. Caps at 32 characters, same
-/// as [stashPendingReferralCode] and the API.
+/// Returns null when no code is present. Caps at [kReferralCodeMaxLength],
+/// same as [stashPendingReferralCode] and the API.
 String? parseInviteCodeFromReferrer(String? raw) => _parseInviteCodeFromReferrer(raw, 0);
 
 String? _parseInviteCodeFromReferrer(String? raw, int depth) {

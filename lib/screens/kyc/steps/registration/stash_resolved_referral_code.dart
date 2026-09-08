@@ -8,7 +8,8 @@ import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 /// Called before KYC submit (crash after backend accept) and again on
 /// success. Null means skip or invalid lookup: leave any deeplink stash in
 /// place so automatic takeover still binds. Only a resolved code is written.
-/// A newer distinct stash is not overwritten.
+/// Last-write-wins: a newer distinct stash must be guarded by
+/// [TypedReferralStash.persistIfStillCurrent], not by this function.
 Future<void> stashResolvedReferralCode(String? resolved) async {
   final override = debugStashResolvedReferralCode;
   if (override != null) {

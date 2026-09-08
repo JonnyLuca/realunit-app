@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
@@ -14,11 +15,13 @@ class KycRegistrationReferralStep extends StatefulWidget {
   final TextEditingController referralCodeCtrl;
 
   /// Injected in tests. Production lookup goes through [ReferralCodeField].
+  @visibleForTesting
   final Future<ReferralCodeLookupDto> Function(String code)? lookup;
 
   final ValueChanged<String?>? onResolved;
 
   /// Injected in tests. Production reads the clipboard in [ReferralCodeField].
+  @visibleForTesting
   final Future<String?> Function()? readClipboard;
 
   /// Injected in tests. Production peeks the deeplink stash.

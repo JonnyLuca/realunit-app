@@ -5,11 +5,7 @@ import 'package:realunit_wallet/packages/service/dfx/exceptions/api_exception.da
 /// Transport failures (5xx, 401, 408, 429) are not invalid — the code may still
 /// work on retry and must not be shown as expired.
 bool isReferralLookupInvalidStatus(int? status) {
-  return status == 400 ||
-      status == 404 ||
-      status == 409 ||
-      status == 410 ||
-      status == 422;
+  return status == 400 || status == 404 || status == 409 || status == 410 || status == 422;
 }
 
 /// NestJS 404/405 body when the referral route is not mounted yet
@@ -47,7 +43,7 @@ bool isReferralRouteMissing(String? message) {
 /// not light the «invalid / expired» copy or drop a stashed invite.
 bool isReferralLookupInvalid(ApiException error) {
   if (isReferralRouteMissing(error.message)) return false;
-  if (error.statusCode == 404 && (error.message == null || error.message!.trim().isEmpty)) {
+  if (error.statusCode == 404 && error.message.trim().isEmpty) {
     return false;
   }
   return isReferralLookupInvalidStatus(error.statusCode);
