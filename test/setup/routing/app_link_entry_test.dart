@@ -893,10 +893,6 @@ void main() {
       expect(release.contains('dev.realunit.app'), isFalse);
       expect(releaseXml.contains('android:autoVerify="true"'), isTrue);
       expect(
-        RegExp(r'<data android:scheme="realunit-wallet"\s*/>').hasMatch(releaseXml),
-        isFalse,
-      );
-      expect(
         releaseXml.contains('android:scheme="realunit-wallet" android:host="open"'),
         isTrue,
       );
@@ -912,6 +908,33 @@ void main() {
         final hosts = hostsIn('android/app/src/$flavor/AndroidManifest.xml');
         expect(hosts, contains('dev.realunit.app'));
       }
+    });
+
+    test('custom scheme still matches pathless open and opaque lightning/invite', () {
+      final xml = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
+      // Hierarchical hosts without pathPrefix so realunit-wallet://open matches.
+      expect(
+        xml.contains('android:scheme="realunit-wallet" android:host="open"/>'),
+        isTrue,
+      );
+      expect(
+        RegExp(
+          r'android:scheme="realunit-wallet" android:host="invite" android:pathPrefix="/"',
+        ).hasMatch(xml),
+        isFalse,
+      );
+      expect(
+        RegExp(
+          r'android:scheme="realunit-wallet" android:host="promo" android:pathPrefix="/"',
+        ).hasMatch(xml),
+        isFalse,
+      );
+      // Separate scheme-only filter: opaque lightning and invite/code URIs
+      // have no host and would miss a host-only filter.
+      expect(
+        RegExp(r'<data android:scheme="realunit-wallet"\s*/>').hasMatch(xml),
+        isTrue,
+      );
     });
 
     test('App Store entitlements do not associate the staging host', () {
