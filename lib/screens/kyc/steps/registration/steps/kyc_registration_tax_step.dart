@@ -237,8 +237,11 @@ class _KycRegistrationTaxStepState extends State<KycRegistrationTaxStep> {
             is KycRegistrationSubmitSuccess) {
           return;
         }
-      } on FlutterError {
-        // No submit cubit in the tree.
+      } catch (_) {
+        // No submit cubit in the tree. `context.read` throws
+        // ProviderNotFoundException, which implements Exception and is not a
+        // FlutterError, so this catch stays untyped: `provider` is not a direct
+        // dependency and must not be imported just to name the type.
       }
       _submitting = false;
       setState(() {});
