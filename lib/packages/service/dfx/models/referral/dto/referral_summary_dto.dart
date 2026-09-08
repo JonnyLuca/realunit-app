@@ -53,16 +53,37 @@ class ReferralSummaryDto {
   }
 
   factory ReferralSummaryDto.fromJson(Map<String, dynamic> json) {
+    final creditedCount = referralJsonInt(json['creditedCount']);
     return ReferralSummaryDto(
       eligible: referralJsonBool(json['eligible']),
       termsAccepted: referralJsonBool(json['termsAccepted']),
       minHolding: referralJsonNum(json['minHolding']),
       openCount: referralJsonInt(json['openCount']),
-      creditedCount: referralJsonInt(json['creditedCount']),
-      realuSum: referralJsonNum(json['realuSum']) ?? 0,
-      chfSum: referralJsonNum(json['chfSum']) ?? 0,
+      creditedCount: creditedCount,
+      realuSum: _summarySum(json, 'realuSum', creditedCount: creditedCount),
+      chfSum: _summarySum(json, 'chfSum', creditedCount: creditedCount),
       sharePriceLabel: referralJsonString(json['sharePriceLabel']),
       sharePrice: referralJsonNum(json['sharePrice']),
     );
   }
+}
+
+/// Omitted sums are 0 on an empty programme. A credited prize without a
+/// sum, or a present non-numeric sum, is a load error — not CHF 0.
+num _summarySum(
+  Map<String, dynamic> json,
+  String key, {
+  required int creditedCount,
+}) {
+  if (!json.containsKey(key)) {
+    if (creditedCount > 0) {
+      throw FormatException('referral summary missing $key');
+    }
+    return 0;
+  }
+  final n = referralJsonNum(json[key]);
+  if (n == null) {
+    throw FormatException('referral summary missing $key');
+  }
+  return n;
 }

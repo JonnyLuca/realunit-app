@@ -87,6 +87,51 @@ void main() {
       expect(dto.chfSum, 512.4);
     });
 
+    test('omitted sums are 0 when nothing is credited', () {
+      final dto = ReferralSummaryDto.fromJson({
+        'eligible': true,
+        'termsAccepted': true,
+        'openCount': 0,
+        'creditedCount': 0,
+      });
+      expect(dto.realuSum, 0);
+      expect(dto.chfSum, 0);
+    });
+
+    test('throws when a credited prize is missing a sum', () {
+      expect(
+        () => ReferralSummaryDto.fromJson({
+          'eligible': true,
+          'termsAccepted': true,
+          'openCount': 0,
+          'creditedCount': 1,
+          'realuSum': 20,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ReferralSummaryDto.fromJson({
+          'eligible': true,
+          'termsAccepted': true,
+          'openCount': 0,
+          'creditedCount': 1,
+          'chfSum': 246.5,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ReferralSummaryDto.fromJson({
+          'eligible': true,
+          'termsAccepted': true,
+          'openCount': 0,
+          'creditedCount': 1,
+          'realuSum': 20,
+          'chfSum': 'nope',
+        }),
+        throwsFormatException,
+      );
+    });
+
     test('API Aktienkurs is a token; the tile uses localized copy', () {
       final dto = ReferralSummaryDto.fromJson({
         'eligible': true,
