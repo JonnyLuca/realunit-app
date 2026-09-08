@@ -17,6 +17,10 @@ class ReferralCubit extends Cubit<ReferralState> {
   int _invitesGeneration = 0;
   int _summaryGeneration = 0;
   String? _createIdempotencyKey;
+  /// The guest name [_createIdempotencyKey] was minted for. A retry after a
+  /// failure may carry a different name, and reusing the key would let a
+  /// conforming server answer with the previous name's invite.
+  String? _createIdempotencyName;
 
   ReferralCubit(this._service) : super(const ReferralInitial());
 
@@ -119,14 +123,18 @@ class ReferralCubit extends Cubit<ReferralState> {
         errorMessage: current is ReferralCreateReady ? current.errorMessage : null,
       ),
     );
-    _createIdempotencyKey ??=
-        'invite-${name.hashCode}-${DateTime.now().microsecondsSinceEpoch}';
+    if (_createIdempotencyKey == null || _createIdempotencyName != name) {
+      _createIdempotencyKey =
+          'invite-${name.hashCode}-${DateTime.now().microsecondsSinceEpoch}';
+      _createIdempotencyName = name;
+    }
     try {
       final created = await _service.createInvite(
         guestName: name,
         idempotencyKey: _createIdempotencyKey,
       );
       _createIdempotencyKey = null;
+      _createIdempotencyName = null;
       _emitIfOpen(ReferralInviteCreated(summary: summary, invite: created));
     } on ApiException catch (e) {
       if (e.code == 'NOT_ELIGIBLE') {

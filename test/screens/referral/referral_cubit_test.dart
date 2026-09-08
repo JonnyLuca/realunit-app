@@ -284,6 +284,35 @@ void main() {
     ],
   );
 
+  test('createInvite mints a fresh idempotency key when the name changes', () async {
+    when(
+      () => service.createInvite(
+        guestName: any(named: 'guestName'),
+        idempotencyKey: any(named: 'idempotencyKey'),
+      ),
+    ).thenThrow(const ApiException(code: 'FAILED', message: 'boom'));
+    final cubit = ReferralCubit(service);
+    cubit.emit(const ReferralCreateReady(summary: _eligible));
+
+    await cubit.createInvite(guestName: 'Alice');
+    await cubit.createInvite(guestName: 'Alice');
+    await cubit.createInvite(guestName: 'Bob');
+
+    final keys = verify(
+      () => service.createInvite(
+        guestName: any(named: 'guestName'),
+        idempotencyKey: captureAny(named: 'idempotencyKey'),
+      ),
+    ).captured.cast<String?>();
+
+    // A retry for the same name must reuse the key so the server can dedupe,
+    // but a different name must never travel under the previous name's key.
+    expect(keys, hasLength(3));
+    expect(keys[0], keys[1]);
+    expect(keys[2], isNot(keys[0]));
+    await cubit.close();
+  });
+
   blocTest<ReferralCubit, ReferralState>(
     'createInvite maps NOT_ELIGIBLE to the gate screen',
     build: () {
