@@ -14,25 +14,41 @@ bool isReferralLookupInvalidStatus(int? status) {
 
 /// NestJS 404/405 body when the referral route is not mounted yet
 /// (`Cannot GET /v1/realunit/referral/code/…`, Fastify
-/// `Route GET:/… not found`). That is not a spent code.
+/// `Route GET:/… not found`). Generic proxy/nginx 404 bodies are the
+/// same class: the code may still be valid. That is not a spent code.
 bool isReferralRouteMissing(String? message) {
   if (message == null) return false;
   final text = message.trim();
+  if (text.isEmpty) return false;
   if (RegExp(
     r'^Cannot (GET|HEAD|POST|PUT|PATCH|DELETE) ',
     caseSensitive: false,
   ).hasMatch(text)) {
     return true;
   }
-  return RegExp(
+  if (RegExp(
     r'^Route (GET|HEAD|POST|PUT|PATCH|DELETE):',
     caseSensitive: false,
-  ).hasMatch(text);
+  ).hasMatch(text)) {
+    return true;
+  }
+  final lower = text.toLowerCase();
+  if (lower == 'not found' ||
+      lower == '404' ||
+      lower == '404 not found' ||
+      lower.contains('<html') ||
+      lower.contains('nginx')) {
+    return true;
+  }
+  return false;
 }
 
 /// True only for a business rejection of this code. An unmounted route must
 /// not light the «invalid / expired» copy or drop a stashed invite.
 bool isReferralLookupInvalid(ApiException error) {
   if (isReferralRouteMissing(error.message)) return false;
+  if (error.statusCode == 404 && (error.message == null || error.message!.trim().isEmpty)) {
+    return false;
+  }
   return isReferralLookupInvalidStatus(error.statusCode);
 }

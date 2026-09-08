@@ -282,6 +282,16 @@ void main() {
       );
     });
 
+    test('unknown kind is neither invite nor promo', () {
+      final dto = ReferralBindResultDto.fromJson({
+        'kind': 'campaign-v2',
+        'campaignText': 'DE text',
+      });
+      expect(dto.isPromo, isFalse);
+      expect(dto.isInvite, isFalse);
+      expect(dto.kind, 'unknown');
+    });
+
     test('keeps inviterName and inviteeName from an invite bind', () {
       final dto = ReferralBindResultDto.fromJson({
         'kind': 'Invite',
@@ -378,6 +388,19 @@ void main() {
       expect(foldEmpfehlerInviteStatus('Deleted'), 'Deleted');
     });
 
+    test('throws when status is missing', () {
+      expect(
+        () => ReferralInviteDto.fromJson({
+          'id': 1,
+          'code': 'AB12',
+          'url': 'https://realunit.app/invite/AB12',
+          'guestName': 'Alice',
+          'created': '2026-08-24T10:00:00Z',
+        }),
+        throwsFormatException,
+      );
+    });
+
     test('stringifies a numeric code and trims guestName', () {
       final dto = ReferralInviteDto.fromJson({
         'id': 1,
@@ -460,26 +483,28 @@ void main() {
       expect(dto.created, DateTime.fromMillisecondsSinceEpoch(0, isUtc: true));
     });
 
-    test('treats a missing or blank status as Open', () {
-      final omitted = ReferralInviteDto.fromJson({
-        'id': 1,
-        'code': 'AB12',
-        'url': 'https://realunit.app/invite/AB12',
-        'guestName': 'Alice',
-        'created': '2026-08-24T10:00:00Z',
-      });
-      final blank = ReferralInviteDto.fromJson({
-        'id': 2,
-        'code': 'CD34',
-        'url': 'https://realunit.app/invite/CD34',
-        'guestName': 'Bob',
-        'status': '  ',
-        'created': '2026-08-24T10:00:00Z',
-      });
-      expect(omitted.status, 'Open');
-      expect(omitted.isOpen, isTrue);
-      expect(blank.status, 'Open');
-      expect(blank.isOpen, isTrue);
+    test('treats a missing or blank status as invalid', () {
+      expect(
+        () => ReferralInviteDto.fromJson({
+          'id': 1,
+          'code': 'AB12',
+          'url': 'https://realunit.app/invite/AB12',
+          'guestName': 'Alice',
+          'created': '2026-08-24T10:00:00Z',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ReferralInviteDto.fromJson({
+          'id': 2,
+          'code': 'CD34',
+          'url': 'https://realunit.app/invite/CD34',
+          'guestName': 'Bob',
+          'status': '  ',
+          'created': '2026-08-24T10:00:00Z',
+        }),
+        throwsFormatException,
+      );
     });
 
     test('fills the invite url from the code when url is omitted', () {

@@ -74,7 +74,7 @@ class _ReferralShareInviteButtonState extends State<ReferralShareInviteButton>
         context: context,
         text: text,
         subject: S.of(context).referralInviteUrlLabel,
-      );
+      ).timeout(const Duration(seconds: 30));
       if (!mounted || generation != _shareGeneration || widget.text != text) {
         return;
       }

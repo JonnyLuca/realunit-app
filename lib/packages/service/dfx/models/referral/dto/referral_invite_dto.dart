@@ -90,9 +90,13 @@ class ReferralInviteDto {
       code: code,
       url: url,
       guestName: guestName,
-      status: foldEmpfehlerInviteStatus(
-        referralJsonString(json['status']) ?? 'Open',
-      ),
+      status: foldEmpfehlerInviteStatus(() {
+        final status = referralJsonString(json['status']);
+        if (status == null || status.isEmpty) {
+          throw const FormatException('referral invite missing status');
+        }
+        return status;
+      }()),
       created: created,
       copyText: referralJsonString(json['copyText']),
       copyTextEn: referralJsonString(json['copyTextEn']),

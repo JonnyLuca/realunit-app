@@ -101,12 +101,17 @@ class RealUnitReferralService extends DFXAuthService {
 
   Future<ReferralCreatedInviteDto> createInvite({
     required String guestName,
+    String? idempotencyKey,
   }) async {
     final uri = buildUri(host, '$_basePath/invites');
     final response = await _timed(
       authenticatedPost(
         uri,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          if (idempotencyKey != null && idempotencyKey.isNotEmpty)
+            'Idempotency-Key': idempotencyKey,
+        },
         body: jsonEncode({'guestName': guestName}),
       ),
     );

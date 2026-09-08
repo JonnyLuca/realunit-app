@@ -33,7 +33,8 @@ void main() {
       ),
       isTrue,
     );
-    expect(isReferralRouteMissing('Not found'), isFalse);
+    expect(isReferralRouteMissing('Not found'), isTrue);
+    expect(isReferralRouteMissing('404 Not Found'), isTrue);
     expect(isReferralRouteMissing(null), isFalse);
     expect(isReferralRouteMissing(''), isFalse);
 
@@ -43,6 +44,26 @@ void main() {
           statusCode: 404,
           code: 'UNKNOWN',
           message: 'Cannot GET /v1/realunit/referral/code/TEST',
+        ),
+      ),
+      isFalse,
+    );
+    expect(
+      isReferralLookupInvalid(
+        const ApiException(
+          statusCode: 404,
+          code: 'UNKNOWN',
+          message: 'Not Found',
+        ),
+      ),
+      isFalse,
+    );
+    expect(
+      isReferralLookupInvalid(
+        const ApiException(
+          statusCode: 404,
+          code: 'UNKNOWN',
+          message: '',
         ),
       ),
       isFalse,

@@ -9,7 +9,11 @@ String inferReferralKind(
   String fallback = 'invite',
 }) {
   final raw = referralJsonString(json['kind']);
-  if (raw != null) return raw;
+  if (raw != null) {
+    final kind = raw.toLowerCase();
+    if (kind == 'invite' || kind == 'promo') return kind;
+    return 'unknown';
+  }
   final inviter = referralPersonName(json['inviterName']);
   if (inviter != null) return 'invite';
   if (firstNonEmpty([

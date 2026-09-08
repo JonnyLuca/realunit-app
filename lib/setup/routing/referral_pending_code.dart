@@ -52,6 +52,8 @@ Future<String?> takePendingReferralCode() async {
     final inMemory = _pendingReferralCode;
     _pendingReferralCode = null;
     _stashGeneration++;
+    final pause = debugPendingReferralBeforePrefs;
+    if (pause != null) await pause();
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(pendingReferralCodeKey);
     final newer = referralCodeFromInput(_pendingReferralCode);
@@ -86,6 +88,8 @@ Future<void> discardPendingReferralCodeIfEqual(String code) async {
   try {
     final inMemory = referralCodeFromInput(_pendingReferralCode);
     if (inMemory != null && inMemory != capped) return;
+    final pause = debugPendingReferralBeforePrefs;
+    if (pause != null) await pause();
     final prefs = await SharedPreferences.getInstance();
     final latest = referralCodeFromInput(_pendingReferralCode);
     if (latest != null && latest != capped) return;
@@ -110,9 +114,8 @@ Future<String?> peekPendingReferralCode() async {
   return referralCodeFromInput(prefs.getString(pendingReferralCodeKey));
 }
 
-/// Synchronous in-memory peek for redirect tests / warm paths that already
-/// stashed in this process. Does not read SharedPreferences.
-@visibleForTesting
+/// Synchronous in-memory peek. Deeplink stash writes memory before prefs.
+/// Does not read SharedPreferences.
 String? peekPendingReferralCodeSync() =>
     referralCodeFromInput(_pendingReferralCode);
 
@@ -123,3 +126,7 @@ void debugSetPendingReferralCodeSync(String? code) {
   _takingPendingReferralCode = false;
   _stashGeneration++;
 }
+
+/// Test-only: pause take/discard after the in-process lock, before prefs I/O.
+@visibleForTesting
+Future<void> Function()? debugPendingReferralBeforePrefs;

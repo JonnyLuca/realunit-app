@@ -96,7 +96,7 @@ void main() {
           jsonEncode({
             'summary': {
               'eligible': 1,
-              'termsAccepted': 'yes',
+              'termsAccepted': 'true',
               'openCount': 0,
               'creditedCount': 0,
               'realuSum': 0,
@@ -110,6 +110,25 @@ void main() {
       final summary = await build(client).getSummary();
       expect(summary.eligible, isTrue);
       expect(summary.termsAccepted, isTrue);
+    });
+
+    test('does not treat termsAccepted: yes as accepted', () async {
+      final client = MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'eligible': true,
+            'termsAccepted': 'yes',
+            'openCount': 0,
+            'creditedCount': 0,
+            'realuSum': 0,
+            'chfSum': 0,
+          }),
+          200,
+        ),
+      );
+
+      final summary = await build(client).getSummary();
+      expect(summary.termsAccepted, isFalse);
     });
 
     test('keeps eligible when a sibling data object is present', () async {
@@ -216,6 +235,7 @@ void main() {
       expect(capturedRequest.method, 'POST');
       expect(capturedRequest.url.path, '/v1/realunit/referral/invites');
       expect(jsonDecode(capturedRequest.body), {'guestName': 'Alice'});
+      expect(capturedRequest.headers['Idempotency-Key'], isNull);
       expect(created.url, 'https://realunit.app/invite/AB12');
       expect(created.inviterName, 'Björn');
       expect(
@@ -241,6 +261,27 @@ void main() {
       final created = await build(client).createInvite(guestName: 'Alice');
       expect(created.code, 'AB12');
       expect(created.guestName, 'Alice');
+    });
+
+    test('sends Idempotency-Key when the cubit supplies one', () async {
+      late http.Request capturedRequest;
+      final client = MockClient((request) async {
+        capturedRequest = request;
+        return http.Response(
+          jsonEncode({
+            'code': 'AB12',
+            'url': 'https://realunit.app/invite/AB12',
+            'guestName': 'Alice',
+          }),
+          201,
+        );
+      });
+
+      await build(client).createInvite(
+        guestName: 'Alice',
+        idempotencyKey: 'invite-1',
+      );
+      expect(capturedRequest.headers['Idempotency-Key'], 'invite-1');
     });
 
     test('throws ApiException on a non-200/201 response', () async {

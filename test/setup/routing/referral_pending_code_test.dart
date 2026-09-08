@@ -8,6 +8,7 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     debugSetPendingReferralCodeSync(null);
+    debugPendingReferralBeforePrefs = null;
   });
 
   test('stash then peek then take: take clears, peek does not', () async {
@@ -81,10 +82,17 @@ void main() {
 
   test('after concurrent take and discard the code is not still claimable', () async {
     await stashPendingReferralCode('AB12CD');
-    await Future.wait<void>([
-      takePendingReferralCode().then<void>((_) {}),
-      discardPendingReferralCodeIfEqual('AB12CD'),
-    ]);
+    final gate = Completer<void>();
+    debugPendingReferralBeforePrefs = () => gate.future;
+    addTearDown(() => debugPendingReferralBeforePrefs = null);
+
+    final discarded = discardPendingReferralCodeIfEqual('AB12CD');
+    await Future<void>.delayed(Duration.zero);
+    final taken = takePendingReferralCode();
+    gate.complete();
+    await discarded;
+    await taken;
+
     expect(await peekPendingReferralCode(), isNull);
     expect(await takePendingReferralCode(), isNull);
   });

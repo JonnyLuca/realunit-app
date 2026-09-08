@@ -15,6 +15,8 @@ class ReferralCubit extends Cubit<ReferralState> {
   final RealUnitReferralService _service;
   bool _refreshing = false;
   int _invitesGeneration = 0;
+  int _summaryGeneration = 0;
+  String? _createIdempotencyKey;
 
   ReferralCubit(this._service) : super(const ReferralInitial());
 
@@ -41,8 +43,11 @@ class ReferralCubit extends Cubit<ReferralState> {
     } else {
       _emitIfOpen(const ReferralLoading());
     }
+    final generation = ++_summaryGeneration;
     try {
-      await _emitFromSummary(await _service.getSummary());
+      final summary = await _service.getSummary();
+      if (generation != _summaryGeneration) return;
+      await _emitFromSummary(summary);
     } on ApiException catch (e) {
       _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
     } catch (e) {
@@ -114,8 +119,14 @@ class ReferralCubit extends Cubit<ReferralState> {
         errorMessage: current is ReferralCreateReady ? current.errorMessage : null,
       ),
     );
+    _createIdempotencyKey ??=
+        'invite-${name.hashCode}-${DateTime.now().microsecondsSinceEpoch}';
     try {
-      final created = await _service.createInvite(guestName: name);
+      final created = await _service.createInvite(
+        guestName: name,
+        idempotencyKey: _createIdempotencyKey,
+      );
+      _createIdempotencyKey = null;
       _emitIfOpen(ReferralInviteCreated(summary: summary, invite: created));
     } on ApiException catch (e) {
       if (e.code == 'NOT_ELIGIBLE') {
@@ -155,8 +166,11 @@ class ReferralCubit extends Cubit<ReferralState> {
     if (state is ReferralLoading || _refreshing) return;
     _refreshing = true;
     final previous = state;
+    final generation = ++_summaryGeneration;
     try {
-      await _emitFromSummary(await _service.getSummary());
+      final summary = await _service.getSummary();
+      if (generation != _summaryGeneration) return;
+      await _emitFromSummary(summary);
     } on ApiException catch (e) {
       if (previous is ReferralOverviewLoaded) return;
       _emitIfOpen(ReferralFailure(message: referralErrorMessage(e)));
