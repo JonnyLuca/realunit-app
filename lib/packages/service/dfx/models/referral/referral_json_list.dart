@@ -35,6 +35,13 @@ num? referralJsonNum(dynamic value) {
 /// Parses a JSON or locale numeric string. Swiss thousands apostrophes,
 /// a DE/CH decimal comma, and an optional `CHF`/`Fr` prefix are accepted.
 num? parseReferralDecimal(String? raw) {
+  final value = normalizeReferralDecimalString(raw);
+  return value == null ? null : num.tryParse(value);
+}
+
+/// Same fold as [parseReferralDecimal], kept as a decimal string so CHF
+/// display can round half-up to cents without binary `double` (1.005 → 1.01).
+String? normalizeReferralDecimalString(String? raw) {
   if (raw == null) return null;
   var value = raw.trim();
   if (value.isEmpty) return null;
@@ -56,7 +63,8 @@ num? parseReferralDecimal(String? raw) {
   } else if (value.contains(',')) {
     value = value.replaceAll(',', '.');
   }
-  return num.tryParse(value);
+  if (num.tryParse(value) == null) return null;
+  return value;
 }
 
 int referralJsonInt(dynamic value, {int orElse = 0}) => referralJsonNum(value)?.round() ?? orElse;

@@ -11,6 +11,9 @@ void main() {
     expect(formatFrozenChfAmount('1.246,50'), '1246.50');
     expect(formatFrozenChfAmount('CHF 246,5'), '246.50');
     expect(formatFrozenChfAmount('not-a-number'), 'not-a-number');
+    expect(formatFrozenChfAmount('1.005'), '1.01');
+    expect(formatFrozenChfAmount('1.004'), '1.00');
+    expect(formatFrozenChfAmount('1.015'), '1.02');
   });
 
   test('referralPayoutSemanticsLabel joins title, date, CHF and amount', () {

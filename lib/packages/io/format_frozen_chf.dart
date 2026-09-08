@@ -6,9 +6,28 @@ import 'package:realunit_wallet/packages/utils/format_fixed.dart';
 /// A DE/CH decimal comma (`246,5`), Swiss thousands apostrophes
 /// (`1'246.50`), and a `CHF` prefix are accepted.
 String formatFrozenChfAmount(String raw) {
-  final n = parseReferralDecimal(raw);
-  if (n == null) return raw;
-  return n.toStringAsFixed(2);
+  final normalized = normalizeReferralDecimalString(raw);
+  if (normalized == null) return raw;
+  return _roundHalfUpToCents(normalized);
+}
+
+/// Half-up to two decimals from a decimal string. `double` + `toStringAsFixed(2)`
+/// can turn `1.005` into `1.00`.
+String _roundHalfUpToCents(String normalized) {
+  final negative = normalized.startsWith('-');
+  var value = negative ? normalized.substring(1) : normalized;
+  final dot = value.indexOf('.');
+  var whole = dot < 0 ? value : value.substring(0, dot);
+  var frac = dot < 0 ? '' : value.substring(dot + 1);
+  if (whole.isEmpty) whole = '0';
+  if (frac.length <= 2) {
+    return '${negative ? '-' : ''}$whole.${frac.padRight(2, '0')}';
+  }
+  final roundUp = frac.codeUnitAt(2) >= 53; // '5'
+  var cents = int.parse(whole) * 100 + int.parse(frac.substring(0, 2));
+  if (roundUp) cents += 1;
+  final sign = negative && cents != 0 ? '-' : '';
+  return '$sign${cents ~/ 100}.${(cents % 100).toString().padLeft(2, '0')}';
 }
 
 /// Matches [HideAmountText] for a whole-REALU prize (+ 20 REALU / + ***.**).
