@@ -420,8 +420,9 @@ row.
   deeplink stash in place. Skip also discards an in-flight paste or
   lookup so a late clipboard write or GET cannot stash after
   Überspringen. After lookup the invite recognition copy or
-  the promo campaign dialog is shown. The campaign dialog stays until
-  Close — a barrier tap does not dismiss it; Close is keyboard-focused.
+  the promo campaign dialog is shown. The campaign text is informational,
+  not a consent gate: a barrier tap or the system back button leaves it, and
+  Close is keyboard-focused. The boot and deeplink bind dialogs stay modal.
   A 4xx bind (stacking, self-referral,
   spent) shows the matching copy once (spent: «Code bereits eingelöst»;
   self-referral / already-bound / already-registered have their own

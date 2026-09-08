@@ -204,15 +204,37 @@ void main() {
       ),
       isTrue,
     );
-    await tester.tapAt(const Offset(2, 2));
-    await tester.pump();
-    expect(find.text('Aktion'), findsOneWidget);
     expect(
       tester.widget<TextButton>(find.widgetWithText(TextButton, 'Schließen')).autofocus,
       isTrue,
     );
     await tester.tap(find.text('Schließen'));
     await tester.pumpAndSettle();
+    expect(find.text('Aktion'), findsNothing);
+  });
+
+  testWidgets('the campaign dialog is left by tapping outside it', (
+    tester,
+  ) async {
+    final ctrl = TextEditingController(text: 'EVT1');
+    await pumpField(
+      tester,
+      controller: ctrl,
+      lookup: (_) async => const ReferralCodeLookupDto(
+        kind: 'promo',
+        actionText: 'Mit dem Code EVT1 schenken wir dir 20 Token.',
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(find.text('Aktion'), findsOneWidget);
+
+    // The campaign text is informational, not a consent gate: a tap on the
+    // barrier outside the dialog leaves it without pressing Schließen.
+    await tester.tapAt(const Offset(2, 2));
+    await tester.pumpAndSettle();
+
     expect(find.text('Aktion'), findsNothing);
   });
 
