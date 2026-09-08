@@ -54,6 +54,10 @@ final class DebugAuthCompleteEvent extends HomeEvent {
   List<Object> get props => [address];
 }
 
+final class HistorySyncStartedEvent extends HomeEvent {
+  const HistorySyncStartedEvent();
+}
+
 final class HistorySyncFailedEvent extends HomeEvent {
   const HistorySyncFailedEvent();
 }

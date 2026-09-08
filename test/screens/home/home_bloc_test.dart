@@ -174,13 +174,36 @@ void main() {
         final wallet = DebugWallet(1, 'Test', _debugAddress);
         when(() => walletService.hasWallet()).thenReturn(true);
         when(() => walletService.getCurrentWallet()).thenAnswer((_) async => wallet);
-        when(() => transactionHistoryService.apiBasedSync()).thenThrow(
-          const FormatException('payout'),
+        when(() => transactionHistoryService.apiBasedSync()).thenAnswer(
+          (_) => Future<void>.error(const FormatException('payout')),
         );
 
         final bloc = build();
         await bloc.stream.firstWhere((s) => s.hasWallet);
         bloc.add(const LoadCurrentWalletEvent());
+        await bloc.stream.firstWhere((s) => s.historySyncFailed);
+        expect(bloc.state.historySyncFailed, isTrue);
+        await bloc.close();
+      });
+
+      test('historySyncFailed clears on the next sync so a later failure can surface', () async {
+        final wallet = DebugWallet(1, 'Test', _debugAddress);
+        when(() => walletService.hasWallet()).thenReturn(true);
+        when(() => walletService.getCurrentWallet()).thenAnswer((_) async => wallet);
+        when(() => transactionHistoryService.apiBasedSync()).thenAnswer(
+          (_) => Future<void>.error(const FormatException('payout')),
+        );
+
+        final bloc = build();
+        await bloc.stream.firstWhere((s) => s.hasWallet);
+        bloc.add(const LoadCurrentWalletEvent());
+        await bloc.stream.firstWhere((s) => s.historySyncFailed);
+        expect(bloc.state.historySyncFailed, isTrue);
+
+        bloc.add(const HistorySyncStartedEvent());
+        await bloc.stream.firstWhere((s) => !s.historySyncFailed);
+        expect(bloc.state.historySyncFailed, isFalse);
+        bloc.add(const HistorySyncFailedEvent());
         await bloc.stream.firstWhere((s) => s.historySyncFailed);
         expect(bloc.state.historySyncFailed, isTrue);
         await bloc.close();

@@ -32,6 +32,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<CompleteOnboardingEvent>(_onCompleteOnboarding);
     on<AcceptSoftwareTermsEvent>(_onAcceptSoftwareTerms);
     on<DebugAuthCompleteEvent>(_onDebugAuthComplete);
+    on<HistorySyncStartedEvent>(_onHistorySyncStarted);
     on<HistorySyncFailedEvent>(_onHistorySyncFailed);
 
     add(const CheckWalletExistsEvent());
@@ -164,6 +165,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _syncHistory() {
     unawaited(() async {
+      add(const HistorySyncStartedEvent());
       try {
         await _transactionHistoryService.apiBasedSync();
       } catch (e, st) {
@@ -175,6 +177,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         add(const HistorySyncFailedEvent());
       }
     }());
+  }
+
+  void _onHistorySyncStarted(
+    HistorySyncStartedEvent event,
+    Emitter<HomeState> emit,
+  ) {
+    emit(state.copyWith(historySyncFailed: false));
   }
 
   void _onHistorySyncFailed(
