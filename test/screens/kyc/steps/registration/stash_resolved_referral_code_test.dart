@@ -10,10 +10,12 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     debugSetPendingReferralCodeSync(null);
     debugStashResolvedReferralCode = null;
+    debugTypedReferralAfterPeek = null;
   });
 
   tearDown(() {
     debugStashResolvedReferralCode = null;
+    debugTypedReferralAfterPeek = null;
   });
 
   test('null resolved leaves a deeplink stash in place', () async {
@@ -49,6 +51,14 @@ void main() {
     final stash = TypedReferralStash();
     await stash.onResolved('AB12CD');
     await stashPendingReferralCode('NEWER1');
+    await stash.persistIfStillCurrent();
+    expect(await peekPendingReferralCode(), 'NEWER1');
+  });
+
+  test('persistIfStillCurrent does not overwrite a deeplink that lands after peek', () async {
+    final stash = TypedReferralStash();
+    await stash.onResolved('AB12CD');
+    debugTypedReferralAfterPeek = () => stashPendingReferralCode('NEWER1');
     await stash.persistIfStillCurrent();
     expect(await peekPendingReferralCode(), 'NEWER1');
   });

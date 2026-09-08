@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/country/country.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/registration/dto/real_unit_registration_request_dto.dart';
+import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registration_submit/kyc_registration_submit_cubit.dart';
 import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/buttons/app_text_button.dart';
@@ -221,10 +223,25 @@ class _KycRegistrationTaxStepState extends State<KycRegistrationTaxStep> {
     unawaited(() async {
       try {
         await widget.onSubmit(_buildResult());
-      } finally {
+      } catch (_) {
         _submitting = false;
         if (mounted) setState(() {});
+        return;
       }
+      if (!mounted) return;
+      // Success: keep the CTA disabled. The page overlay stays until
+      // this route is disposed. Failure/BitBox re-enable. Isolated
+      // tax-step tests have no submit cubit and must re-enable.
+      try {
+        if (context.read<KycRegistrationSubmitCubit>().state
+            is KycRegistrationSubmitSuccess) {
+          return;
+        }
+      } on FlutterError {
+        // No submit cubit in the tree.
+      }
+      _submitting = false;
+      setState(() {});
     }());
   }
 

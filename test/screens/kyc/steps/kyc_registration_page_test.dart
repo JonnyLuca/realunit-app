@@ -1346,9 +1346,12 @@ void main() {
     testWidgets(
       'submit does not overwrite a newer deeplink stash',
       (tester) async {
-        addTearDown(clearPendingReferralCode);
+        addTearDown(() async {
+          debugTypedReferralAfterPeek = null;
+          await clearPendingReferralCode();
+        });
         await primeTypedCode(tester);
-        await stashPendingReferralCode('NEWER1');
+        debugTypedReferralAfterPeek = () => stashPendingReferralCode('NEWER1');
 
         await tapComplete(tester);
 

@@ -193,7 +193,9 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
           builder: (context, state) {
             return AppBar(
               leading: IconButton(
-                onPressed: state.canGoBack
+                onPressed: _submitInFlight
+                    ? null
+                    : state.canGoBack
                     ? context.read<KycRegistrationStepCubit>().previous
                     : context.pop,
                 icon: const Icon(Icons.arrow_back_rounded),
@@ -296,7 +298,8 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
                   ),
                   BlocBuilder<KycRegistrationSubmitCubit, KycRegistrationSubmitState>(
                     builder: (context, state) {
-                      if (state is KycRegistrationSubmitLoading) {
+                      if (state is KycRegistrationSubmitLoading ||
+                          _submitInFlight) {
                         return Container(
                           color: RealUnitColors.basic.white,
                           child: const Center(
@@ -384,8 +387,9 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
 
   Future<void> _onSubmitTax(KycTaxResidenceSubmit tax) async {
     if (_submitInFlight) return;
-    _submitInFlight = true;
+    setState(() => _submitInFlight = true);
     final cubit = context.read<KycRegistrationSubmitCubit>();
+    var releaseGuard = true;
     try {
       // Persist the typed code before POST so a crash after the backend
       // accepts still binds. Skip/invalid already discarded via onResolved(null).
@@ -410,8 +414,17 @@ class _KycRegistrationViewState extends State<KycRegistrationView> {
         swissTaxResidence: tax.swissTaxResidence,
         countryAndTINs: tax.countryAndTINs,
       );
+      // Success: keep the guard until this route is disposed so a second
+      // tap during checkKyc cannot POST again. Failure/BitBox re-enable.
+      if (cubit.state is KycRegistrationSubmitSuccess) {
+        releaseGuard = false;
+      }
     } finally {
-      _submitInFlight = false;
+      if (releaseGuard && mounted) {
+        setState(() => _submitInFlight = false);
+      } else if (releaseGuard) {
+        _submitInFlight = false;
+      }
     }
   }
 
