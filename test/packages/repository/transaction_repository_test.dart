@@ -170,6 +170,26 @@ void main() {
       },
     );
 
+    test('parallel mixed-case inserts collapse onto one row', () async {
+      await Future.wait([
+        repo.insertTransaction(
+          buildTokenTransfer(txId: '0xAbC', height: 1),
+        ),
+        repo.insertTransaction(
+          buildTokenTransfer(
+            txId: '0xabc',
+            height: 1,
+            type: TransactionTypes.referralPayout,
+            data: '246.50',
+          ),
+        ),
+      ]);
+
+      final all = await repo.allTransactions;
+      expect(all, hasLength(1));
+      expect(all.single.txId.toLowerCase(), '0xabc');
+    });
+
     test('updateTransaction mutates the row identified by txId', () async {
       await repo.insertTransaction(
         buildTokenTransfer(txId: 'tx-1', height: 1, amount: BigInt.from(1)),

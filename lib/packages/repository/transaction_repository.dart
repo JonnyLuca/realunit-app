@@ -10,6 +10,10 @@ import 'package:realunit_wallet/packages/storage/database.dart';
 import 'package:realunit_wallet/packages/storage/dfx_transaction_storage.dart';
 import 'package:realunit_wallet/packages/storage/transaction_storage.dart';
 
+/// Serializes inserts of the same hash (any casing) in this isolate so two
+/// parallel syncs cannot insert `0xAbC` and `0xabc` as two UNIQUE rows.
+final Map<String, Future<void>> _insertTxLocks = {};
+
 class TransactionRepository {
   final AppDatabase _appDatabase;
   final AssetRepository _assetRepository;
@@ -22,24 +26,44 @@ class TransactionRepository {
   /// SQLite UNIQUE on `txId` is case-sensitive. A payout hash `0xabc` must
   /// not sit beside a history row `0xAbC` as a second prize/buy
   /// (Offerte Punkt 2). Write onto the stored casing when it exists.
+  /// Same-isolate parallel syncs of mixed-case hashes are serialized so
+  /// UNIQUE cannot accept both rows.
   Future<int> insertTransaction(Transaction transaction) async {
-    if (await findTxIdIgnoreCase(transaction.txId) != null) {
-      return updateTransaction(transaction);
+    final key = transaction.txId.toLowerCase();
+    Completer<void>? mine;
+    while (true) {
+      final pending = _insertTxLocks[key];
+      if (pending == null) {
+        mine = Completer<void>();
+        _insertTxLocks[key] = mine.future;
+        break;
+      }
+      await pending;
     }
-    return _appDatabase.insertTransactions(
-      transaction.height,
-      transaction.txId,
-      transaction.chainId,
-      transaction.senderAddress,
-      transaction.receiverAddress,
-      transaction.amount.toRadixString(16),
-      transaction.asset.id,
-      transaction.type.index,
-      transaction.category?.value ?? '',
-      transaction.note ?? '',
-      transaction.data ?? '',
-      transaction.timestamp,
-    );
+    try {
+      if (await findTxIdIgnoreCase(transaction.txId) != null) {
+        return updateTransaction(transaction);
+      }
+      return await _appDatabase.insertTransactions(
+        transaction.height,
+        transaction.txId,
+        transaction.chainId,
+        transaction.senderAddress,
+        transaction.receiverAddress,
+        transaction.amount.toRadixString(16),
+        transaction.asset.id,
+        transaction.type.index,
+        transaction.category?.value ?? '',
+        transaction.note ?? '',
+        transaction.data ?? '',
+        transaction.timestamp,
+      );
+    } finally {
+      mine!.complete();
+      if (identical(_insertTxLocks[key], mine.future)) {
+        _insertTxLocks.remove(key);
+      }
+    }
   }
 
   /// Payout hashes and history hashes do not always share casing.
