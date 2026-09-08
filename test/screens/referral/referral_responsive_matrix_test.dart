@@ -41,9 +41,9 @@ const _summary = ReferralSummaryDto(
 
 final _openInvite = ReferralInviteDto(
   id: 1,
-  code: 'AAAA',
-  url: 'https://realunit.app/invite/AAAA',
-  guestName: 'Alice',
+  code: 'ABCD12EF',
+  url: 'https://realunit.app/invite/ABCD12EF',
+  guestName: 'Alexandra-Katharina',
   status: 'Open',
   created: DateTime.utc(2026, 8, 1),
 );
@@ -75,6 +75,7 @@ Future<void> _pumpScreen(
       ),
     ],
   );
+  addTearDown(router.dispose);
   await tester.pumpWidget(
     MediaQuery(
       data: mediaQuery,

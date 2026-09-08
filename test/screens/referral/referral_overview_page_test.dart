@@ -21,11 +21,9 @@ import 'package:realunit_wallet/styles/language.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 
-class _MockReferralCubit extends MockCubit<ReferralState>
-    implements ReferralCubit {}
+class _MockReferralCubit extends MockCubit<ReferralState> implements ReferralCubit {}
 
-class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState>
-    implements SettingsBloc {}
+class _MockSettingsBloc extends MockBloc<SettingsEvent, SettingsState> implements SettingsBloc {}
 
 void main() {
   late _MockReferralCubit cubit;
@@ -105,6 +103,7 @@ void main() {
           ),
         ],
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -128,16 +127,13 @@ void main() {
       expect(find.text('Gutgeschrieben'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.label == '3 Offen',
+          (widget) => widget is Semantics && widget.properties.label == '3 Offen',
         ),
         findsOneWidget,
       );
       expect(
         find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics &&
-              widget.properties.label == '2 Gutgeschrieben',
+          (widget) => widget is Semantics && widget.properties.label == '2 Gutgeschrieben',
         ),
         findsOneWidget,
       );
@@ -396,6 +392,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(
@@ -551,6 +548,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(
@@ -571,8 +569,7 @@ void main() {
       find.ancestor(
         of: find.text('Einladungslink kopieren'),
         matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.liveRegion == true,
+          (widget) => widget is Semantics && widget.properties.liveRegion == true,
         ),
       ),
       findsNothing,
@@ -606,8 +603,7 @@ void main() {
       find.ancestor(
         of: find.text('Einladungslink kopieren'),
         matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.liveRegion == true,
+          (widget) => widget is Semantics && widget.properties.liveRegion == true,
         ),
       ),
       findsNothing,
@@ -618,8 +614,7 @@ void main() {
     tester,
   ) async {
     String? copied;
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
       if (call.method == 'Clipboard.setData') {
         copied = (call.arguments as Map)['text'] as String?;
@@ -680,6 +675,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(
@@ -755,6 +751,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(
@@ -852,6 +849,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(
@@ -934,6 +932,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(
@@ -1008,6 +1007,7 @@ void main() {
           ),
         ],
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -1037,8 +1037,7 @@ void main() {
             'Wir konnten den Code gerade nicht prüfen. Bitte versuche es später erneut.',
           ),
           matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is Semantics && widget.properties.liveRegion == true,
+            (widget) => widget is Semantics && widget.properties.liveRegion == true,
           ),
         ),
         findsOneWidget,
@@ -1295,8 +1294,7 @@ void main() {
             'Wir konnten den Code gerade nicht prüfen. Bitte versuche es später erneut.',
           ),
           matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is Semantics && widget.properties.liveRegion == true,
+            (widget) => widget is Semantics && widget.properties.liveRegion == true,
           ),
         ),
         findsOneWidget,
@@ -1360,8 +1358,7 @@ void main() {
           'Wir konnten den Code gerade nicht prüfen. Bitte versuche es später erneut.',
         ),
         matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.liveRegion == true,
+          (widget) => widget is Semantics && widget.properties.liveRegion == true,
         ),
       ),
       findsOneWidget,
@@ -1485,8 +1482,7 @@ void main() {
         find.ancestor(
           of: find.text('Offene Einladungen werden geladen…'),
           matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is Semantics && widget.properties.liveRegion == true,
+            (widget) => widget is Semantics && widget.properties.liveRegion == true,
           ),
         ),
         findsOneWidget,
@@ -1634,11 +1630,9 @@ void main() {
         ),
       );
       await tester.pump();
-      final button = tester.widget<AppFilledButton>(
-        find.widgetWithText(AppFilledButton, 'Einladungslink erstellen'),
-      );
-      button.onPressed?.call();
-      button.onPressed?.call();
+      final button = find.widgetWithText(AppFilledButton, 'Einladungslink erstellen');
+      await tester.tap(button);
+      await tester.tap(button);
       await tester.pumpAndSettle();
       expect(find.text('create-form'), findsOneWidget);
     },

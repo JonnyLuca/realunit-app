@@ -461,11 +461,9 @@ void main() {
       expect(find.text('Wiederholen'), findsOneWidget);
       expect(calls, 1);
 
-      final retry = tester.widget<AppFilledButton>(
-        find.widgetWithText(AppFilledButton, 'Wiederholen'),
-      );
-      retry.onPressed?.call();
-      retry.onPressed?.call();
+      final retry = find.widgetWithText(AppFilledButton, 'Wiederholen');
+      await tester.tap(retry);
+      await tester.tap(retry);
       await tester.pump();
       expect(calls, 2);
       expect(find.text('Wiederholen'), findsOneWidget);
@@ -662,6 +660,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(
@@ -711,6 +710,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MaterialApp.router(

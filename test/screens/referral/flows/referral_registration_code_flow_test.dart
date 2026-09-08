@@ -116,7 +116,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Aktion'), findsOneWidget);
 
-    tester.widget<AppTextButton>(find.byType(AppTextButton)).onPressed!();
+    await tester.tap(find.byType(AppTextButton));
     await tester.pump();
     expect(
       tester.widget<AppFilledButton>(find.byType(AppFilledButton)).state,

@@ -241,8 +241,7 @@ void main() {
 
         await tester.pumpApp(buildSubject(const KycRegistrationView()));
         await tester.pump();
-        (tester.widget(find.byType(PageView)) as PageView).controller
-            ?.jumpToPage(state.index);
+        (tester.widget(find.byType(PageView)) as PageView).controller?.jumpToPage(state.index);
         await tester.pump();
 
         await tester.enterText(find.byType(TextField), 'AB12CD');
@@ -301,8 +300,7 @@ void main() {
 
       await tester.pumpApp(buildSubject(const KycRegistrationView()));
       await tester.pump();
-      (tester.widget(find.byType(PageView)) as PageView).controller
-          ?.jumpToPage(state.index);
+      (tester.widget(find.byType(PageView)) as PageView).controller?.jumpToPage(state.index);
       await tester.pump();
       await tester.pump();
 
@@ -350,8 +348,7 @@ void main() {
       expect(find.byType(KycRegistrationAddressStep), findsOne);
     });
 
-    testWidgets('postal code field uses a text keyboard for alphanumeric codes',
-        (tester) async {
+    testWidgets('postal code field uses a text keyboard for alphanumeric codes', (tester) async {
       // Regression guard: foreign postal codes are alphanumeric (NL "1011 AB",
       // UK "EC1A 1BB"). A number-only keyboard blocked customers from entering
       // them even though the validator + backend accept letters and spaces.
@@ -376,8 +373,7 @@ void main() {
       expect(postalField.keyboardType, TextInputType.text);
     });
 
-    testWidgets('dismisses the keyboard when tapping outside the address fields',
-        (tester) async {
+    testWidgets('dismisses the keyboard when tapping outside the address fields', (tester) async {
       final state = const KycRegistrationStepState(
         step: KycRegistrationStep.address,
         steps: [
@@ -1234,17 +1230,17 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    Future<VoidCallback> completePressed(WidgetTester tester) async {
-      final completeButton = find.descendant(
+    Future<Finder> completeButton(WidgetTester tester) async {
+      final button = find.descendant(
         of: find.byType(KycRegistrationTaxStep),
         matching: find.byType(AppFilledButton),
       );
       await tester.scrollUntilVisible(
-        completeButton,
+        button,
         100,
         scrollable: taxScrollable(),
       );
-      return tester.widget<AppFilledButton>(completeButton).onPressed!;
+      return button;
     }
 
     testWidgets(
@@ -1259,7 +1255,7 @@ void main() {
         final stashGate = Completer<void>();
         debugStashResolvedReferralCode = (_) => stashGate.future;
 
-        (await completePressed(tester))();
+        await tester.tap(await completeButton(tester));
         await tester.pump();
 
         verifyNever(
@@ -1316,9 +1312,9 @@ void main() {
         final stashGate = Completer<void>();
         debugStashResolvedReferralCode = (_) => stashGate.future;
 
-        final onPressed = await completePressed(tester);
-        onPressed();
-        onPressed();
+        final button = await completeButton(tester);
+        await tester.tap(button);
+        await tester.tap(button);
         stashGate.complete();
         await tester.pump();
         await tester.pump();

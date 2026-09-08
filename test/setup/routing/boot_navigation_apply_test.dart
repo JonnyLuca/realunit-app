@@ -39,41 +39,45 @@ void main() {
   // Only the routes this seam touches. `/buyPaymentDetails` mirrors the real
   // builder's non-nullable `extra` cast, so building it from a bare path throws
   // — exactly the crash the restore allowlist must prevent.
-  GoRouter buildRouter() => GoRouter(
-    initialLocation: '/verifyPin',
-    routes: [
-      GoRoute(
-        name: PinRoutes.verify,
-        path: '/verifyPin',
-        builder: (_, _) => const Text('verify'),
-      ),
-      GoRoute(
-        name: AppRoutes.dashboard,
-        path: '/dashboard',
-        builder: (_, _) => const Text('dashboard'),
-      ),
-      GoRoute(
-        name: SettingsRoutes.settings,
-        path: '/settings',
-        builder: (_, _) => const Text('settings'),
-      ),
-      GoRoute(
-        name: AppRoutes.kyc,
-        path: '/kyc',
-        builder: (_, _) => const Text('kyc'),
-      ),
-      GoRoute(
-        name: AppRoutes.buyPaymentDetails,
-        path: '/buyPaymentDetails',
-        builder: (_, state) => Text('buy ${state.extra as Object}'),
-      ),
-      GoRoute(
-        name: AppRoutes.pay,
-        path: '/pay',
-        builder: (_, state) => Text('pay ${state.extra}'),
-      ),
-    ],
-  );
+  GoRouter buildRouter() {
+    final router = GoRouter(
+      initialLocation: '/verifyPin',
+      routes: [
+        GoRoute(
+          name: PinRoutes.verify,
+          path: '/verifyPin',
+          builder: (_, _) => const Text('verify'),
+        ),
+        GoRoute(
+          name: AppRoutes.dashboard,
+          path: '/dashboard',
+          builder: (_, _) => const Text('dashboard'),
+        ),
+        GoRoute(
+          name: SettingsRoutes.settings,
+          path: '/settings',
+          builder: (_, _) => const Text('settings'),
+        ),
+        GoRoute(
+          name: AppRoutes.kyc,
+          path: '/kyc',
+          builder: (_, _) => const Text('kyc'),
+        ),
+        GoRoute(
+          name: AppRoutes.buyPaymentDetails,
+          path: '/buyPaymentDetails',
+          builder: (_, state) => Text('buy ${state.extra as Object}'),
+        ),
+        GoRoute(
+          name: AppRoutes.pay,
+          path: '/pay',
+          builder: (_, state) => Text('pay ${state.extra}'),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    return router;
+  }
 
   // Fully-passed post-gate input: the router is on the PIN gate right after a
   // re-lock, so a captured non-gate route can be restored.
@@ -291,9 +295,7 @@ void main() {
         // via the AFTER-pop check below where /dashboard is onstage again.
         expect(find.text('pay lightning:LNURL1DP68GURN8GHJ7VF3XGENJVE5UMD'), findsOneWidget);
         expect(
-          router.routerDelegate.currentConfiguration.matches
-              .map((m) => m.matchedLocation)
-              .toList(),
+          router.routerDelegate.currentConfiguration.matches.map((m) => m.matchedLocation).toList(),
           ['/dashboard', '/pay'],
         );
         expect(peekPendingPaymentDeeplink(), isNull);
@@ -367,9 +369,7 @@ void main() {
 
         expect(find.text('pay lightning:LNURL1DP68GURN8GHJ7VF3XGENJVE5UMD'), findsOneWidget);
         expect(
-          router.routerDelegate.currentConfiguration.matches
-              .map((m) => m.matchedLocation)
-              .toList(),
+          router.routerDelegate.currentConfiguration.matches.map((m) => m.matchedLocation).toList(),
           ['/dashboard', '/pay'],
         );
         expect(peekPendingPaymentDeeplink(), isNull);
@@ -402,9 +402,7 @@ void main() {
         // where /kyc is onstage again.
         expect(find.text('pay lightning:LNURL1DP68GURN8GHJ7VF3XGENJVE5UMD'), findsOneWidget);
         expect(
-          router.routerDelegate.currentConfiguration.matches
-              .map((m) => m.matchedLocation)
-              .toList(),
+          router.routerDelegate.currentConfiguration.matches.map((m) => m.matchedLocation).toList(),
           ['/dashboard', '/kyc', '/pay'],
         );
         expect(peekPendingPaymentDeeplink(), isNull);
@@ -442,9 +440,7 @@ void main() {
         verifyNever(() => service.bind(code: any(named: 'code')));
         expect(await peekPendingReferralCode(), 'AB12CD');
         expect(
-          router.routerDelegate.currentConfiguration.matches
-              .map((m) => m.matchedLocation)
-              .toList(),
+          router.routerDelegate.currentConfiguration.matches.map((m) => m.matchedLocation).toList(),
           ['/dashboard', '/kyc', '/pay'],
         );
       },
@@ -474,9 +470,7 @@ void main() {
 
         expect(find.text('pay lightning:LNURL1DP68GURN8GHJ7VF3XGENJVE5UMD'), findsOneWidget);
         expect(
-          router.routerDelegate.currentConfiguration.matches
-              .map((m) => m.matchedLocation)
-              .toList(),
+          router.routerDelegate.currentConfiguration.matches.map((m) => m.matchedLocation).toList(),
           ['/dashboard', '/pay'],
         );
         expect(peekPendingPaymentDeeplink(), isNull);

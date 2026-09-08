@@ -503,11 +503,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.text('Wiederholen'), findsOneWidget);
 
-      final retry = tester.widget<AppFilledButton>(
-        find.widgetWithText(AppFilledButton, 'Wiederholen'),
-      );
-      retry.onPressed?.call();
-      retry.onPressed?.call();
+      final retry = find.widgetWithText(AppFilledButton, 'Wiederholen');
+      await tester.tap(retry);
+      await tester.tap(retry);
       await tester.pump();
       expect(calls, 2);
       expect(
@@ -1462,8 +1460,7 @@ void main() {
     tester,
   ) async {
     String? lookedUp;
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
       if (call.method == 'Clipboard.getData') {
         return <String, dynamic>{'text': 'AB12CD'};
@@ -1597,9 +1594,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Aktion'), findsOneWidget);
 
-    tester
-        .state<ReferralCodeFieldState>(find.byType(ReferralCodeField))
-        .dismissPromoDialog();
+    tester.state<ReferralCodeFieldState>(find.byType(ReferralCodeField)).dismissPromoDialog();
     await tester.pumpAndSettle();
     expect(find.text('Aktion'), findsNothing);
   });
@@ -1614,9 +1609,7 @@ void main() {
       lookup: (_) async => const ReferralCodeLookupDto(kind: 'invite'),
     );
     await tester.pump();
-    tester
-        .state<ReferralCodeFieldState>(find.byType(ReferralCodeField))
-        .dismissPromoDialog();
+    tester.state<ReferralCodeFieldState>(find.byType(ReferralCodeField)).dismissPromoDialog();
     await tester.pump();
     expect(find.byType(ReferralCodeField), findsOneWidget);
   });

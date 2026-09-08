@@ -20,8 +20,9 @@ import 'package:realunit_wallet/styles/colors.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 
-class _MockReferralCubit extends MockCubit<ReferralState>
-    implements ReferralCubit {}
+import '../../helper/helper.dart';
+
+class _MockReferralCubit extends MockCubit<ReferralState> implements ReferralCubit {}
 
 class _MockService extends Mock implements RealUnitReferralService {}
 
@@ -43,22 +44,13 @@ void main() {
   });
 
   Future<void> pumpCreateView(WidgetTester tester) {
-    return tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
+    return tester.pumpApp(
+      BlocProvider<ReferralCubit>.value(
+        value: cubit,
+        child: const ReferralCreateView(),
       ),
+      locale: const Locale('de'),
+      theme: realUnitTheme,
     );
   }
 
@@ -177,8 +169,7 @@ void main() {
     tester,
   ) async {
     String? copied;
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
       if (call.method == 'Clipboard.setData') {
         copied = (call.arguments as Map)['text'] as String?;
@@ -313,8 +304,7 @@ void main() {
           'Wir konnten den Code gerade nicht prüfen. Bitte versuche es später erneut.',
         ),
         matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.liveRegion == true,
+          (widget) => widget is Semantics && widget.properties.liveRegion == true,
         ),
       ),
       findsOneWidget,
@@ -357,8 +347,7 @@ void main() {
       find.ancestor(
         of: find.text('In diesem Quartal sind keine weiteren Prämien möglich.'),
         matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.liveRegion == true,
+          (widget) => widget is Semantics && widget.properties.liveRegion == true,
         ),
       ),
       findsOneWidget,
@@ -392,8 +381,7 @@ void main() {
       find.ancestor(
         of: find.text('Einladung wird erstellt…'),
         matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.liveRegion == true,
+          (widget) => widget is Semantics && widget.properties.liveRegion == true,
         ),
       ),
       findsOneWidget,
@@ -460,8 +448,7 @@ void main() {
           'Das Empfehlungsprogramm steht verifizierten Aktionären mit dem erforderlichen Bestand zur Verfügung.',
         ),
         matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.liveRegion == true,
+          (widget) => widget is Semantics && widget.properties.liveRegion == true,
         ),
       ),
       findsOneWidget,
@@ -559,8 +546,7 @@ void main() {
       const Stream<ReferralState>.empty(),
       initialState: const ReferralCreateReady(summary: _summary),
     );
-    when(() => cubit.createInvite(guestName: any(named: 'guestName')))
-        .thenAnswer((_) async {});
+    when(() => cubit.createInvite(guestName: any(named: 'guestName'))).thenAnswer((_) async {});
 
     await pumpCreateView(tester);
     await tester.pump();
@@ -587,8 +573,7 @@ void main() {
       const Stream<ReferralState>.empty(),
       initialState: const ReferralCreateReady(summary: _summary),
     );
-    when(() => cubit.createInvite(guestName: any(named: 'guestName')))
-        .thenAnswer((_) async {});
+    when(() => cubit.createInvite(guestName: any(named: 'guestName'))).thenAnswer((_) async {});
 
     await pumpCreateView(tester);
     await tester.pump();
@@ -631,8 +616,9 @@ void main() {
       initialState: const ReferralCreateReady(summary: _summary),
     );
     final release = Completer<void>();
-    when(() => cubit.createInvite(guestName: any(named: 'guestName')))
-        .thenAnswer((_) => release.future);
+    when(
+      () => cubit.createInvite(guestName: any(named: 'guestName')),
+    ).thenAnswer((_) => release.future);
 
     await pumpCreateView(tester);
     await tester.pump();
@@ -659,33 +645,24 @@ void main() {
     );
 
     Object? popped;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: Builder(
-          builder: (context) {
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              popped = await Navigator.of(context).push<Object>(
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider<ReferralCubit>.value(
-                    value: cubit,
-                    child: const ReferralCreateView(),
-                  ),
+    await tester.pumpApp(
+      Builder(
+        builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            popped = await Navigator.of(context).push<Object>(
+              MaterialPageRoute(
+                builder: (_) => BlocProvider<ReferralCubit>.value(
+                  value: cubit,
+                  child: const ReferralCreateView(),
                 ),
-              );
-            });
-            return const SizedBox();
-          },
-        ),
+              ),
+            );
+          });
+          return const SizedBox();
+        },
       ),
+      locale: const Locale('de'),
+      theme: realUnitTheme,
     );
     await tester.pumpAndSettle();
     expect(
@@ -870,19 +847,10 @@ void main() {
         await GetIt.instance.reset();
       });
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: realUnitTheme,
-          locale: const Locale('de'),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
-          home: const ReferralCreatePage(),
-        ),
+      await tester.pumpApp(
+        const ReferralCreatePage(),
+        locale: const Locale('de'),
+        theme: realUnitTheme,
       );
       await tester.pump();
       await tester.pump();
