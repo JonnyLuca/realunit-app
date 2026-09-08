@@ -29,6 +29,7 @@ class ReferralShareInviteButton extends StatefulWidget {
 class _ReferralShareInviteButtonState extends State<ReferralShareInviteButton>
     with WidgetsBindingObserver {
   Timer? _reset;
+  Timer? _shareTimeout;
   bool _failed = false;
   bool _sharing = false;
   int _shareGeneration = 0;
@@ -51,13 +52,18 @@ class _ReferralShareInviteButtonState extends State<ReferralShareInviteButton>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _reset?.cancel();
+    _shareTimeout?.cancel();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || !_sharing) return;
+    // Abandon the hung sheet for good: bump the generation so a late reply is
+    // ignored, and cancel the timeout so no stray timer outlives the tap.
     _shareGeneration++;
+    _shareTimeout?.cancel();
+    _shareTimeout = null;
     setState(() => _sharing = false);
   }
 
@@ -69,16 +75,39 @@ class _ReferralShareInviteButtonState extends State<ReferralShareInviteButton>
       _failed = false;
     });
     final text = widget.text;
+    final subject = S.of(context).referralInviteUrlLabel;
+    // Own the timeout instead of using Future.timeout: its timer cannot be
+    // cancelled, so a sheet that never returns would leave a pending timer and
+    // throw a TimeoutException into a future nobody awaits.
+    final settled = Completer<ShareResult?>();
+    _shareTimeout?.cancel();
+    _shareTimeout = Timer(const Duration(seconds: 30), () {
+      if (!settled.isCompleted) settled.complete(null);
+    });
+    unawaited(() async {
+      try {
+        final r = await shareReferralInvite(
+          context: context,
+          text: text,
+          subject: subject,
+        );
+        if (!settled.isCompleted) settled.complete(r);
+      } catch (_) {
+        if (!settled.isCompleted) settled.complete(null);
+      }
+    }());
     try {
-      final result = await shareReferralInvite(
-        context: context,
-        text: text,
-        subject: S.of(context).referralInviteUrlLabel,
-      ).timeout(const Duration(seconds: 30));
+      final result = await settled.future;
+      _shareTimeout?.cancel();
+      _shareTimeout = null;
       if (!mounted || generation != _shareGeneration || widget.text != text) {
         return;
       }
-      if (result.status != ShareResultStatus.unavailable) return;
+      // null means the sheet timed out or the platform threw: neither reported
+      // a successful share, so both surface the same transient failure.
+      if (result != null && result.status != ShareResultStatus.unavailable) {
+        return;
+      }
       setState(() => _failed = true);
       _reset?.cancel();
       _reset = Timer(const Duration(seconds: 2), () {
