@@ -102,6 +102,7 @@
   "firstName": "First name",
   "from": "from",
   "hardwareWalletSubtitle": "I own a Bitbox02 Nova and want to store RealUnit stock tokens on it.",
+  "historySyncFailed": "Transaction history could not be updated.",
   "iban": "IBAN",
   "ibanInvalid": "IBAN is invalid",
   "ibanRequired": "IBAN is required",

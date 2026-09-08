@@ -170,6 +170,22 @@ void main() {
         },
       );
 
+      test('historySyncFailed is set when apiBasedSync throws', () async {
+        final wallet = DebugWallet(1, 'Test', _debugAddress);
+        when(() => walletService.hasWallet()).thenReturn(true);
+        when(() => walletService.getCurrentWallet()).thenAnswer((_) async => wallet);
+        when(() => transactionHistoryService.apiBasedSync()).thenThrow(
+          const FormatException('payout'),
+        );
+
+        final bloc = build();
+        await bloc.stream.firstWhere((s) => s.hasWallet);
+        bloc.add(const LoadCurrentWalletEvent());
+        await bloc.stream.firstWhere((s) => s.historySyncFailed);
+        expect(bloc.state.historySyncFailed, isTrue);
+        await bloc.close();
+      });
+
       test('openWallet already set → early return, no second fetch', () async {
         final wallet = DebugWallet(1, 'Test', _debugAddress);
         when(() => walletService.hasWallet()).thenReturn(true);

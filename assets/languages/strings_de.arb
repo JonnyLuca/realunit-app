@@ -102,6 +102,7 @@
   "firstName": "Vorname",
   "from": "von",
   "hardwareWalletSubtitle": "Ich besitze eine Bitbox02 Nova und möchte RealUnit Aktientoken darauf verwahren.",
+  "historySyncFailed": "Die Umsatzhistorie konnte nicht aktualisiert werden.",
   "iban": "IBAN",
   "ibanInvalid": "IBAN ist ungültig",
   "ibanRequired": "IBAN ist erforderlich",

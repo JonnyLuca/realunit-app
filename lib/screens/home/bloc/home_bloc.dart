@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:equatable/equatable.dart';
@@ -31,6 +32,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<CompleteOnboardingEvent>(_onCompleteOnboarding);
     on<AcceptSoftwareTermsEvent>(_onAcceptSoftwareTerms);
     on<DebugAuthCompleteEvent>(_onDebugAuthComplete);
+    on<HistorySyncFailedEvent>(_onHistorySyncFailed);
 
     add(const CheckWalletExistsEvent());
   }
@@ -88,7 +90,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     _balanceService.updateBalance(_appStore.primaryAddress);
     _balanceService.startSync(_appStore.primaryAddress);
-    _transactionHistoryService.apiBasedSync();
+    _syncHistory();
   }
 
   Future<void> _onDeleteCurrentWallet(
@@ -157,6 +159,28 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _appStore.wallet = wallet;
     _balanceService.updateBalance(_appStore.primaryAddress);
     _balanceService.startSync(_appStore.primaryAddress);
-    _transactionHistoryService.apiBasedSync();
+    _syncHistory();
+  }
+
+  void _syncHistory() {
+    unawaited(() async {
+      try {
+        await _transactionHistoryService.apiBasedSync();
+      } catch (e, st) {
+        developer.log(
+          'Transaction history sync failed',
+          error: e,
+          stackTrace: st,
+        );
+        add(const HistorySyncFailedEvent());
+      }
+    }());
+  }
+
+  void _onHistorySyncFailed(
+    HistorySyncFailedEvent event,
+    Emitter<HomeState> emit,
+  ) {
+    emit(state.copyWith(historySyncFailed: true));
   }
 }

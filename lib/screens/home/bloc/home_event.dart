@@ -53,3 +53,7 @@ final class DebugAuthCompleteEvent extends HomeEvent {
   @override
   List<Object> get props => [address];
 }
+
+final class HistorySyncFailedEvent extends HomeEvent {
+  const HistorySyncFailedEvent();
+}
