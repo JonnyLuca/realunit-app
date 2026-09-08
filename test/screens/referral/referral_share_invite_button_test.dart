@@ -228,4 +228,62 @@ void main() {
       );
     },
   );
+
+  testWidgets('a sheet that never answers times out into the error state', (
+    tester,
+  ) async {
+    final never = Completer<void>();
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+      call,
+    ) async {
+      await never.future;
+      return null;
+    });
+    addTearDown(() {
+      if (!never.isCompleted) never.complete();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      );
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: const Scaffold(
+          body: ReferralShareInviteButton(
+            text: 'Hey Alice: https://realunit.app/invite/AAAA',
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Einladungslink versenden'));
+    await tester.pump();
+    expect(
+      tester.widget<AppFilledButton>(find.byType(AppFilledButton)).state,
+      FilledButtonState.loading,
+    );
+
+    // Without a resume the attempt must still be given up: the owned timer
+    // fires, the wait completes, and the button reports the same transient
+    // failure as a share the platform rejected.
+    await tester.pump(const Duration(seconds: 30));
+    expect(
+      tester.widget<AppFilledButton>(find.byType(AppFilledButton)).state,
+      FilledButtonState.error,
+    );
+    await tester.pump(const Duration(seconds: 2));
+    expect(
+      tester.widget<AppFilledButton>(find.byType(AppFilledButton)).state,
+      FilledButtonState.idle,
+    );
+  });
 }
