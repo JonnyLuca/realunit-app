@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:realunit_wallet/packages/hardware_wallet/bitbox.dart';
 import 'package:realunit_wallet/packages/service/app_store.dart';
 import 'package:realunit_wallet/packages/service/balance_service.dart';
@@ -44,6 +45,9 @@ void main() {
   });
 
   setUp(() {
+    // The wallet-reset paths clear the pending referral code, which is
+    // persisted, so the store must exist in tests.
+    SharedPreferences.setMockInitialValues(const <String, Object>{});
     walletService = _MockWalletService();
     balanceService = _MockBalanceService();
     transactionHistoryService = _MockTransactionHistoryService();

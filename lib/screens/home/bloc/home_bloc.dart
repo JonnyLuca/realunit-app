@@ -11,6 +11,7 @@ import 'package:realunit_wallet/packages/service/transaction_history_service.dar
 import 'package:realunit_wallet/packages/service/wallet_service.dart';
 import 'package:realunit_wallet/packages/wallet/wallet.dart';
 import 'package:realunit_wallet/setup/routing/boot_navigation.dart';
+import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -110,6 +111,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     // wallet. Covers every DeleteCurrentWalletEvent path (settings delete and
     // BitBox recovery cancel), including those that never call PinAuthCubit.reset().
     clearPendingPaymentDeeplink();
+    // A pending referral code must not be credited to the next wallet either;
+    // unlike the deeplink that binding cannot be undone.
+    await clearPendingReferralCode();
     emit(
       HomeState(
         hasWallet: false,
