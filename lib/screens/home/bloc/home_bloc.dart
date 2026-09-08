@@ -183,6 +183,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HistorySyncStartedEvent event,
     Emitter<HomeState> emit,
   ) {
+    // Only emit when a previous failure is actually being cleared: every sync
+    // start would otherwise push an identical state and rebuild the home tree.
+    if (!state.historySyncFailed) return;
     emit(state.copyWith(historySyncFailed: false));
   }
 
