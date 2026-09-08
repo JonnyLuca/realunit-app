@@ -275,7 +275,7 @@ void main() {
     expect(await peekPendingReferralCode(), isNull);
   });
 
-  test('defers bind while on /kyc and keeps the stash', () async {
+  testWidgets('defers bind while on /kyc and keeps the stash', (tester) async {
     router.dispose();
     router = GoRouter(
       navigatorKey: GlobalKey<NavigatorState>(),
@@ -291,6 +291,10 @@ void main() {
         ),
       ],
     );
+    // The router only resolves its configuration once it is attached to a
+    // widget tree: an unpumped GoRouter reports an empty match list, so the
+    // KYC guard could never see /kyc.
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await stashPendingReferralCode('AB12CD');
 
     await bindPendingReferralCode(router);
@@ -320,7 +324,22 @@ void main() {
         ),
       ],
     );
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    // The bind result is shown in a dialog that reads S.of(context), so the
+    // localization delegates must be present or the dialog build throws.
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        routerConfig: router,
+      ),
+    );
     await tester.pumpAndSettle();
     router.push('/kyc');
     await tester.pumpAndSettle();
