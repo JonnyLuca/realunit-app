@@ -86,8 +86,9 @@ bool _isWebReferralLink(Uri uri) =>
 /// - `ios-app://6759720010/realunit-wallet/invite/{code}`
 /// - a share message or nested invite URL in `app-argument`
 ///
-/// Returns the last path segment (trimmed, percent-decoded, max 256) or
-/// null when not a referral/promo link. Invite and promo share one code field.
+/// Returns the last path segment (trimmed, percent-decoded, capped at
+/// [kReferralCodeMaxLength]) or null when not a referral/promo link.
+/// Invite and promo share one code field.
 String? _referralCodeFromQuery(Uri uri) {
   return referralCodeFromQueryParameters(uri.queryParameters);
 }

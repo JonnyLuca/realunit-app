@@ -47,6 +47,7 @@ void main() {
   });
 
   tearDown(() async {
+    router.dispose();
     await GetIt.instance.reset();
   });
 
@@ -275,6 +276,7 @@ void main() {
   });
 
   test('defers bind while on /kyc and keeps the stash', () async {
+    router.dispose();
     router = GoRouter(
       navigatorKey: GlobalKey<NavigatorState>(),
       initialLocation: '/kyc',
@@ -301,6 +303,7 @@ void main() {
     when(() => service.bind(code: 'AB12CD')).thenAnswer(
       (_) async => const ReferralBindResultDto(kind: 'Invite'),
     );
+    router.dispose();
     router = GoRouter(
       navigatorKey: GlobalKey<NavigatorState>(),
       initialLocation: '/dashboard',
@@ -330,6 +333,7 @@ void main() {
   });
 
   testWidgets('defers bind when /kyc is pushed over /dashboard', (tester) async {
+    router.dispose();
     router = GoRouter(
       navigatorKey: GlobalKey<NavigatorState>(),
       initialLocation: '/dashboard',
@@ -359,6 +363,7 @@ void main() {
   testWidgets('defers bind when /pay is pushed over restored /kyc', (
     tester,
   ) async {
+    router.dispose();
     router = GoRouter(
       navigatorKey: GlobalKey<NavigatorState>(),
       initialLocation: '/dashboard',

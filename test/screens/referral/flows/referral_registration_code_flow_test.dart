@@ -1,18 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:realunit_wallet/generated/i18n.dart';
 import 'package:realunit_wallet/packages/service/dfx/models/referral/dto/referral_code_lookup_dto.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/cubits/registration_step/kyc_registration_step_cubit.dart';
-import 'package:realunit_wallet/screens/kyc/steps/registration/stash_resolved_referral_code.dart';
 import 'package:realunit_wallet/screens/kyc/steps/registration/steps/kyc_registration_referral_step.dart';
-import 'package:realunit_wallet/setup/routing/referral_pending_code.dart';
 import 'package:realunit_wallet/styles/themes.dart';
 import 'package:realunit_wallet/widgets/buttons/app_filled_button.dart';
 import 'package:realunit_wallet/widgets/buttons/app_text_button.dart';
@@ -24,8 +19,6 @@ void main() {
   late _MockKycRegistrationStepCubit stepCubit;
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
-    debugSetPendingReferralCodeSync(null);
     stepCubit = _MockKycRegistrationStepCubit();
     when(() => stepCubit.state).thenReturn(
       const KycRegistrationStepState(
@@ -42,7 +35,6 @@ void main() {
     WidgetTester tester, {
     required TextEditingController ctrl,
     required Future<ReferralCodeLookupDto> Function(String code) lookup,
-    TypedReferralStash? typed,
   }) {
     return tester.pumpWidget(
       MaterialApp(
@@ -61,11 +53,6 @@ void main() {
             child: KycRegistrationReferralStep(
               referralCodeCtrl: ctrl,
               lookup: lookup,
-              onResolved: typed == null
-                  ? null
-                  : (code) {
-                      unawaited(typed.onResolved(code));
-                    },
             ),
           ),
         ),
@@ -115,12 +102,10 @@ void main() {
   });
 
   testWidgets('skip dismisses an open promo dialog', (tester) async {
-    final typed = TypedReferralStash();
     final ctrl = TextEditingController(text: 'EVT1');
     await pumpStep(
       tester,
       ctrl: ctrl,
-      typed: typed,
       lookup: (_) async => const ReferralCodeLookupDto(
         kind: 'promo',
         actionText: 'Mit dem Code EVT1 schenken wir dir 20 Token.',
@@ -141,8 +126,6 @@ void main() {
 
     expect(find.text('Aktion'), findsNothing);
     expect(ctrl.text, isEmpty);
-    await typed.awaitIdle();
-    expect(await peekPendingReferralCode(), isNull);
     verify(() => stepCubit.next()).called(1);
   });
 }

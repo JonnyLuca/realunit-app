@@ -42,6 +42,26 @@ void main() {
     when(() => cubit.isClosed).thenReturn(false);
   });
 
+  Future<void> pumpCreateView(WidgetTester tester) {
+    return tester.pumpWidget(
+      MaterialApp(
+        theme: realUnitTheme,
+        locale: const Locale('de'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: BlocProvider<ReferralCubit>.value(
+          value: cubit,
+          child: const ReferralCreateView(),
+        ),
+      ),
+    );
+  }
+
   testWidgets('after create, copy and share actions are shown with the share text', (
     tester,
   ) async {
@@ -59,23 +79,7 @@ void main() {
       initialState: const ReferralInviteCreated(summary: _summary, invite: created),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
 
     expect(find.text('Deine Einladung für Alice'), findsOneWidget);
@@ -115,23 +119,7 @@ void main() {
       initialState: const ReferralInviteCreated(summary: _summary, invite: created),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
 
     expect(find.text('Deine Einladung'), findsOneWidget);
@@ -170,23 +158,7 @@ void main() {
       initialState: const ReferralInviteCreated(summary: _summary, invite: created),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     await tester.tap(find.text('Einladungslink kopieren'));
     await tester.pump();
@@ -232,23 +204,7 @@ void main() {
       initialState: const ReferralInviteCreated(summary: _summary, invite: created),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     await tester.tap(find.text('Einladungslink kopieren'));
     await tester.pump();
@@ -300,23 +256,7 @@ void main() {
       initialState: const ReferralInviteCreated(summary: _summary, invite: created),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     expect(
       find.text(
@@ -347,23 +287,7 @@ void main() {
     when(() => cubit.load()).thenAnswer((_) async {});
     when(() => cubit.openCreate()).thenReturn(null);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
 
     expect(
@@ -422,23 +346,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
 
     expect(
@@ -476,23 +384,7 @@ void main() {
       initialState: const ReferralCreating(summary: _summary, guestName: 'Alice'),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
 
     expect(find.text('Einladung wird erstellt…'), findsOneWidget);
@@ -530,23 +422,7 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: realUnitTheme,
-          locale: const Locale('de'),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
-          home: BlocProvider<ReferralCubit>.value(
-            value: cubit,
-            child: const ReferralCreateView(),
-          ),
-        ),
-      );
+      await pumpCreateView(tester);
       await tester.pump();
 
       expect(
@@ -569,23 +445,7 @@ void main() {
       initialState: const ReferralNotEligible(),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
 
     expect(
@@ -680,23 +540,7 @@ void main() {
       initialState: const ReferralCreateReady(summary: _summary),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     await tester.tap(find.byType(AppFilledButton));
     await tester.pump();
@@ -718,23 +562,7 @@ void main() {
     when(() => cubit.createInvite(guestName: any(named: 'guestName')))
         .thenAnswer((_) async {});
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     final group = tester.widget<AutofillGroup>(find.byType(AutofillGroup));
     expect(group.onDisposeAction, AutofillContextAction.commit);
@@ -762,23 +590,7 @@ void main() {
     when(() => cubit.createInvite(guestName: any(named: 'guestName')))
         .thenAnswer((_) async {});
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     await tester.enterText(find.byType(TextFormField), '  Alice   Bob  ');
     await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -801,23 +613,7 @@ void main() {
       initialState: const ReferralCreateReady(summary: _summary),
     );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     await tester.enterText(find.byType(TextFormField), 'Alice\u3000Bob');
     await tester.pump();
@@ -838,23 +634,7 @@ void main() {
     when(() => cubit.createInvite(guestName: any(named: 'guestName')))
         .thenAnswer((_) => release.future);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: realUnitTheme,
-        locale: const Locale('de'),
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: BlocProvider<ReferralCubit>.value(
-          value: cubit,
-          child: const ReferralCreateView(),
-        ),
-      ),
-    );
+    await pumpCreateView(tester);
     await tester.pump();
     await tester.enterText(find.byType(TextFormField), 'Alice');
     await tester.tap(find.byType(AppFilledButton));
@@ -935,23 +715,7 @@ void main() {
         initialState: const ReferralNeedsTerms(summary: _summary, retrying: true),
       );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: realUnitTheme,
-          locale: const Locale('de'),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
-          home: BlocProvider<ReferralCubit>.value(
-            value: cubit,
-            child: const ReferralCreateView(),
-          ),
-        ),
-      );
+      await pumpCreateView(tester);
       await tester.pump();
 
       expect(
@@ -1146,23 +910,7 @@ void main() {
         () => cubit.createInvite(guestName: any(named: 'guestName')),
       ).thenAnswer((_) async {});
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: realUnitTheme,
-          locale: const Locale('de'),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
-          home: BlocProvider<ReferralCubit>.value(
-            value: cubit,
-            child: const ReferralCreateView(),
-          ),
-        ),
-      );
+      await pumpCreateView(tester);
       await tester.pump();
       await tester.enterText(find.byType(TextFormField), 'Alice');
       await tester.tap(find.byType(AppFilledButton));
@@ -1186,23 +934,7 @@ void main() {
         () => cubit.createInvite(guestName: any(named: 'guestName')),
       ).thenAnswer((_) async {});
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: realUnitTheme,
-          locale: const Locale('de'),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
-          home: BlocProvider<ReferralCubit>.value(
-            value: cubit,
-            child: const ReferralCreateView(),
-          ),
-        ),
-      );
+      await pumpCreateView(tester);
       await tester.pump();
       await tester.enterText(find.byType(TextFormField), 'Alice');
       when(() => cubit.state).thenReturn(
