@@ -260,7 +260,7 @@ void main() {
   blocTest<ReferralCubit, ReferralState>(
     'createInvite emits the created invite from the API',
     build: () {
-      when(() => service.createInvite(guestName: 'Alice')).thenAnswer(
+      when(() => service.createInvite(guestName: 'Alice', idempotencyKey: any(named: 'idempotencyKey'))).thenAnswer(
         (_) async => const ReferralCreatedInviteDto(
           code: 'AB12',
           url: 'https://realunit.app/invite/AB12',
@@ -287,7 +287,7 @@ void main() {
   blocTest<ReferralCubit, ReferralState>(
     'createInvite maps NOT_ELIGIBLE to the gate screen',
     build: () {
-      when(() => service.createInvite(guestName: 'Alice')).thenThrow(
+      when(() => service.createInvite(guestName: 'Alice', idempotencyKey: any(named: 'idempotencyKey'))).thenThrow(
         const ApiException(
           statusCode: 403,
           code: 'NOT_ELIGIBLE',
@@ -307,7 +307,7 @@ void main() {
   blocTest<ReferralCubit, ReferralState>(
     'createInvite maps NEEDS_TERMS to the terms screen',
     build: () {
-      when(() => service.createInvite(guestName: 'Alice')).thenThrow(
+      when(() => service.createInvite(guestName: 'Alice', idempotencyKey: any(named: 'idempotencyKey'))).thenThrow(
         const ApiException(
           statusCode: 409,
           code: 'NEEDS_TERMS',
@@ -327,7 +327,7 @@ void main() {
   blocTest<ReferralCubit, ReferralState>(
     'createInvite surfaces the API error on the name-entry form',
     build: () {
-      when(() => service.createInvite(guestName: 'Alice')).thenThrow(
+      when(() => service.createInvite(guestName: 'Alice', idempotencyKey: any(named: 'idempotencyKey'))).thenThrow(
         const ApiException(code: 'QUOTA', message: 'limit'),
       );
       return ReferralCubit(service);
@@ -346,7 +346,7 @@ void main() {
   blocTest<ReferralCubit, ReferralState>(
     'createInvite maps 503 holding lookup failed to the unavailable token',
     build: () {
-      when(() => service.createInvite(guestName: 'Alice')).thenThrow(
+      when(() => service.createInvite(guestName: 'Alice', idempotencyKey: any(named: 'idempotencyKey'))).thenThrow(
         const ApiException(
           statusCode: 503,
           code: 'UNAVAILABLE',
@@ -369,7 +369,7 @@ void main() {
   blocTest<ReferralCubit, ReferralState>(
     'createInvite keeps the previous error while the retry POST is in flight',
     build: () {
-      when(() => service.createInvite(guestName: 'Alice')).thenAnswer(
+      when(() => service.createInvite(guestName: 'Alice', idempotencyKey: any(named: 'idempotencyKey'))).thenAnswer(
         (_) async => const ReferralCreatedInviteDto(
           code: 'AB12',
           url: 'https://realunit.app/invite/AB12',
@@ -678,6 +678,7 @@ void main() {
       when(
         () => service.createInvite(
           guestName: 'A' * maxReferralGuestNameLength,
+          idempotencyKey: any(named: 'idempotencyKey'),
         ),
       ).thenAnswer(
         (_) async => ReferralCreatedInviteDto(
@@ -708,6 +709,7 @@ void main() {
       verify(
         () => service.createInvite(
           guestName: 'A' * maxReferralGuestNameLength,
+          idempotencyKey: any(named: 'idempotencyKey'),
         ),
       ).called(1);
     },
@@ -716,7 +718,7 @@ void main() {
   blocTest<ReferralCubit, ReferralState>(
     'createInvite collapses newlines in the guest name to a single line',
     build: () {
-      when(() => service.createInvite(guestName: 'Alice Bob')).thenAnswer(
+      when(() => service.createInvite(guestName: 'Alice Bob', idempotencyKey: any(named: 'idempotencyKey'))).thenAnswer(
         (_) async => const ReferralCreatedInviteDto(
           code: 'AB12',
           url: 'https://realunit.app/invite/AB12',
@@ -739,7 +741,7 @@ void main() {
       ),
     ],
     verify: (_) {
-      verify(() => service.createInvite(guestName: 'Alice Bob')).called(1);
+      verify(() => service.createInvite(guestName: 'Alice Bob', idempotencyKey: any(named: 'idempotencyKey'))).called(1);
     },
   );
 
@@ -1000,7 +1002,7 @@ void main() {
     'createInvite maps a timed-out POST to the name-entry form',
     build: () {
       when(
-        () => service.createInvite(guestName: 'Alice'),
+        () => service.createInvite(guestName: 'Alice', idempotencyKey: any(named: 'idempotencyKey')),
       ).thenThrow(TimeoutException('create'));
       return ReferralCubit(service);
     },
