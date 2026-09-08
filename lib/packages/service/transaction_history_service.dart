@@ -129,6 +129,8 @@ class TransactionHistoryService extends DFXAuthService {
     Object? parseError;
     StackTrace? parseStack;
     for (final raw in rows) {
+      final status = referralJsonString(raw['status']) ?? '';
+      if (!referralPayoutStatusIsSettled(status)) continue;
       final ReferralPayoutDto payout;
       try {
         payout = ReferralPayoutDto.fromJson(raw);
@@ -137,7 +139,6 @@ class TransactionHistoryService extends DFXAuthService {
         parseStack ??= st;
         continue;
       }
-      if (!payout.isSettled) continue;
       final hash = payout.txHash;
       final hashKey = hash != null && hash.isNotEmpty ? hash.toLowerCase() : null;
       if (payout.id == 0 && hashKey == null) continue;

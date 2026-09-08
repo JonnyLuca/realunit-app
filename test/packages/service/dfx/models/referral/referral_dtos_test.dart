@@ -681,6 +681,12 @@ void main() {
       expect(dto.isSettled, isTrue);
     });
 
+    test('referralPayoutStatusIsSettled treats missing/pending as not settled', () {
+      expect(referralPayoutStatusIsSettled(''), isFalse);
+      expect(referralPayoutStatusIsSettled('Pending'), isFalse);
+      expect(referralPayoutStatusIsSettled('Complete'), isTrue);
+    });
+
     test('reads amount and frozen CHF when the API sends numeric strings', () {
       final dto = ReferralPayoutDto.fromJson({
         'id': '9',

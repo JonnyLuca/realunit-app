@@ -25,19 +25,7 @@ class ReferralPayoutDto {
   /// History only shows a prize after the on-chain transfer is confirmed
   /// (Offerte Punkt 4). Pending/failed/missing-status rows stay off the
   /// ledger — a missing status is not treated as settled.
-  bool get isSettled {
-    final s = status.toLowerCase();
-    if (s.isEmpty) return false;
-    return s == 'complete' ||
-        s == 'completed' ||
-        s == 'credited' ||
-        s == 'success' ||
-        s == 'confirmed' ||
-        s == 'settled' ||
-        s == 'paid' ||
-        s == 'done' ||
-        s == 'transferred';
-  }
+  bool get isSettled => referralPayoutStatusIsSettled(status);
 
   factory ReferralPayoutDto.fromJson(Map<String, dynamic> json) {
     final amount = referralJsonNum(json['amount']);
@@ -57,4 +45,20 @@ class ReferralPayoutDto {
       txHash: referralJsonString(json['txHash']),
     );
   }
+}
+
+/// Reads status from a payout row before amount/created are required, so a
+/// pending/failed row with missing fields cannot poison history sync.
+bool referralPayoutStatusIsSettled(String status) {
+  final s = status.toLowerCase();
+  if (s.isEmpty) return false;
+  return s == 'complete' ||
+      s == 'completed' ||
+      s == 'credited' ||
+      s == 'success' ||
+      s == 'confirmed' ||
+      s == 'settled' ||
+      s == 'paid' ||
+      s == 'done' ||
+      s == 'transferred';
 }
