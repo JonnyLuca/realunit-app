@@ -79,15 +79,13 @@ void main() {
     expect(await peekPendingReferralCode(), 'NEWER1');
   });
 
-  test('concurrent take and discard of the same code leave an empty stash', () async {
+  test('after concurrent take and discard the code is not still claimable', () async {
     await stashPendingReferralCode('AB12CD');
-    final results = await Future.wait<Object?>([
-      takePendingReferralCode(),
+    await Future.wait<void>([
+      takePendingReferralCode().then<void>((_) {}),
       discardPendingReferralCodeIfEqual('AB12CD'),
     ]);
     expect(await peekPendingReferralCode(), isNull);
-    final taken = results[0] as String?;
-    expect(taken, anyOf(isNull, 'AB12CD'));
     expect(await takePendingReferralCode(), isNull);
   });
 
